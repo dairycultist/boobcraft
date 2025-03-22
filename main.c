@@ -1,4 +1,6 @@
 #include <stdio.h>
+#define GLEW_STATIC
+#include "lib/glew.h"
 #include "lib/glfw3.h"
 
 // gcc main.c lib/libglfw.3.dylib -o a.out -framework OpenGL -rpath lib/
@@ -9,7 +11,7 @@
 
 int main() {
 
-	printf("Hello world! Idk how OpenGL/GLFW works\n");
+	printf("Hello world! Idk how OpenGL/GLFW/GLEW works\n");
 	// printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 
     glfwInit();
@@ -25,6 +27,14 @@ int main() {
 	// GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL", glfwGetPrimaryMonitor(), nullptr); // Fullscreen
 
 	glfwMakeContextCurrent(window);
+
+	glewExperimental = GL_TRUE;
+	glewInit();
+
+	GLuint vertexBuffer;
+	glGenBuffers(1, &vertexBuffer);
+
+	printf("%u\n", vertexBuffer);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwSwapBuffers(window);
