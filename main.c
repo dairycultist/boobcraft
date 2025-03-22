@@ -1,15 +1,15 @@
 #include <stdio.h>
-#include "GLFW/glfw3.h"
-// #include <thread>
+#include "lib/glad.h"
+#include "lib/glfw3.h"
 
-// gcc main.c GLFW/libglfw.3.dylib -o a.out -framework OpenGL -rpath GLFW/
+// gcc main.c lib/libglfw.3.dylib -o a.out -framework OpenGL -rpath lib/
 // ./a.out
 
 // I really don't wanna make a makefile
 // https://open.gl/
 
 int main() {
-	
+
 	printf("Hello world! Idk how OpenGL/GLFW works\n");
 
     glfwInit();
