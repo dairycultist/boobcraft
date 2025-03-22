@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "lib/glad.h"
 #include "lib/glfw3.h"
 
 // gcc main.c lib/libglfw.3.dylib -o a.out -framework OpenGL -rpath lib/
@@ -11,6 +10,7 @@
 int main() {
 
 	printf("Hello world! Idk how OpenGL/GLFW works\n");
+	// printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 
     glfwInit();
 
