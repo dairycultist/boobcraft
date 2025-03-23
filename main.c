@@ -97,30 +97,41 @@ int main() {
 	// copy vertex data to active buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-/**************************************************
-	create shader program and send to graphics card
+/************************
+	create shader program
 	*/
 
+	// create shaders
 	GLuint vertexShader = load_shader("vertex.glsl", GL_VERTEX_SHADER);
 	GLuint fragmentShader = load_shader("fragment.glsl", GL_FRAGMENT_SHADER);
 
+	// create program
 	GLuint shaderProgram = glCreateProgram();
+
+	// link shaders to program
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram); // must be called to 'refresh' attachment
 
-	glLinkProgram(shaderProgram);
+	// use program for future drawing
 	glUseProgram(shaderProgram);
 
-/******************************************
-	link between vertex data and attributes
+/************************************************************************************
+	link between vertex data and shader attributes (aka registering vert data format)
 	*/
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
+	// vertices have the attribute "position"
 	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+
+	// tell the program that, to read the attribute "position," use the CURRENT
+	// VBO bound to GL_ARRAY_BUFFER and read two floats per vertex in-order
 	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+	// enable this attribute
 	glEnableVertexAttribArray(posAttrib);
 
 /*******
