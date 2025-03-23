@@ -78,15 +78,15 @@ int main() {
 	printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 
 /***********************************************************************************
-	initialize a VAO (stores all the vertex/attribute information declared after it)
+	initialize a VAO (stores all the VERTEX-ATTRIBUTE information declared after it)
 	*/
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-/*****************************************
-	send vertices to graphics card via VBO
+/*************************
+	initialize VERTEX DATA
 	*/
 	
 	// create buffer (returns index)
@@ -105,8 +105,8 @@ int main() {
 	// copy vertex data to active buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-/************************
-	create shader program
+/****************************
+	initialize shader program
 	*/
 
 	// create shaders
@@ -124,8 +124,8 @@ int main() {
 	// use program for future drawing
 	glUseProgram(shaderProgram);
 
-/************************************************************************************
-	link between VERTEX DATA and SHADER ATTRIBUTES (aka registering vert data format)
+/**************************************************************************************
+	link between VERTEX DATA and SHADER ATTRIBUTES (aka registering vertex data format)
 	*/
 
 	// vertices have the attribute "position"
