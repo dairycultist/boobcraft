@@ -77,6 +77,14 @@ int main() {
 
 	printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 
+/***********************************************************************************
+	initialize a VAO (stores all the vertex/attribute information declared after it)
+	*/
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
 /*****************************************
 	send vertices to graphics card via VBO
 	*/
@@ -117,18 +125,14 @@ int main() {
 	glUseProgram(shaderProgram);
 
 /************************************************************************************
-	link between vertex data and shader attributes (aka registering vert data format)
+	link between VERTEX DATA and SHADER ATTRIBUTES (aka registering vert data format)
 	*/
-
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
 
 	// vertices have the attribute "position"
 	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
 
-	// tell the program that, to read the attribute "position," use the CURRENT
-	// VBO bound to GL_ARRAY_BUFFER and read two floats per vertex in-order
+	// tell the program that, to read the attribute "position," use the VBO
+	// currently bound to GL_ARRAY_BUFFER and read two floats per vertex in-order
 	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 	// enable this attribute
