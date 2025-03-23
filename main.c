@@ -6,13 +6,10 @@
 #include "lib/glfw3.h"
 
 /*
- * gcc main.c lib/libglfw.3.dylib lib/glew.o -o a.out -framework OpenGL -rpath lib/
- * ./a.out
- *
- * I really don't wanna make a makefile
  * https://open.gl/
  *
  * using OpenGL/GLFW/GLEW
+ * this is probably not gonna be a Minecraft clone, but a Doom clone lol
  */
 
 GLuint load_shader(const char* path, GLenum shader_type) {
@@ -90,7 +87,7 @@ int main() {
 	*/
 	
 	// create buffer (returns index)
-	GLuint vbo;
+	GLuint vbo; // rename to like, map_vbo
 	glGenBuffers(1, &vbo);
 
 	// make this buffer the active object
@@ -109,27 +106,23 @@ int main() {
 	initialize shader program
 	*/
 
-	// create shaders
-	GLuint vertexShader = load_shader("vertex.glsl", GL_VERTEX_SHADER);
-	GLuint fragmentShader = load_shader("fragment.glsl", GL_FRAGMENT_SHADER);
-
 	// create program
-	GLuint shaderProgram = glCreateProgram();
+	GLuint shader_program = glCreateProgram();
 
-	// link shaders to program
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram); // must be called to 'refresh' attachment
+	// create shaders and link them to program
+	glAttachShader(shader_program, load_shader("vertex.glsl", GL_VERTEX_SHADER));
+	glAttachShader(shader_program, load_shader("fragment.glsl", GL_FRAGMENT_SHADER));
+	glLinkProgram(shader_program); // must be called to 'refresh' attachment
 
 	// use program for future drawing
-	glUseProgram(shaderProgram);
+	glUseProgram(shader_program);
 
 /**************************************************************************************
 	link between VERTEX DATA and SHADER ATTRIBUTES (aka registering vertex data format)
 	*/
 
 	// vertices have the attribute "position"
-	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+	GLint posAttrib = glGetAttribLocation(shader_program, "position");
 
 	// tell the program that, to read the attribute "position," use the VBO
 	// currently bound to GL_ARRAY_BUFFER and read two floats per vertex in-order
@@ -138,13 +131,16 @@ int main() {
 	// enable this attribute
 	glEnableVertexAttribArray(posAttrib);
 
-/*******
-	loop
+/************
+	main loop
 	*/
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	while (!glfwWindowShouldClose(window)) {
+
+		vertices[0] += 0.001;
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
