@@ -1,17 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define GLEW_STATIC
+#define GLEW_STATIC // idk if I need this
 #include "lib/glew.h"
 #include "lib/glfw3.h"
 
-// gcc main.c lib/libglfw.3.dylib lib/glew.o -o a.out -framework OpenGL -rpath lib/
-// ./a.out
-
-// I really don't wanna make a makefile
-// https://open.gl/
-
-// using OpenGL/GLFW/GLEW
+/*
+ * gcc main.c lib/libglfw.3.dylib lib/glew.o -o a.out -framework OpenGL -rpath lib/
+ * ./a.out
+ *
+ * I really don't wanna make a makefile
+ * https://open.gl/
+ *
+ * using OpenGL/GLFW/GLEW
+ */
 
 GLuint load_shader(const char* path, GLenum shader_type) {
 
@@ -75,7 +77,9 @@ int main() {
 
 	printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 
-/* send vertices to graphics card via VBO */
+/*****************************************
+	send vertices to graphics card via VBO
+	*/
 	
 	// create buffer (returns index)
 	GLuint vbo;
@@ -93,7 +97,9 @@ int main() {
 	// copy vertex data to active buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-/* create shader program and send to graphics card */
+/**************************************************
+	create shader program and send to graphics card
+	*/
 
 	GLuint vertexShader = load_shader("vertex.glsl", GL_VERTEX_SHADER);
 	GLuint fragmentShader = load_shader("fragment.glsl", GL_FRAGMENT_SHADER);
@@ -105,7 +111,9 @@ int main() {
 	glLinkProgram(shaderProgram);
 	glUseProgram(shaderProgram);
 
-/* link between vertex data and attributes */
+/******************************************
+	link between vertex data and attributes
+	*/
 
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
