@@ -3,13 +3,13 @@
 #include "lib/glew.h"
 #include "lib/glfw3.h"
 
-// gcc main.c lib/libglfw.3.dylib -o a.out -framework OpenGL -rpath lib/
+// gcc main.c lib/libglfw.3.dylib lib/glew.o -o a.out -framework OpenGL -rpath lib/
 // ./a.out
 
 // I really don't wanna make a makefile
 // https://open.gl/
 
-// OpenGL/GLFW/GLEW
+// using OpenGL/GLFW/GLEW
 
 int main() {
 
@@ -42,9 +42,9 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 	float vertices[] = {
-		0.0f,  0.5f, // Vertex 1 (X, Y)
-		0.5f, -0.5f, // Vertex 2 (X, Y)
-	   -0.5f, -0.5f  // Vertex 3 (X, Y)
+		0.0f,  0.5f,
+		0.5f, -0.5f,
+	   -0.5f, -0.5f
 	};
 
 	// copy vertex data to active buffer
@@ -81,8 +81,15 @@ int main() {
 	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(posAttrib);
 
-/* loop */
+	glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+
+/*******
+	loop
+	*/
+
 	while (!glfwWindowShouldClose(window)) {
+
+		glClear(GL_COLOR_BUFFER_BIT);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -90,9 +97,9 @@ int main() {
 		glfwPollEvents();
 	}
 
+/********************
+	terminate program
+	*/
 
-
-
-/* terminate program */
     glfwTerminate();
 }
