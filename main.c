@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #define GLEW_STATIC
 #include "lib/glew.h"
 #include "lib/glfw3.h"
@@ -10,6 +12,47 @@
 // https://open.gl/
 
 // using OpenGL/GLFW/GLEW
+
+GLuint load_shader(const char* path, GLenum shader_type) {
+
+	FILE *file = fopen(path, "r");
+	if (file == NULL) {
+		return -1; // file IO error
+	}
+  
+	// determine file size
+	fseek(file, 0, SEEK_END);
+	long file_size = ftell(file);
+	fseek(file, 0, SEEK_SET);
+  
+	// allocate memory for the string (+1 for null terminator)
+	char *shadercode = (char *) malloc(file_size + 1);
+	if (shadercode == NULL) {
+		fclose(file);
+		return -1; // memory allocation error
+	}
+	
+	// read file content
+	size_t bytes_read = fread(shadercode, 1, file_size, file);
+	if (bytes_read != file_size) {
+		fclose(file);
+		free(shadercode);
+		return -1; // read error or incomplete read
+	}
+	
+	shadercode[file_size] = '\0';
+  
+	fclose(file);
+
+	// use shadercode to create shader
+	const char *const_shadercode = shadercode;
+
+	GLuint shader = glCreateShader(shader_type);
+	glShaderSource(shader, 1, &const_shadercode, NULL);
+	glCompileShader(shader);
+
+	return shader;
+}
 
 int main() {
 
@@ -52,17 +95,8 @@ int main() {
 
 /* create shader program and send to graphics card */
 
-	const char* vertexSource = "#version 150 core \n in vec2 position; void main() { gl_Position = vec4(position, 0.0, 1.0); }";
-
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexSource, NULL);
-	glCompileShader(vertexShader);
-
-	const char* fragmentSource = "#version 150 core \n out vec4 outColor; void main() { outColor = vec4(1.0, 1.0, 1.0, 1.0); }";
-
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
-	glCompileShader(fragmentShader);
+	GLuint vertexShader = load_shader("vertex.glsl", GL_VERTEX_SHADER);
+	GLuint fragmentShader = load_shader("fragment.glsl", GL_FRAGMENT_SHADER);
 
 	GLuint shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, vertexShader);
@@ -71,26 +105,25 @@ int main() {
 	glLinkProgram(shaderProgram);
 	glUseProgram(shaderProgram);
 
+/* link between vertex data and attributes */
+
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
-
-/* link between vertex data and attributes */
 
 	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
 	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(posAttrib);
 
-	glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-
 /*******
 	loop
 	*/
 
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
 	while (!glfwWindowShouldClose(window)) {
 
 		glClear(GL_COLOR_BUFFER_BIT);
-
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glfwSwapBuffers(window);
