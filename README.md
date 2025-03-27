@@ -1,6 +1,6 @@
 # lucoacraft
 
-A Doom clone written in C focused on level-clearing and light fantasy.
+A Doom clone written in C focused on being minimal and lightweight with no external dependencies (it currently uses the Mac-only version of one of the libraries tho I think).
 
 ## Technical
 
@@ -9,10 +9,5 @@ A sector is just a **2D poly** with a **floor** and **ceiling** height. Collisio
 - find out how to do input with GLFW
 - implement shader stuff below + render a cube + player controls (just flying for now)
 
-```
-Shading for 3D
-vertex shader does all the transforms related to camera position and perspective divide and whatnot, so we have to pass in the player position/rotation as a uniform
-ALSO we can use the post-transform pre-perspective divide Z coordinate to determine how bright something is (closer = brighter) giving us simple lighting for free
-we just have to pass the depth alongside the position to the frag shader
-also need to remember to discard anything behind the player
+The vertex shader is passed in the camera position/rotation as a uniform. It uses this to transformation meshdata relative to the camera. Then, it performs the perspective divide. The final Z coordinate represents the **depth** of each vertex. Any vertex behind the camera is discarded. Finally, the depth is passed to the fragment shader to determine how bright something is (closer = brighter) giving us simple lighting for free.
 ```
