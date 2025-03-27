@@ -10,4 +10,4 @@ Todo
 
 A sector is just a **2D poly** with a **floor** and **ceiling** height. Collision is just 1) check if you're inside the sector (2D comparison) and 2) check if you're below the ceiling and above the floor (1D comparison).
 
-The vertex shader is passed in the camera position/rotation as a uniform. It uses this to transformation meshdata relative to the camera. Then, it performs the perspective divide. The final Z coordinate represents the **depth** of each vertex. Any vertex behind the camera is discarded. Finally, the depth is passed to the fragment shader to determine how bright something is (closer = brighter) giving us simple lighting for free.
+The vertex shader is provided the camera position/rotation as a uniform. It uses this to transformation meshdata relative to the camera. Then, it performs the perspective divide. The final Z coordinate represents the **depth** of each vertex. Any vertex behind the camera is discarded. Finally, the depth is passed to the fragment shader to determine how bright something is (closer = brighter) giving us simple lighting for free.
