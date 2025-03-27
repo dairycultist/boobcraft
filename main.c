@@ -50,12 +50,17 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
-/*
- * https://open.gl/
- *
- * using OpenGL/GLFW/GLEW
- * this is probably not gonna be a Minecraft clone, but a Doom clone lol
- */
+void push_mesh() {
+
+	float vertices[] = {
+		player_pos.x,        player_pos.y + 0.5f,
+		player_pos.x + 0.5f, player_pos.y - 0.5f,
+		player_pos.x - 0.5f, player_pos.y - 0.5f
+	};
+
+	// copy vertex data to active buffer
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+}
 
 GLuint load_shader(const char* path, GLenum shader_type) {
 
@@ -139,14 +144,7 @@ int main() {
 	// make this buffer the active object
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	float vertices[] = {
-		0.0f,  0.5f,
-		0.5f, -0.5f,
-	   -0.5f, -0.5f
-	};
-
-	// copy vertex data to active buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	push_mesh();
 
 /****************************
 	initialize shader program
@@ -185,15 +183,12 @@ int main() {
 
 	while (!glfwWindowShouldClose(window)) {
 
-		vertices[0] = player_pos.x;
-		vertices[1] = player_pos.y;
-
 		if (input_up)    { player_pos.y += 0.01; }
 		if (input_down)  { player_pos.y -= 0.01; }
 		if (input_right) { player_pos.x += 0.01; }
 		if (input_left)  { player_pos.x -= 0.01; }
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		push_mesh();
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
