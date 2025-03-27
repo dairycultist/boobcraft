@@ -5,6 +5,51 @@
 #include "lib/glew.h"
 #include "lib/glfw3.h"
 
+#define TRUE 1
+#define FALSE 0
+
+typedef struct {
+	float x;
+	float y;
+	float z;
+} Vec3;
+
+Vec3 player_pos;
+
+int input_up    = FALSE;
+int input_down  = FALSE;
+int input_left  = FALSE;
+int input_right = FALSE;
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+
+	if (action == GLFW_PRESS) {
+
+		if (key == GLFW_KEY_W) {
+			input_up = TRUE;
+		} else if (key == GLFW_KEY_S) {
+			input_down = TRUE;
+		}else if (key == GLFW_KEY_A) {
+			input_left = TRUE;
+		} else if (key == GLFW_KEY_D) {
+			input_right = TRUE;
+		}
+
+	} else if (action == GLFW_RELEASE) {
+
+		if (key == GLFW_KEY_W) {
+			input_up = FALSE;
+		} else if (key == GLFW_KEY_S) {
+			input_down = FALSE;
+		}else if (key == GLFW_KEY_A) {
+			input_left = FALSE;
+		} else if (key == GLFW_KEY_D) {
+			input_right = FALSE;
+		}
+
+	}
+}
+
 /*
  * https://open.gl/
  *
@@ -68,6 +113,7 @@ int main() {
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL", NULL, NULL);
 	glfwMakeContextCurrent(window);
+	glfwSetKeyCallback(window, key_callback);
 
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -139,7 +185,14 @@ int main() {
 
 	while (!glfwWindowShouldClose(window)) {
 
-		vertices[0] += 0.001;
+		vertices[0] = player_pos.x;
+		vertices[1] = player_pos.y;
+
+		if (input_up)    { player_pos.y += 0.01; }
+		if (input_down)  { player_pos.y -= 0.01; }
+		if (input_right) { player_pos.x += 0.01; }
+		if (input_left)  { player_pos.x -= 0.01; }
+
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 		glClear(GL_COLOR_BUFFER_BIT);

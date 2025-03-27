@@ -1,5 +1,5 @@
 a.out: main.c
-	gcc main.c lib/libglfw.3.dylib lib/glew.o -o a.out -framework OpenGL -rpath lib/
+	@gcc main.c lib/libglfw.3.dylib lib/glew.o -o a.out -framework OpenGL -rpath lib/
 
-run:
+run: a.out
 	@./a.out
