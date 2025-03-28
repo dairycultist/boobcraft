@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #define GLEW_STATIC // idk if I need this
 #include "lib/glew.h"
@@ -17,11 +18,7 @@ typedef struct {
 	float z;
 } Vec3;
 
-typedef struct { // would be nice to load map data from a file...
-	Vec3 *corners;
-	GLuint vbo; // vertex buffer object
-	// later we'll have floor and ceiling height but not rn
-} Sector;
+#include "sectors.c"
 
 int IN_UP    = FALSE;
 int IN_DOWN  = FALSE;
@@ -54,47 +51,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			case GLFW_KEY_M: IN_RTURN = FALSE; break;
 		}
 	}
-}
-
-Sector *init_sector() {
-
-	// create buffer (returns index)
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
-
-	// construct vertices of all sectors
-	float vertices[] = {
-		0,     -0.5f, -2.0f,
-		0.5f,  -0.5f, 2.0f,
-		-0.5f, -0.5f, 2.0f
-	};
-
-	// make this sector's buffer the active object
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	// copy vertex data to active buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	Sector *sector = malloc(sizeof(Sector));
-	sector->vbo = vbo;
-
-	return sector;
-}
-
-// later we'll have remesh sector for when its height changes
-void redraw_sector(const Sector *const sector, const Vec3 player_pos, const float player_rot, const GLuint shader_program) {
-
-	GLint gl_player_pos = glGetUniformLocation(shader_program, "player_pos");
-	GLint gl_player_rot = glGetUniformLocation(shader_program, "player_rot");
-
-	glUniform3f(gl_player_pos, player_pos.x, player_pos.y, player_pos.z);
-	glUniform1f(gl_player_rot, player_rot);
-
-	// make this sector's buffer the active object
-	glBindBuffer(GL_ARRAY_BUFFER, sector->vbo);
-
-	// draw active object
-	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 GLuint load_shader(const char* path, GLenum shader_type) {
@@ -168,11 +124,15 @@ int main() {
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-/*************************************
-	initialize VERTEX DATA for sectors
+/*********************
+	initialize sectors
 	*/
 	
-	Sector *my_sector = init_sector();
+	float cx1[] = { 0.0, 2.0, 2.0 };
+	float cy1[] = { 2.0, 2.0, 0.0 };
+
+	Sector *my_sector1 = init_sector(cx1, cy1, sizeof(cx1)); // would be nice to load map data from a file...
+	Sector *my_sector2 = init_sector(cx1, cy1, sizeof(cx1));
 
 /****************************
 	initialize shader program
@@ -223,7 +183,8 @@ int main() {
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		redraw_sector(my_sector, *player_pos, player_rot, shader_program);
+		redraw_sector(my_sector1, *player_pos, player_rot, shader_program);
+		redraw_sector(my_sector2, *player_pos, player_rot, shader_program);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -234,6 +195,8 @@ int main() {
 	*/
 
 	free(player_pos);
+	free_sector(my_sector1);
+	free_sector(my_sector2);
 
     glfwTerminate();
 }
