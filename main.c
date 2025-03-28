@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define GLEW_STATIC // idk if I need this
 #include "lib/glew.h"
 #include "lib/glfw3.h"
+
+#define PI 3.141592654
 
 #define TRUE 1
 #define FALSE 0
@@ -14,41 +17,40 @@ typedef struct {
 	float z;
 } Vec3;
 
-int input_up    = FALSE;
-int input_down  = FALSE;
-int input_left  = FALSE;
-int input_right = FALSE;
+int IN_UP    = FALSE;
+int IN_DOWN  = FALSE;
+int IN_LEFT  = FALSE;
+int IN_RIGHT = FALSE;
+int IN_LTURN = FALSE;
+int IN_RTURN = FALSE;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 
 	if (action == GLFW_PRESS) {
 
-		if (key == GLFW_KEY_W) {
-			input_up = TRUE;
-		} else if (key == GLFW_KEY_S) {
-			input_down = TRUE;
-		}else if (key == GLFW_KEY_A) {
-			input_left = TRUE;
-		} else if (key == GLFW_KEY_D) {
-			input_right = TRUE;
+		switch (key) {
+			case GLFW_KEY_W: IN_UP = TRUE; break;
+			case GLFW_KEY_S: IN_DOWN = TRUE; break;
+			case GLFW_KEY_A: IN_LEFT = TRUE; break;
+			case GLFW_KEY_D: IN_RIGHT = TRUE; break;
+			case GLFW_KEY_N: IN_LTURN = TRUE; break;
+			case GLFW_KEY_M: IN_RTURN = TRUE; break;
 		}
 
 	} else if (action == GLFW_RELEASE) {
 
-		if (key == GLFW_KEY_W) {
-			input_up = FALSE;
-		} else if (key == GLFW_KEY_S) {
-			input_down = FALSE;
-		}else if (key == GLFW_KEY_A) {
-			input_left = FALSE;
-		} else if (key == GLFW_KEY_D) {
-			input_right = FALSE;
+		switch (key) {
+			case GLFW_KEY_W: IN_UP = FALSE; break;
+			case GLFW_KEY_S: IN_DOWN = FALSE; break;
+			case GLFW_KEY_A: IN_LEFT = FALSE; break;
+			case GLFW_KEY_D: IN_RIGHT = FALSE; break;
+			case GLFW_KEY_N: IN_LTURN = FALSE; break;
+			case GLFW_KEY_M: IN_RTURN = FALSE; break;
 		}
-
 	}
 }
 
-void update_mesh(const Vec3 *player_pos, GLuint shader_program) {
+void update_mesh(const Vec3 player_pos, const float player_rot, const GLuint shader_program) {
 
 	float vertices[] = {
 		0,      0.5f, 2.0f,
@@ -57,7 +59,10 @@ void update_mesh(const Vec3 *player_pos, GLuint shader_program) {
 	};
 
 	GLint gl_player_pos = glGetUniformLocation(shader_program, "player_pos");
-	glUniform3f(gl_player_pos, player_pos->x, player_pos->y, player_pos->z);
+	GLint gl_player_rot = glGetUniformLocation(shader_program, "player_rot");
+
+	glUniform3f(gl_player_pos, player_pos.x, player_pos.y, player_pos.z);
+	glUniform1f(gl_player_rot, player_rot);
 
 	// copy vertex data to active buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -182,16 +187,19 @@ int main() {
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	Vec3 *player_pos = calloc(sizeof(Vec3), 1);
+	Vec3 *player_pos = calloc(sizeof(Vec3), 1); // should really put this inside a "agent" class or smth
+	float player_rot = 0;
 
 	while (!glfwWindowShouldClose(window)) {
 
-		if (input_up)    { player_pos->z += 0.01; }
-		if (input_down)  { player_pos->z -= 0.01; }
-		if (input_right) { player_pos->x += 0.01; }
-		if (input_left)  { player_pos->x -= 0.01; }
+		if (IN_UP)    { player_pos->x -= sin(player_rot) * 0.01; player_pos->z += cos(player_rot) * 0.01; }
+		if (IN_DOWN)  { player_pos->x += sin(player_rot) * 0.01; player_pos->z -= cos(player_rot) * 0.01; }
+		if (IN_RIGHT) { player_pos->x += cos(player_rot) * 0.01; player_pos->z += sin(player_rot) * 0.01; }
+		if (IN_LEFT)  { player_pos->x -= cos(player_rot) * 0.01; player_pos->z -= sin(player_rot) * 0.01; }
+		if (IN_RTURN) { player_rot -= 0.01; }
+		if (IN_LTURN) { player_rot += 0.01; }
 
-		update_mesh(player_pos, shader_program);
+		update_mesh(*player_pos, player_rot, shader_program);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
