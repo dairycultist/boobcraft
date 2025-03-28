@@ -14,8 +14,6 @@ typedef struct {
 	float z;
 } Vec3;
 
-Vec3 player_pos;
-
 int input_up    = FALSE;
 int input_down  = FALSE;
 int input_left  = FALSE;
@@ -50,7 +48,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
-void update_mesh(GLuint shader_program) {
+void update_mesh(const Vec3 *player_pos, GLuint shader_program) {
 
 	float vertices[] = {
 		0,      0.5f, 2.0f,
@@ -59,7 +57,7 @@ void update_mesh(GLuint shader_program) {
 	};
 
 	GLint gl_player_pos = glGetUniformLocation(shader_program, "player_pos");
-	glUniform3f(gl_player_pos, player_pos.x, player_pos.y, player_pos.z);
+	glUniform3f(gl_player_pos, player_pos->x, player_pos->y, player_pos->z);
 
 	// copy vertex data to active buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -147,6 +145,8 @@ int main() {
 	// make this buffer the active object
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
+	// would update mesh here, but we do it in the update loop anyways
+
 /****************************
 	initialize shader program
 	*/
@@ -182,14 +182,16 @@ int main() {
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+	Vec3 *player_pos = calloc(sizeof(Vec3), 1);
+
 	while (!glfwWindowShouldClose(window)) {
 
-		if (input_up)    { player_pos.y += 0.01; }
-		if (input_down)  { player_pos.y -= 0.01; }
-		if (input_right) { player_pos.x += 0.01; }
-		if (input_left)  { player_pos.x -= 0.01; }
+		if (input_up)    { player_pos->y += 0.01; }
+		if (input_down)  { player_pos->y -= 0.01; }
+		if (input_right) { player_pos->x += 0.01; }
+		if (input_left)  { player_pos->x -= 0.01; }
 
-		update_mesh(shader_program);
+		update_mesh(player_pos, shader_program);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
