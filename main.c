@@ -186,8 +186,8 @@ int main() {
 
 	while (!glfwWindowShouldClose(window)) {
 
-		if (input_up)    { player_pos->y += 0.01; }
-		if (input_down)  { player_pos->y -= 0.01; }
+		if (input_up)    { player_pos->z += 0.01; }
+		if (input_down)  { player_pos->z -= 0.01; }
 		if (input_right) { player_pos->x += 0.01; }
 		if (input_left)  { player_pos->x -= 0.01; }
 
@@ -203,6 +203,8 @@ int main() {
 /********************
 	terminate program
 	*/
+
+	free(player_pos);
 
     glfwTerminate();
 }
