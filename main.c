@@ -17,6 +17,12 @@ typedef struct {
 	float z;
 } Vec3;
 
+typedef struct { // would be nice to load map data from a file...
+	Vec3 *corners;
+	GLuint vbo; // vertex buffer object
+	// later we'll have floor and ceiling height but not rn
+} Sector;
+
 int IN_UP    = FALSE;
 int IN_DOWN  = FALSE;
 int IN_LEFT  = FALSE;
@@ -50,13 +56,33 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
-void update_mesh(const Vec3 player_pos, const float player_rot, const GLuint shader_program) {
+Sector *init_sector() {
 
+	// create buffer (returns index)
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+
+	// construct vertices of all sectors
 	float vertices[] = {
-		0,      0.5f, 2.0f,
+		0,     -0.5f, -2.0f,
 		0.5f,  -0.5f, 2.0f,
 		-0.5f, -0.5f, 2.0f
 	};
+
+	// make this sector's buffer the active object
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	// copy vertex data to active buffer
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	Sector *sector = malloc(sizeof(Sector));
+	sector->vbo = vbo;
+
+	return sector;
+}
+
+// later we'll have remesh sector for when its height changes
+void redraw_sector(const Sector *const sector, const Vec3 player_pos, const float player_rot, const GLuint shader_program) {
 
 	GLint gl_player_pos = glGetUniformLocation(shader_program, "player_pos");
 	GLint gl_player_rot = glGetUniformLocation(shader_program, "player_rot");
@@ -64,8 +90,11 @@ void update_mesh(const Vec3 player_pos, const float player_rot, const GLuint sha
 	glUniform3f(gl_player_pos, player_pos.x, player_pos.y, player_pos.z);
 	glUniform1f(gl_player_rot, player_rot);
 
-	// copy vertex data to active buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// make this sector's buffer the active object
+	glBindBuffer(GL_ARRAY_BUFFER, sector->vbo);
+
+	// draw active object
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 GLuint load_shader(const char* path, GLenum shader_type) {
@@ -139,18 +168,11 @@ int main() {
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-/*************************
-	initialize VERTEX DATA
+/*************************************
+	initialize VERTEX DATA for sectors
 	*/
 	
-	// create buffer (returns index)
-	GLuint vbo; // rename to like, map_vbo
-	glGenBuffers(1, &vbo);
-
-	// make this buffer the active object
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	// would update mesh here, but we do it in the update loop anyways
+	Sector *my_sector = init_sector();
 
 /****************************
 	initialize shader program
@@ -199,10 +221,9 @@ int main() {
 		if (IN_RTURN) { player_rot -= 0.01; }
 		if (IN_LTURN) { player_rot += 0.01; }
 
-		update_mesh(*player_pos, player_rot, shader_program);
-
 		glClear(GL_COLOR_BUFFER_BIT);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		redraw_sector(my_sector, *player_pos, player_rot, shader_program);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
