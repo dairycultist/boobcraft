@@ -50,13 +50,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
-void push_mesh() {
+void update_mesh(GLuint shader_program) {
 
 	float vertices[] = {
-		player_pos.x,        player_pos.y + 0.5f,
-		player_pos.x + 0.5f, player_pos.y - 0.5f,
-		player_pos.x - 0.5f, player_pos.y - 0.5f
+		0,      0.5f, 2.0f,
+		0.5f,  -0.5f, 2.0f,
+		-0.5f, -0.5f, 2.0f
 	};
+
+	GLint gl_player_pos = glGetUniformLocation(shader_program, "player_pos");
+	glUniform3f(gl_player_pos, player_pos.x, player_pos.y, player_pos.z);
 
 	// copy vertex data to active buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -144,8 +147,6 @@ int main() {
 	// make this buffer the active object
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	push_mesh();
-
 /****************************
 	initialize shader program
 	*/
@@ -166,14 +167,14 @@ int main() {
 	*/
 
 	// vertices have the attribute "position"
-	GLint posAttrib = glGetAttribLocation(shader_program, "position");
+	GLint gl_pos_attribute = glGetAttribLocation(shader_program, "position");
 
 	// tell the program that, to read the attribute "position," use the VBO
-	// currently bound to GL_ARRAY_BUFFER and read two floats per vertex in-order
-	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	// currently bound to GL_ARRAY_BUFFER and read three floats per vertex in-order
+	glVertexAttribPointer(gl_pos_attribute, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	// enable this attribute
-	glEnableVertexAttribArray(posAttrib);
+	glEnableVertexAttribArray(gl_pos_attribute);
 
 /************
 	main loop
@@ -188,7 +189,7 @@ int main() {
 		if (input_right) { player_pos.x += 0.01; }
 		if (input_left)  { player_pos.x -= 0.01; }
 
-		push_mesh();
+		update_mesh(shader_program);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawArrays(GL_TRIANGLES, 0, 3);

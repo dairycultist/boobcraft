@@ -8,7 +8,8 @@ Todo
 
 ## Technical
 
-Tutorial https://open.gl/
+OpenGL tutorial https://open.gl/
+Input tutorial https://www.glfw.org/docs/3.3/input_guide.html
 
 Using OpenGL/GLFW/GLEW
 
