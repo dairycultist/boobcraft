@@ -8,6 +8,12 @@
 // \033[38;2;<r>;<g>;<b>m     #Select RGB foreground color
 // \033[48;2;<r>;<g>;<b>m     #Select RGB background color
 
+#define WIDTH 80
+#define HEIGHT 40
+
+char R[WIDTH][HEIGHT], G[WIDTH][HEIGHT], B[WIDTH][HEIGHT]; // [0,5]
+char x, y;
+
 #define RESET_COLOR() printf("\033[0m");
 #define NEWLINE() printf("\033[0m\n");
 #define CLEAR_SCREEN() printf("\033[2J");
@@ -65,5 +71,20 @@ void print_2pix(int top_r, int top_g, int top_b, int bot_r, int bot_g, int bot_b
 			long_long_2pix[18] = (char) (topc % 10 + 48);
 			printf("%s", long_long_2pix);
 		}
+	}
+}
+
+void draw_buffer() {
+
+	RESET_CURSOR();
+
+	for (y = 0; y < HEIGHT; y += 2) {
+
+		for (x = 0; x < WIDTH; x++) {
+
+			print_2pix(R[x][y], G[x][y], B[x][y], R[x][y + 1], G[x][y + 1], B[x][y + 1]);
+		}
+
+		NEWLINE();
 	}
 }
