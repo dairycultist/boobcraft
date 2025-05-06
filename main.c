@@ -8,13 +8,40 @@
 // \033[38;2;<r>;<g>;<b>m     #Select RGB foreground color
 // \033[48;2;<r>;<g>;<b>m     #Select RGB background color
 
-#define PRINT_2PIX(topc, botc) printf("\033[38;5;" #botc ";48;5;" #topc "m▄");
-
 #define RESET_COLOR() printf("\033[0m");
+#define CLEAR_SCREEN() printf("\033[2J");
+
+void print_2pix(int topc, int botc) {
+
+	static char short_short_2pix[] = "\033[38;5;XX;48;5;11m▄";
+	static char short_long_2pix[] = "\033[38;5;XX;48;5;111m▄";
+	static char long_short_2pix[] = "\033[38;5;XXX;48;5;11m▄";
+	static char long_long_2pix[] = "\033[38;5;XXX;48;5;111m▄";
+
+	// 48 is 0
+	if (botc < 100) {
+		short_short_2pix[7] = (char) (botc / 10 + 48);
+		short_short_2pix[8] = (char) (botc % 10 + 48);
+		printf("%s", short_short_2pix);
+	} else {
+		printf("%s", long_short_2pix);
+	}
+}
 
 int main() {
 
-	PRINT_2PIX(149, 58);
+	CLEAR_SCREEN();
+
+	int r, g, b;
+
+	for (r = 0; r < 6; r++) {
+
+		int topc = 16 + r;
+
+		print_2pix(topc, topc);
+	}
+
 	RESET_COLOR();
+
     return 0;
 }
