@@ -1,5 +1,5 @@
-a.out: main.c sectors.c
-	@gcc main.c lib/libglfw.3.dylib lib/glew.o -o a.out -framework OpenGL -rpath lib/
+boobcraft: main.c
+	@gcc main.c -o boobcraft
 
-run: a.out
-	@./a.out
+run: boobcraft
+	@./boobcraft
