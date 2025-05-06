@@ -11,6 +11,7 @@
 #define RESET_COLOR() printf("\033[0m");
 #define NEWLINE() printf("\033[0m\n");
 #define CLEAR_SCREEN() printf("\033[2J");
+#define RESET_CURSOR() printf("\033[0;0H");
 
 void print_2pix(int top_r, int top_g, int top_b, int bot_r, int bot_g, int bot_b) {
 

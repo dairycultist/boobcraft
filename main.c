@@ -1,19 +1,53 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "draw.c"
+
+#define WIDTH 80
+#define HEIGHT 40
+
+char R[WIDTH][HEIGHT], G[WIDTH][HEIGHT], B[WIDTH][HEIGHT]; // [0,5]
 
 int main() {
 
 	CLEAR_SCREEN();
 
-	int r, g, b;
+	int x, y;
 
-	for (r = 0; r < 6; r += 2) {
-		for (b = 0; b < 6; b++) {
+	int i = 0;
 
-			print_2pix(r, 0, b, r + 1, 0, b);
+	while (i < 1000) {
+
+		for (y = 0; y < HEIGHT; y += 2) {
+
+			for (x = 0; x < WIDTH; x++) {
+
+				if (x < 20) {
+					R[x][y] = (i / 6) % 6;
+					R[x][y+1] = (i / 6) % 6;
+					G[x][y] = i % 6;
+					G[x][y+1] = i % 6;
+					B[x][y] = (i / 36) % 6;
+					B[x][y+1] = (i / 36) % 6;
+				}
+			}
 		}
-		NEWLINE();
+
+		RESET_CURSOR();
+
+		for (y = 0; y < HEIGHT; y += 2) {
+
+			for (x = 0; x < WIDTH; x++) {
+
+				print_2pix(R[x][y], G[x][y], B[x][y], R[x][y + 1], G[x][y + 1], B[x][y + 1]);
+			}
+
+			NEWLINE();
+		}
+
+		i++;
+
+		usleep(100000);
 	}
 
 	RESET_COLOR();
