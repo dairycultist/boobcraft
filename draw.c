@@ -88,3 +88,16 @@ void draw_buffer() {
 		NEWLINE();
 	}
 }
+
+void clear_buffer() {
+
+	for (y = 0; y < HEIGHT; y++) {
+
+		for (x = 0; x < WIDTH; x++) {
+
+			R[x][y] = 0;
+			G[x][y] = 0;
+			B[x][y] = 0;
+		}
+	}
+}

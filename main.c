@@ -8,25 +8,42 @@ int main() {
 
 	CLEAR_SCREEN();
 
-	int i = 20;
+	int r, g, b, i = 0;
 
-	while (i < 1000) {
+	while (i < 30) {
 
-		for (y = 0; y < HEIGHT; y++) {
+		for (r = 0; r < 6 - abs(i % 10 - 5); r++) {
 
-			for (x = 0; x < WIDTH; x++) {
+			for (g = 0; g < 6; g++) {
 
-				int dist = sqrt(pow(x - 40, 2) + pow(y - 20, 2));
+				for (b = 0; b < 6; b++) {
 
-				if (dist < 20) {
-					R[x][y] = abs((i - dist) % 10 - 5);
+					x = 30 + b * 2 - g * 2;
+					y = 20 + g + b - r * 2;
+
+					R[x][y] = r;
+					R[x+1][y] = r;
+					R[x+1][y+1] = r;
+					R[x][y+1] = r;
+
+					G[x][y] = g;
+					G[x+1][y] = g;
+					G[x+1][y+1] = g;
+					G[x][y+1] = g;
+
+					B[x][y] = b;
+					B[x+1][y] = b;
+					B[x+1][y+1] = b;
+					B[x][y+1] = b;
 				}
 			}
 		}
 
 		draw_buffer();
+		clear_buffer();
+		usleep(100000); // this is in MICROSECONDS (1/1000 of a millisecond)
+
 		i++;
-		usleep(50000); // this is in MICROSECONDS (1/1000 of a millisecond)
 	}
 
 	RESET_COLOR();
