@@ -17,7 +17,7 @@
 typedef struct {
 
 	GLuint vertex_array; // "VAO"
-	uint vertex_count;
+	uint index_count;
 	GLuint shader_program; // not stored by the VAO so have to include separately
 
 	// TODO store Transform
@@ -187,6 +187,17 @@ Mesh *load_obj_as_mesh(const char *obj_path, const GLuint shader_program) {
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 	// copy vertex data into the active buffer
 	
+	// make element buffer
+	GLuint ebo;
+	glGenBuffers(1, &ebo);
+
+	GLuint elements[] = {
+		0, 1, 2
+	};
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+
 	// link active vertex data and shader attributes
 	GLint posAttrib = glGetAttribLocation(shader_program, "position");
 	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
@@ -194,7 +205,7 @@ Mesh *load_obj_as_mesh(const char *obj_path, const GLuint shader_program) {
 
 	Mesh *mesh = malloc(sizeof(Mesh));
 	mesh->vertex_array = vertexArray;
-	mesh->vertex_count = 3;
+	mesh->index_count = 3;
 	mesh->shader_program = shader_program;
 
 	return mesh;
@@ -206,5 +217,5 @@ void draw_mesh(const Mesh *mesh) {
 	glUseProgram(mesh->shader_program);
 
 	glClear(GL_COLOR_BUFFER_BIT);
-	glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_count);
+	glDrawElements(GL_TRIANGLES, mesh->index_count, GL_UNSIGNED_INT, 0);
 }
