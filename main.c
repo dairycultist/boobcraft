@@ -3,6 +3,7 @@
 #define TRUE 1
 #define FALSE 0
 
+// maybe move to a util.c file
 void crash(const char *msg) {
 	
 	if (strlen(SDL_GetError()) == 0) {
