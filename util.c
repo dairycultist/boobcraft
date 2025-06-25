@@ -3,24 +3,25 @@
 #define TRUE 1
 #define FALSE 0
 
-// typedef struct {
+typedef struct {
 
-// 	int x;
-// 	int y;
-// 	int z;
-// 	int pitch;
-// 	// no one needs roll
-// 	int yaw;
+	float x;
+	float y;
+	float z;
+	float pitch;
+	// no one needs roll
+	float yaw;
 
-// } Transform;
+} Transform;
 
 typedef struct {
+
+	Transform transform;
 
 	GLuint vertex_array; // "VAO"
 	uint index_count;
 	GLuint shader_program; // not stored by the VAO so have to include separately
 
-	// TODO store Transform
 	// TODO store texture info (GLuint)
 	// maybe also store the vertex_buffer ("VBO") if it needs to be manipulated
 
@@ -242,6 +243,11 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	glEnableVertexAttribArray(posAttrib); // requires a VAO to be bound
 
 	Mesh *mesh = malloc(sizeof(Mesh));
+	mesh->transform.x 		= 0.0f;
+	mesh->transform.y 		= 0.0f;
+	mesh->transform.z 		= 0.0f;
+	mesh->transform.pitch 	= 0.0f;
+	mesh->transform.yaw 	= 0.0f;
 	mesh->vertex_array = vertex_array;
 	mesh->index_count = index_i;
 	mesh->shader_program = shader_program;
