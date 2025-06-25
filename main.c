@@ -4,21 +4,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
+#include "util.c"
+
 #define TRUE 1
 #define FALSE 0
 #define PROGRAM_NAME "Boobcraft"
-
-// maybe move to a util.c file
-void crash(const char *msg) {
-	
-	if (strlen(SDL_GetError()) == 0) {
-		fprintf(stderr, "\n%s: <No error given>\n\n", msg);
-	} else {
-		fprintf(stderr, "\n%s: %s\n\n", msg, SDL_GetError());
-	}
-	
-	exit(1);
-}
 
 int main() {
 
