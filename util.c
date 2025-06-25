@@ -177,7 +177,11 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 
 	while (fgets(line, 1024, file)) {
 
-		printf("%s\n", line);
+		char prefix[8];
+
+		sscanf(line, "%s", prefix);
+
+		printf("%s\n", prefix);
 	}
 
 	// make vertex array
@@ -187,9 +191,9 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 
 	// make vertex buffer (stored by vertexArray)
 	float vertices[] = {
-		0.0f,  0.5f,
-		0.5f, -0.5f,
-		-0.5f, -0.5f
+		0.0f,  0.5f, 0.5f,
+		0.5f, -0.5f, 1.5f,
+		-0.5f, -0.5f, 1.0f
 	};
 
 	GLuint vertexBuffer;			 											// create vertex buffer object
@@ -209,7 +213,7 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 
 	// link active vertex data and shader attributes
 	GLint posAttrib = glGetAttribLocation(shader_program, "position");
-	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(posAttrib); // requires a VAO to be bound
 
 	Mesh *mesh = malloc(sizeof(Mesh));
