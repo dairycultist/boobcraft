@@ -6,13 +6,6 @@
 
 typedef struct {
 
-	SDL_Window *window;
-	SDL_GLContext context;
-
-} App;
-
-typedef struct {
-
 	GLuint vertex_array; // "VAO"
 	uint vertex_count;
 	GLuint shader_program; // not stored by the VAO so have to include separately
@@ -30,7 +23,7 @@ void crash(const char *msg) {
 	exit(1);
 }
 
-App *init_app(const char *window_title) {
+void app(const char *window_title, void (*on_start)(), void (*on_terminate)(), void (*process)(), void (*process_event)(SDL_Event)) {
 
 	printf("Starting %s\n", window_title);
 
@@ -44,7 +37,7 @@ App *init_app(const char *window_title) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
-	// window
+	// create the window
 	SDL_Window *window = SDL_CreateWindow(window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 700, 500, SDL_WINDOW_OPENGL);
 
 	if (!window) {
@@ -56,15 +49,9 @@ App *init_app(const char *window_title) {
 	glewExperimental = GL_TRUE;
 	glewInit();
 	
-	App *app = malloc(sizeof(App));
-	app->window = window;
-	app->context = context;
+	// let programmer initialize stuff
+	on_start();
 
-	return app;
-}
-
-void run_app(const App *app, void (*process)(), void (*process_event)(SDL_Event)) {
-	
 	// process events until window is closed
 	SDL_Event event;
 	int running = TRUE;
@@ -82,17 +69,15 @@ void run_app(const App *app, void (*process)(), void (*process_event)(SDL_Event)
 
 		process();
 
-		SDL_GL_SwapWindow(app->window);
+		SDL_GL_SwapWindow(window);
 	}
-}
 
-void free_app(App *app) {
+	// free everything
+	on_terminate();
 
-	SDL_DestroyWindow(app->window);
-	SDL_GL_DeleteContext(app->context);
+	SDL_DestroyWindow(window);
+	SDL_GL_DeleteContext(context);
 	SDL_Quit();
-
-	free(app);
 }
 
 GLuint load_shader(const char* path, GLenum shader_type) {
