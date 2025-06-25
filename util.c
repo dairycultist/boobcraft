@@ -1,9 +1,20 @@
+// isolation/abstraction is good :)
+// trying to use only snake case and failing
+
 typedef struct {
 
 	SDL_Window *window;
 	SDL_GLContext context;
 
 } App;
+
+typedef struct {
+
+	GLuint vertex_array; // "VAO"
+	uint vertex_count;
+	GLuint shader_program; // not stored by the VAO (I think)
+
+} Mesh;
 
 void crash(const char *msg) {
 	
@@ -104,4 +115,50 @@ GLuint load_shader(const char* path, GLenum shader_type) {
 	return shader;
 }
 
-// load_obj
+Mesh *load_obj_as_mesh() {
+
+	// make vertex array
+	GLuint vertexArray;
+	glGenVertexArrays(1, &vertexArray);
+	glBindVertexArray(vertexArray);
+
+	// make vertex buffer
+	float vertices[] = {
+		0.0f,  0.5f,
+		0.5f, -0.5f,
+		-0.5f, -0.5f
+	};
+
+	GLuint vertexBuffer;			 											// create vertex buffer object
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);								// make it the active buffer
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 	// copy vertex data into the active buffer
+
+	// make shader
+	GLuint shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, load_shader("vertex.glsl", GL_VERTEX_SHADER));
+	glAttachShader(shaderProgram, load_shader("fragment.glsl", GL_FRAGMENT_SHADER));
+	glLinkProgram(shaderProgram); // apply changes to shader program, not gonna call "glUseProgram" yet bc not drawing
+	
+	// link active vertex data and shader attributes
+	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(posAttrib); // requires a VAO to be bound
+
+	Mesh *mesh = malloc(sizeof(Mesh));
+	mesh->vertex_array = vertexArray;
+	mesh->vertex_count = 3;
+	mesh->shader_program = shaderProgram;
+
+	return mesh;
+}
+
+void draw_mesh(const Mesh *mesh) {
+
+	glBindVertexArray(mesh->vertex_array);
+	glUseProgram(mesh->shader_program);
+
+	glClear(GL_COLOR_BUFFER_BIT);
+	glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_count);
+}
