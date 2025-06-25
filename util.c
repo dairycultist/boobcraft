@@ -21,7 +21,7 @@ void log_error(const char *msg) {
 	}
 }
 
-int app(const char *window_title, void (*on_start)(), void (*on_terminate)(), void (*process)(), void (*process_event)(SDL_Event)) {
+int app(const char *window_title, void (*on_start)(), void (*on_terminate)(), void (*process_tick)(), void (*process_event)(SDL_Event)) {
 
 	printf("Starting %s\n", window_title);
 
@@ -67,7 +67,7 @@ int app(const char *window_title, void (*on_start)(), void (*on_terminate)(), vo
 			}
 		}
 
-		process();
+		process_tick();
 
 		SDL_GL_SwapWindow(window);
 	}
