@@ -165,6 +165,7 @@ GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
 	return shader_program;
 }
 
+// returns NULL on error
 Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 
 	FILE *file = fopen(path, "r");
@@ -175,41 +176,61 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 
 	char line[1024];
 
+	float vertex_data[65536];
+	int vertex_i = 0;
+
+	GLuint index_data[65536];
+	int index_i = 0;
+
 	while (fgets(line, 1024, file)) {
 
 		char prefix[8];
 
 		sscanf(line, "%s", prefix);
 
-		printf("%s\n", prefix);
+		if (!strcmp(prefix, "v")) {
+
+			float v1, v2, v3;
+			
+			sscanf(line, "v %f %f %f", &v1, &v2, &v3);
+
+			vertex_data[vertex_i]   = v1;
+			vertex_data[vertex_i+1] = v2;
+			vertex_data[vertex_i+2] = v3;
+
+			vertex_i += 3;
+		}
+
+		else if (!strcmp(prefix, "f")) {
+
+			GLuint i1, i2, i3;
+			
+			sscanf(line, "f %d/1/1 %d/1/1 %d/1/1", &i1, &i2, &i3);
+
+			index_data[index_i]   = i1 - 1; // starts at 1 for some reason
+			index_data[index_i+1] = i2 - 1;
+			index_data[index_i+2] = i3 - 1;
+
+			index_i += 3;
+		}
 	}
 
 	// make vertex array
-	GLuint vertexArray;
-	glGenVertexArrays(1, &vertexArray);
-	glBindVertexArray(vertexArray);
+	GLuint vertex_array;
+	glGenVertexArrays(1, &vertex_array);
+	glBindVertexArray(vertex_array);
 
-	// make vertex buffer (stored by vertexArray)
-	float vertices[] = {
-		0.0f,  0.5f, 0.5f,
-		0.5f, -0.5f, 1.5f,
-		-0.5f, -0.5f, 1.0f
-	};
-
-	GLuint vertexBuffer;			 											// create vertex buffer object
+	// make vertex buffer (stored by vertex_array)
+	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);								// make it the active buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 	// copy vertex data into the active buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);											// make it the active buffer
+	glBufferData(GL_ARRAY_BUFFER, vertex_i * sizeof(float), vertex_data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 	
-	// make element buffer (stored by vertexArray)
-	GLuint elements[] = {
-		0, 1, 2
-	};
-
+	// make element buffer (stored by vertex_array)
 	GLuint elementBuffer;
 	glGenBuffers(1, &elementBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_i * sizeof(GLuint), index_data, GL_STATIC_DRAW);
 
 	// link active vertex data and shader attributes
 	GLint posAttrib = glGetAttribLocation(shader_program, "position");
@@ -217,8 +238,8 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	glEnableVertexAttribArray(posAttrib); // requires a VAO to be bound
 
 	Mesh *mesh = malloc(sizeof(Mesh));
-	mesh->vertex_array = vertexArray;
-	mesh->index_count = 3;
+	mesh->vertex_array = vertex_array;
+	mesh->index_count = index_i;
 	mesh->shader_program = shader_program;
 
 	return mesh;
