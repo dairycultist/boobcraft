@@ -96,6 +96,7 @@ int app(const char *window_title, void (*on_start)(), void (*on_terminate)(), vo
 	return 0;
 }
 
+// returns -1 on error
 GLuint load_shader(const char* path, GLenum shader_type) {
 
 	FILE *file = fopen(path, "r");
@@ -148,7 +149,7 @@ GLuint load_shader(const char* path, GLenum shader_type) {
 
     if (status != GL_TRUE) {
         log_error("A shader failed to compile");
-		exit(1);
+		return -1;
     }
 
 	return shader;
@@ -157,24 +158,34 @@ GLuint load_shader(const char* path, GLenum shader_type) {
 GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
 	
 	GLuint shader_program = glCreateProgram();
-	glAttachShader(shader_program, load_shader(vertex_path, GL_VERTEX_SHADER));
+	glAttachShader(shader_program, load_shader(vertex_path, GL_VERTEX_SHADER)); // does not catch errors load_shader makes lol
 	glAttachShader(shader_program, load_shader(fragment_path, GL_FRAGMENT_SHADER));
 	glLinkProgram(shader_program); // apply changes to shader program, not gonna call "glUseProgram" yet bc not drawing
 
 	return shader_program;
 }
 
-Mesh *load_obj_as_mesh(const char *obj_path, const GLuint shader_program) {
+Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 
-	// https://open.gl/drawing
-	// need Element buffers for loading obj
+	FILE *file = fopen(path, "r");
+
+	if (file == NULL) {
+		return NULL;
+	}
+
+	char line[1024];
+
+	while (fgets(line, 1024, file)) {
+
+		printf("%s\n", line);
+	}
 
 	// make vertex array
 	GLuint vertexArray;
 	glGenVertexArrays(1, &vertexArray);
 	glBindVertexArray(vertexArray);
 
-	// make vertex buffer
+	// make vertex buffer (stored by vertexArray)
 	float vertices[] = {
 		0.0f,  0.5f,
 		0.5f, -0.5f,
@@ -184,18 +195,16 @@ Mesh *load_obj_as_mesh(const char *obj_path, const GLuint shader_program) {
 	GLuint vertexBuffer;			 											// create vertex buffer object
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);								// make it the active buffer
-
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 	// copy vertex data into the active buffer
 	
-	// make element buffer
-	GLuint ebo;
-	glGenBuffers(1, &ebo);
-
+	// make element buffer (stored by vertexArray)
 	GLuint elements[] = {
 		0, 1, 2
 	};
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	GLuint elementBuffer;
+	glGenBuffers(1, &elementBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
 	// link active vertex data and shader attributes
