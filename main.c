@@ -1,7 +1,9 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 
 #define TRUE 1
 #define FALSE 0
+#define PROGRAM_NAME "Boobcraft"
 
 // maybe move to a util.c file
 void crash(const char *msg) {
@@ -17,17 +19,26 @@ void crash(const char *msg) {
 
 int main() {
 
-	printf("starting\n");
+	printf("Starting %s\n", PROGRAM_NAME);
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		crash("Could not initialize SDL");
 	}
 
-	SDL_Window *window = SDL_CreateWindow("Boobcraft", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 700, 500, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	// init OpenGL
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
+	// window
+	SDL_Window *window = SDL_CreateWindow(PROGRAM_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 700, 500, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	if (!window) {
         crash("Could not create window");
     }
+
+	SDL_GLContext context = SDL_GL_CreateContext(window);
 
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
 
@@ -40,20 +51,23 @@ int main() {
     SDL_RenderPresent(renderer);
 
 	// process events until window is closed
-	SDL_Event e;
+	SDL_Event event;
 	int quit = FALSE;
 
 	while (!quit) {
 
-		while (SDL_PollEvent(&e)) {
+		while (SDL_PollEvent(&event)) {
 
-			if (e.type == SDL_QUIT) {
+			if (event.type == SDL_QUIT) {
 				quit = TRUE;
 			}
 		}
+
+		SDL_GL_SwapWindow(window);
 	}
 
 	SDL_DestroyWindow(window);
+	SDL_GL_DeleteContext(context);
 	SDL_Quit();
 
     return 0;
