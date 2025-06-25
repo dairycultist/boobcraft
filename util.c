@@ -47,6 +47,14 @@ GLuint load_shader(const char* path, GLenum shader_type) {
 	glShaderSource(shader, 1, &const_shadercode, NULL);
 	glCompileShader(shader);
 
+    // check for compilation log
+    char compile_log[512];
+    glGetShaderInfoLog(shader, 512, NULL, compile_log);
+
+    if (compile_log[0] != '\0') {
+        printf("'%s' provided a compilation log: %s\n", path, compile_log);
+    }
+
     // check if it compiled successfully
     GLint status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
