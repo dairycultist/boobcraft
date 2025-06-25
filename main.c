@@ -18,7 +18,9 @@ int main() {
 
 	// test OpenGL rendering
 
-	Mesh *mesh = load_obj_as_mesh();
+	GLuint shader_program = load_shader_program("vertex.glsl", "fragment.glsl");
+
+	Mesh *mesh = load_obj_as_mesh(shader_program);
 
 	// process events until window is closed
 	SDL_Event event;

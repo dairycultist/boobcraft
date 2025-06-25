@@ -12,7 +12,7 @@ typedef struct {
 
 	GLuint vertex_array; // "VAO"
 	uint vertex_count;
-	GLuint shader_program; // not stored by the VAO (I think)
+	GLuint shader_program; // not stored by the VAO so have to include separately
 
 } Mesh;
 
@@ -115,7 +115,17 @@ GLuint load_shader(const char* path, GLenum shader_type) {
 	return shader;
 }
 
-Mesh *load_obj_as_mesh() {
+GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
+	
+	GLuint shader_program = glCreateProgram();
+	glAttachShader(shader_program, load_shader(vertex_path, GL_VERTEX_SHADER));
+	glAttachShader(shader_program, load_shader(fragment_path, GL_FRAGMENT_SHADER));
+	glLinkProgram(shader_program); // apply changes to shader program, not gonna call "glUseProgram" yet bc not drawing
+
+	return shader_program;
+}
+
+Mesh *load_obj_as_mesh(const GLuint shader_program) {
 
 	// make vertex array
 	GLuint vertexArray;
@@ -134,22 +144,16 @@ Mesh *load_obj_as_mesh() {
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);								// make it the active buffer
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 	// copy vertex data into the active buffer
-
-	// make shader
-	GLuint shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, load_shader("vertex.glsl", GL_VERTEX_SHADER));
-	glAttachShader(shaderProgram, load_shader("fragment.glsl", GL_FRAGMENT_SHADER));
-	glLinkProgram(shaderProgram); // apply changes to shader program, not gonna call "glUseProgram" yet bc not drawing
 	
 	// link active vertex data and shader attributes
-	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+	GLint posAttrib = glGetAttribLocation(shader_program, "position");
 	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(posAttrib); // requires a VAO to be bound
 
 	Mesh *mesh = malloc(sizeof(Mesh));
 	mesh->vertex_array = vertexArray;
 	mesh->vertex_count = 3;
-	mesh->shader_program = shaderProgram;
+	mesh->shader_program = shader_program;
 
 	return mesh;
 }
