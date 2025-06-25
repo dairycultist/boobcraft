@@ -203,9 +203,13 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 
 		else if (!strcmp(prefix, "f")) {
 
-			GLuint i1, i2, i3;
+			// only works with tris right now (no quads or ngons)
+
+			GLuint i1, i2, i3; // vertex indices
+			GLuint t1, t2, t3; // vertex texture coordinate indices
+			GLuint n1, n2, n3; // vertex normal indices
 			
-			sscanf(line, "f %d/1/1 %d/1/1 %d/1/1", &i1, &i2, &i3);
+			sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", &i1, &t1, &n1, &i2, &t2, &n2, &i3, &t3, &n3);
 
 			index_data[index_i]   = i1 - 1; // starts at 1 for some reason
 			index_data[index_i+1] = i2 - 1;
