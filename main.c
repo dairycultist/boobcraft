@@ -39,9 +39,9 @@ int main() {
 	// test OpenGL rendering
 
 	// make vertex array
-	// GLuint vertexArray;
-	// glGenVertexArrays(1, &vertexArray);
-	// glBindVertexArray(vertexArray);
+	GLuint vertexArray;
+	glGenVertexArrays(1, &vertexArray);
+	glBindVertexArray(vertexArray);
 
 	// make vertex buffer
 	float vertices[] = {
@@ -65,9 +65,9 @@ int main() {
 	glUseProgram(shaderProgram);
 	
 	// link active vertex data and shader attributes
-	// GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-	// glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	// glEnableVertexAttribArray(posAttrib);
+	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(posAttrib); // requires a VAO to be bound
 
 	printf("%d %d\n", glGetError(), GL_INVALID_OPERATION);
 
