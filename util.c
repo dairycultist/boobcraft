@@ -1,3 +1,10 @@
+typedef struct {
+
+	SDL_Window *window;
+	SDL_GLContext context;
+
+} App;
+
 void crash(const char *msg) {
 	
 	if (strlen(SDL_GetError()) == 0) {
@@ -7,6 +14,37 @@ void crash(const char *msg) {
 	}
 	
 	exit(1);
+}
+
+App *init_app(const char *window_title) {
+
+	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+		crash("Could not initialize SDL");
+	}
+
+	// init OpenGL
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
+	// window
+	SDL_Window *window = SDL_CreateWindow(window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 700, 500, SDL_WINDOW_OPENGL);
+
+	if (!window) {
+        crash("Could not create window");
+    }
+
+	SDL_GLContext context = SDL_GL_CreateContext(window);
+
+	glewExperimental = GL_TRUE;
+	glewInit();
+	
+	App *app = malloc(sizeof(App));
+	app->window = window;
+	app->context = context;
+
+	return app;
 }
 
 GLuint load_shader(const char* path, GLenum shader_type) {

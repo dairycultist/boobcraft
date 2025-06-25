@@ -14,27 +14,7 @@ int main() {
 
 	printf("Starting %s\n", PROGRAM_NAME);
 
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-		crash("Could not initialize SDL");
-	}
-
-	// init OpenGL
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-
-	// window
-	SDL_Window *window = SDL_CreateWindow(PROGRAM_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 700, 500, SDL_WINDOW_OPENGL);
-
-	if (!window) {
-        crash("Could not create window");
-    }
-
-	SDL_GLContext context = SDL_GL_CreateContext(window);
-
-	glewExperimental = GL_TRUE;
-	glewInit();
+	App *app = init_app(PROGRAM_NAME);
 
 	// test OpenGL rendering
 
@@ -69,20 +49,18 @@ int main() {
 	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(posAttrib); // requires a VAO to be bound
 
-	printf("%d %d\n", glGetError(), GL_INVALID_OPERATION);
-
 	// process events until window is closed
 	SDL_Event event;
-	int quit = FALSE;
+	int running = TRUE;
 
-	glClearColor(0.4f, 0.0f, 0.6f, 1.0f);
+	glClearColor(0.0f, 0.5f, 0.0f, 1.0f);
 
-	while (!quit) {
+	while (running) {
 
 		while (SDL_PollEvent(&event)) {
 
 			if (event.type == SDL_QUIT) {
-				quit = TRUE;
+				running = FALSE;
 			}
 		}
 
@@ -90,11 +68,11 @@ int main() {
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		SDL_GL_SwapWindow(window);
+		SDL_GL_SwapWindow(app->window);
 	}
 
-	SDL_DestroyWindow(window);
-	SDL_GL_DeleteContext(context);
+	SDL_DestroyWindow(app->window);
+	SDL_GL_DeleteContext(app->context);
 	SDL_Quit();
 
     return 0;
