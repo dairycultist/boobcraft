@@ -32,6 +32,8 @@ void crash(const char *msg) {
 
 App *init_app(const char *window_title) {
 
+	printf("Starting %s\n", window_title);
+
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		crash("Could not initialize SDL");
 	}
@@ -160,7 +162,7 @@ GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
 	return shader_program;
 }
 
-Mesh *load_obj_as_mesh(const GLuint shader_program) {
+Mesh *load_obj_as_mesh(const char *obj_path, const GLuint shader_program) {
 
 	// make vertex array
 	GLuint vertexArray;
