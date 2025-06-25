@@ -8,6 +8,8 @@ minimal and lightweight with no external dependencies
 
 triangle projection and rasterization
 
+SDL2 installed and compiled as part of the program
+
 https://github.com/libsdl-org/SDL
 
 https://github.com/michalzalobny/3d-renderer-in-c
