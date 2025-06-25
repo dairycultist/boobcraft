@@ -58,6 +58,15 @@ App *init_app(const char *window_title) {
 	return app;
 }
 
+void free_app(App *app) {
+	
+	SDL_DestroyWindow(app->window);
+	SDL_GL_DeleteContext(app->context);
+	SDL_Quit();
+
+	free(app);
+}
+
 GLuint load_shader(const char* path, GLenum shader_type) {
 
 	FILE *file = fopen(path, "r");

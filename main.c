@@ -14,12 +14,9 @@ int main() {
 
 	printf("Starting %s\n", PROGRAM_NAME);
 
-	App *app = init_app(PROGRAM_NAME);
-
-	// test OpenGL rendering
+	App *app = init_app(PROGRAM_NAME); // must be first!
 
 	GLuint shader_program = load_shader_program("vertex.glsl", "fragment.glsl");
-
 	Mesh *mesh = load_obj_as_mesh(shader_program);
 
 	// process events until window is closed
@@ -43,11 +40,7 @@ int main() {
 		SDL_GL_SwapWindow(app->window);
 	}
 
-	SDL_DestroyWindow(app->window);
-	SDL_GL_DeleteContext(app->context);
-	SDL_Quit();
-
-	free(app);
+	free_app(app);
 	free(mesh);
 
     return 0;
