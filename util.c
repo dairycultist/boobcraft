@@ -1,6 +1,9 @@
 // isolation/abstraction is good :)
 // trying to use only snake case and failing
 
+#define TRUE 1
+#define FALSE 0
+
 typedef struct {
 
 	SDL_Window *window;
@@ -58,8 +61,31 @@ App *init_app(const char *window_title) {
 	return app;
 }
 
-void free_app(App *app) {
+void run_app(const App *app, void (*process)(), void (*process_event)(SDL_Event)) {
 	
+	// process events until window is closed
+	SDL_Event event;
+	int running = TRUE;
+
+	while (running) {
+
+		while (SDL_PollEvent(&event)) {
+
+			if (event.type == SDL_QUIT) {
+				running = FALSE;
+			} else {
+				process_event(event);
+			}
+		}
+
+		process();
+
+		SDL_GL_SwapWindow(app->window);
+	}
+}
+
+void free_app(App *app) {
+
 	SDL_DestroyWindow(app->window);
 	SDL_GL_DeleteContext(app->context);
 	SDL_Quit();
