@@ -12,6 +12,8 @@ trying to use only snake case and failing
 
 https://open.gl/
 
+https://www.khronos.org/files/opengl-quick-reference-card.pdf
+
 **SDL2** installed and compiled as part of the program
 
 https://github.com/libsdl-org/SDL

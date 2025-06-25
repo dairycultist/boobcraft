@@ -35,7 +35,7 @@ void log_error(const char *msg) {
 	}
 }
 
-int app(const char *window_title, void (*on_start)(), void (*on_terminate)(), void (*process_tick)(), void (*process_event)(SDL_Event)) {
+int app(const char *window_title, const int width, const int height, void (*on_start)(), void (*on_terminate)(), void (*process_tick)(), void (*process_event)(SDL_Event)) {
 
 	printf("Starting %s\n", window_title);
 
@@ -51,7 +51,7 @@ int app(const char *window_title, void (*on_start)(), void (*on_terminate)(), vo
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 	// create the window
-	SDL_Window *window = SDL_CreateWindow(window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 700, 500, SDL_WINDOW_OPENGL);
+	SDL_Window *window = SDL_CreateWindow(window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
 
 	if (!window) {
         log_error("Could not create window");

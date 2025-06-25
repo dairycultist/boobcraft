@@ -37,5 +37,5 @@ void process_event(SDL_Event event) {
 
 int main() {
 
-    return app("Boobcraft", on_start, on_terminate, process_tick, process_event);
+    return app("Boobcraft", 800, 400, on_start, on_terminate, process_tick, process_event);
 }
