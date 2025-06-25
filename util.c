@@ -1,14 +1,26 @@
 // isolation/abstraction is good :)
-// trying to use only snake case and failing
 
 #define TRUE 1
 #define FALSE 0
 
 typedef struct {
 
+	int x;
+	int y;
+	int z;
+	int pitch;
+	// no one needs roll
+	int yaw;
+
+} Transform;
+
+typedef struct {
+
 	GLuint vertex_array; // "VAO"
 	uint vertex_count;
 	GLuint shader_program; // not stored by the VAO so have to include separately
+
+	// TODO store Transform
 
 } Mesh;
 

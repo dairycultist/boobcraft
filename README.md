@@ -4,9 +4,9 @@ Making a 3D game like it's 1998(ish). Working title.
 
 ### References
 
-minimal and lightweight with no external dependencies
+minimal and lightweight with no static dependencies
 
-triangle projection and rasterization
+trying to use only snake case and failing
 
 **OpenGL**
 
