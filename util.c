@@ -47,5 +47,15 @@ GLuint load_shader(const char* path, GLenum shader_type) {
 	glShaderSource(shader, 1, &const_shadercode, NULL);
 	glCompileShader(shader);
 
+    // check if it compiled successfully
+    GLint status;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+
+    if (status != GL_TRUE) {
+        crash("A shader failed to compile");
+    }
+
 	return shader;
 }
+
+// load_obj
