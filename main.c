@@ -1,3 +1,6 @@
+#define GLEW_STATIC
+#include "glew.h"
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
@@ -40,15 +43,21 @@ int main() {
 
 	SDL_GLContext context = SDL_GL_CreateContext(window);
 
-	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+	glewExperimental = GL_TRUE;
+	glewInit();
 
-    if (!renderer) {
-        crash("Could not create renderer");
-    }
+	// GLuint vertexBuffer;
+	// glGenBuffers(1, &vertexBuffer);
 
-    SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
+	// SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+
+    // if (!renderer) {
+    //     crash("Could not create renderer");
+    // }
+
+    // SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
+    // SDL_RenderClear(renderer);
+    // SDL_RenderPresent(renderer);
 
 	// process events until window is closed
 	SDL_Event event;
