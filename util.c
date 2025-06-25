@@ -3,16 +3,16 @@
 #define TRUE 1
 #define FALSE 0
 
-typedef struct {
+// typedef struct {
 
-	int x;
-	int y;
-	int z;
-	int pitch;
-	// no one needs roll
-	int yaw;
+// 	int x;
+// 	int y;
+// 	int z;
+// 	int pitch;
+// 	// no one needs roll
+// 	int yaw;
 
-} Transform;
+// } Transform;
 
 typedef struct {
 
@@ -21,6 +21,8 @@ typedef struct {
 	GLuint shader_program; // not stored by the VAO so have to include separately
 
 	// TODO store Transform
+	// TODO store texture info (GLuint)
+	// maybe also store the vertex_buffer ("VBO") if it needs to be manipulated
 
 } Mesh;
 
@@ -163,6 +165,9 @@ GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
 }
 
 Mesh *load_obj_as_mesh(const char *obj_path, const GLuint shader_program) {
+
+	// https://open.gl/drawing
+	// need Element buffers for loading obj
 
 	// make vertex array
 	GLuint vertexArray;
