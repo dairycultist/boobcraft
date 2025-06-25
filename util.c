@@ -12,23 +12,22 @@ typedef struct {
 
 } Mesh;
 
-void crash(const char *msg) {
+void log_error(const char *msg) {
 	
 	if (strlen(SDL_GetError()) == 0) {
 		fprintf(stderr, "\n%s: <No error given>\n\n", msg);
 	} else {
 		fprintf(stderr, "\n%s: %s\n\n", msg, SDL_GetError());
 	}
-	
-	exit(1);
 }
 
-void app(const char *window_title, void (*on_start)(), void (*on_terminate)(), void (*process)(), void (*process_event)(SDL_Event)) {
+int app(const char *window_title, void (*on_start)(), void (*on_terminate)(), void (*process)(), void (*process_event)(SDL_Event)) {
 
 	printf("Starting %s\n", window_title);
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-		crash("Could not initialize SDL");
+		log_error("Could not initialize SDL");
+		return 1;
 	}
 
 	// init OpenGL
@@ -41,7 +40,8 @@ void app(const char *window_title, void (*on_start)(), void (*on_terminate)(), v
 	SDL_Window *window = SDL_CreateWindow(window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 700, 500, SDL_WINDOW_OPENGL);
 
 	if (!window) {
-        crash("Could not create window");
+        log_error("Could not create window");
+		return 1;
     }
 
 	SDL_GLContext context = SDL_GL_CreateContext(window);
@@ -78,6 +78,8 @@ void app(const char *window_title, void (*on_start)(), void (*on_terminate)(), v
 	SDL_DestroyWindow(window);
 	SDL_GL_DeleteContext(context);
 	SDL_Quit();
+
+	return 0;
 }
 
 GLuint load_shader(const char* path, GLenum shader_type) {
@@ -131,7 +133,8 @@ GLuint load_shader(const char* path, GLenum shader_type) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 
     if (status != GL_TRUE) {
-        crash("A shader failed to compile");
+        log_error("A shader failed to compile");
+		exit(1);
     }
 
 	return shader;
