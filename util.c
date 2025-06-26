@@ -163,6 +163,9 @@ GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
 	glAttachShader(shader_program, load_shader(fragment_path, GL_FRAGMENT_SHADER));
 	glLinkProgram(shader_program); // apply changes to shader program, not gonna call "glUseProgram" yet bc not drawing
 
+	// TODO you should stop using glGetAttribLocation/glGetUniformLocation
+	// https://stackoverflow.com/questions/15639957/glgetattriblocation-returns-1-when-retrieving-existing-shader-attribute
+
 	return shader_program;
 }
 
@@ -256,6 +259,9 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 }
 
 void draw_mesh(const Mesh *mesh) {
+
+	glUniform3f(glGetUniformLocation(mesh->shader_program, "translation"), mesh->transform.x, mesh->transform.y, mesh->transform.z);
+	glUniform1f(glGetUniformLocation(mesh->shader_program, "yaw"), mesh->transform.yaw);
 
 	glBindVertexArray(mesh->vertex_array);
 	glUseProgram(mesh->shader_program);

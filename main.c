@@ -12,6 +12,8 @@ void on_start() {
 
 	GLuint shader_program = load_shader_program("vertex.glsl", "fragment.glsl");
 	mesh = load_obj_as_mesh("test.obj", shader_program);
+
+	mesh->transform.z = -4.0;
 }
 
 void on_terminate() {
