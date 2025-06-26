@@ -2,7 +2,8 @@
 #include "GLEW/glew.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-#include "util.c"
+#include "app.c"
+#include "3D.c"
 
 Mesh *mesh;
 
