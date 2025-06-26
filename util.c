@@ -261,6 +261,7 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 void draw_mesh(const Mesh *mesh) {
 
 	glUniform3f(glGetUniformLocation(mesh->shader_program, "translation"), mesh->transform.x, mesh->transform.y, mesh->transform.z);
+	glUniform1f(glGetUniformLocation(mesh->shader_program, "pitch"), mesh->transform.pitch);
 	glUniform1f(glGetUniformLocation(mesh->shader_program, "yaw"), mesh->transform.yaw);
 
 	glBindVertexArray(mesh->vertex_array);
