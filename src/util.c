@@ -16,4 +16,17 @@ void log_error(const char *msg) {
 	}
 }
 
+typedef struct {
+
+	char data[65536];
+	int bytecount;
+
+} EZArray;
+
+void append_ezarray(EZArray *array, void *data, int data_length) {
+
+	memcpy(array->data[array->bytecount], data, data_length);
+	array->bytecount += data_length;
+}
+
 #endif

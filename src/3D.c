@@ -107,8 +107,7 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 
 	char line[1024];
 
-	float vertex_data[65536];
-	int vertex_i = 0;
+	EZArray vertex_data;
 
 	GLuint index_data[65536];
 	int index_i = 0;
@@ -125,11 +124,9 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 			
 			sscanf(line, "v %f %f %f", &v1, &v2, &v3);
 
-			vertex_data[vertex_i]   = v1;
-			vertex_data[vertex_i+1] = v2;
-			vertex_data[vertex_i+2] = v3;
-
-			vertex_i += 3;
+			append_ezarray(vertex_data, v1, sizeof(float));
+			append_ezarray(vertex_data, v2, sizeof(float));
+			append_ezarray(vertex_data, v3, sizeof(float));
 		}
 
 		else if (!strcmp(prefix, "f")) {
@@ -159,7 +156,7 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);											// make it the active buffer
-	glBufferData(GL_ARRAY_BUFFER, vertex_i * sizeof(float), vertex_data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
+	glBufferData(GL_ARRAY_BUFFER, vertex_data->bytecount, vertex_data->data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 	
 	// make element buffer (stored by vertex_array)
 	GLuint elementBuffer;
