@@ -12,8 +12,8 @@ void on_start() {
 	
 	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
 
-	GLuint shader_program = load_shader_program("vertex.glsl", "fragment.glsl");
-	mesh = load_obj_as_mesh("test.obj", shader_program);
+	GLuint shader_program = load_shader_program("res/testshader.vert", "res/testshader.frag");
+	mesh = load_obj_as_mesh("res/test.obj", shader_program);
 
 	mesh->transform.z = -4.0;
 }
