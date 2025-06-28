@@ -118,25 +118,29 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 
 		if (!strcmp(prefix, "v")) {
 
-			float v1, v2, v3;
+			float v[3];
 			
-			sscanf(line, "v %f %f %f", &v1, &v2, &v3);
+			sscanf(line, "v %f %f %f", &v[0], &v[1], &v[2]);
 
-			append_ezarray(vertex_data, [v1, v2, v3], sizeof(float) * 3);
+			append_ezarray(&vertex_data, v, sizeof(float) * 3);
 		}
 
 		else if (!strcmp(prefix, "f")) {
 
 			// only works with tris right now (no quads or ngons)
 
-			GLuint i1, i2, i3; // vertex indices
-			GLuint t1, t2, t3; // vertex texture coordinate indices
-			GLuint n1, n2, n3; // vertex normal indices
+			GLuint i[3]; // vertex indices
+			GLuint t[3]; // vertex texture coordinate indices
+			GLuint n[3]; // vertex normal indices
 			
-			sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", &i1, &t1, &n1, &i2, &t2, &n2, &i3, &t3, &n3);
+			sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", &i[0], &t[0], &n[0], &i[1], &t[1], &n[1], &i[2], &t[2], &n[2]);
 
 			// indices start at 1 for some reason
-			append_ezarray(index_data, [i1 - 1, i2 - 1, i3 - 1], sizeof(GLuint) * 3);
+			i[0] -= 1;
+			i[1] -= 1;
+			i[2] -= 1;
+
+			append_ezarray(&index_data, i, sizeof(GLuint) * 3);
 		}
 	}
 
@@ -148,14 +152,14 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	// make vertex buffer (stored by vertex_array)
 	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);												// make it the active buffer
-	glBufferData(GL_ARRAY_BUFFER, vertex_data->bytecount, vertex_data->data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);											// make it the active buffer
+	glBufferData(GL_ARRAY_BUFFER, vertex_data.bytecount, vertex_data.data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 	
 	// make element buffer (stored by vertex_array)
 	GLuint elementBuffer;
 	glGenBuffers(1, &elementBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertex_data->bytecount, index_data->data, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_data.bytecount, index_data.data, GL_STATIC_DRAW);
 
 	// link active vertex data and shader attributes
 	GLint posAttrib = glGetAttribLocation(shader_program, "position");
@@ -169,7 +173,7 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	mesh->transform.pitch 	= 0.0f;
 	mesh->transform.yaw 	= 0.0f;
 	mesh->vertex_array = vertex_array;
-	mesh->index_count = index_i;
+	mesh->index_count = index_data.bytecount / sizeof(GLuint);
 	mesh->shader_program = shader_program;
 
 	return mesh;
