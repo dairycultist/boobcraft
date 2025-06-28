@@ -52,6 +52,7 @@ int app(const char *window_title, const int width, const int height, void (*on_s
 		process_tick();
 
 		SDL_GL_SwapWindow(window);
+		SDL_Delay(1000 / 60);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 

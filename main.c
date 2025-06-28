@@ -24,8 +24,6 @@ void on_terminate() {
 }
 
 void process_tick() {
-	
-	SDL_Delay(1000 / 60);
 
 	mesh->transform.yaw += 0.1;
 	draw_mesh(mesh);
