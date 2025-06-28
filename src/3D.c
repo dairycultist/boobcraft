@@ -108,9 +108,7 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	char line[1024];
 
 	EZArray vertex_data;
-
-	GLuint index_data[65536];
-	int index_i = 0;
+	EZArray index_data;
 
 	while (fgets(line, 1024, file)) {
 
@@ -124,9 +122,7 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 			
 			sscanf(line, "v %f %f %f", &v1, &v2, &v3);
 
-			append_ezarray(vertex_data, v1, sizeof(float));
-			append_ezarray(vertex_data, v2, sizeof(float));
-			append_ezarray(vertex_data, v3, sizeof(float));
+			append_ezarray(vertex_data, [v1, v2, v3], sizeof(float) * 3);
 		}
 
 		else if (!strcmp(prefix, "f")) {
@@ -139,11 +135,8 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 			
 			sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", &i1, &t1, &n1, &i2, &t2, &n2, &i3, &t3, &n3);
 
-			index_data[index_i]   = i1 - 1; // starts at 1 for some reason
-			index_data[index_i+1] = i2 - 1;
-			index_data[index_i+2] = i3 - 1;
-
-			index_i += 3;
+			// indices start at 1 for some reason
+			append_ezarray(index_data, [i1 - 1, i2 - 1, i3 - 1], sizeof(GLuint) * 3);
 		}
 	}
 
@@ -155,14 +148,14 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	// make vertex buffer (stored by vertex_array)
 	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);											// make it the active buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);												// make it the active buffer
 	glBufferData(GL_ARRAY_BUFFER, vertex_data->bytecount, vertex_data->data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 	
 	// make element buffer (stored by vertex_array)
 	GLuint elementBuffer;
 	glGenBuffers(1, &elementBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_i * sizeof(GLuint), index_data, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertex_data->bytecount, index_data->data, GL_STATIC_DRAW);
 
 	// link active vertex data and shader attributes
 	GLint posAttrib = glGetAttribLocation(shader_program, "position");
