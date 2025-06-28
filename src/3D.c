@@ -108,7 +108,7 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	char line[1024];
 
 	EZArray vertex_data;
-	EZArray index_data;
+	EZArray index_data; // stores combined vertex, normal, and texture data
 
 	while (fgets(line, 1024, file)) {
 
@@ -133,14 +133,15 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 			GLuint t[3]; // vertex texture coordinate indices
 			GLuint n[3]; // vertex normal indices
 			
-			sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", &i[0], &t[0], &n[0], &i[1], &t[1], &n[1], &i[2], &t[2], &n[2]);
+			sscanf(line, "f %u/%u/%u %u/%u/%u %u/%u/%u",
+				&i[0], &t[0], &n[0],
+				&i[1], &t[1], &n[1],
+				&i[2], &t[2], &n[2]);
 
-			// indices start at 1 for some reason
-			i[0] -= 1;
-			i[1] -= 1;
-			i[2] -= 1;
-
-			append_ezarray(&index_data, i, sizeof(GLuint) * 3);
+			// convert vertex indices to vertex data (indices start at 1 for some reason)
+			append_ezarray(&index_data, vertex_data.data + ((i[0] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			append_ezarray(&index_data, vertex_data.data + ((i[1] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			append_ezarray(&index_data, vertex_data.data + ((i[2] - 1) * sizeof(float) * 3), sizeof(float) * 3);
 		}
 	}
 
@@ -153,13 +154,7 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);											// make it the active buffer
-	glBufferData(GL_ARRAY_BUFFER, vertex_data.bytecount, vertex_data.data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
-	
-	// make element buffer (stored by vertex_array)
-	GLuint elementBuffer;
-	glGenBuffers(1, &elementBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_data.bytecount, index_data.data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, index_data.bytecount, index_data.data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 
 	// link active vertex data and shader attributes
 	GLint posAttrib = glGetAttribLocation(shader_program, "position");
@@ -173,7 +168,7 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	mesh->transform.pitch 	= 0.0f;
 	mesh->transform.yaw 	= 0.0f;
 	mesh->vertex_array = vertex_array;
-	mesh->index_count = index_data.bytecount / sizeof(GLuint);
+	mesh->index_count = index_data.bytecount / sizeof(float);
 	mesh->shader_program = shader_program;
 
 	return mesh;
@@ -188,5 +183,5 @@ void draw_mesh(const Mesh *mesh) {
 	glBindVertexArray(mesh->vertex_array);
 	glUseProgram(mesh->shader_program);
 
-	glDrawElements(GL_TRIANGLES, mesh->index_count, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, mesh->index_count);
 }
