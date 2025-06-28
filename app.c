@@ -27,6 +27,9 @@ int app(const char *window_title, const int width, const int height, void (*on_s
 
 	glewExperimental = GL_TRUE;
 	glewInit();
+
+	// enable depth buffer
+	glEnable(GL_DEPTH_TEST);
 	
 	// let programmer initialize stuff
 	on_start();
@@ -49,7 +52,7 @@ int app(const char *window_title, const int width, const int height, void (*on_s
 		process_tick();
 
 		SDL_GL_SwapWindow(window);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	// free everything

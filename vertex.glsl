@@ -5,8 +5,11 @@ uniform float pitch;
 uniform float yaw;
 
 in vec3 position;
+out vec3 pos;
 
 void main() {
+
+    pos = position;
 
     // constructing matrices should probably be done once in C and passed through a uniform...
 
