@@ -49,5 +49,5 @@ void main() {
     // get final position
     gl_Position = proj * (rot_yaw * rot_pitch * vec4(position.xy, -position.z, 1.0) - vec4(translation.xy, -translation.z, 0.0));
 
-    normal_camera = (inverse(rot_yaw) * vec4(normal, 1.0)).xyz;
+    normal_camera = (inverse(rot_yaw) * inverse(rot_pitch) * vec4(normal, 1.0)).xyz;
 }
