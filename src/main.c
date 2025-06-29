@@ -36,9 +36,9 @@ void process_tick() {
 		mesh->transform.yaw -= 0.1;
 	}
 
-	if (down) {
+	if (up) {
 		mesh->transform.pitch += 0.1;
-	} else if (up) {
+	} else if (down) {
 		mesh->transform.pitch -= 0.1;
 	}
 
