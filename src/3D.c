@@ -245,14 +245,14 @@ void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) 
 void draw_mesh(const Mesh *mesh) {
 
 	// rotation matrices (used later)
-	GLfloat rot_pitch[4][4] = {
+	GLfloat pitch_matrix[4][4] = {
 		{ 1, 0,          				  0,       					  0 },
 		{ 0, cos(mesh->transform.pitch), -sin(mesh->transform.pitch), 0 },
 		{ 0, sin(mesh->transform.pitch),  cos(mesh->transform.pitch), 0 },
 		{ 0, 0,           				  0,         				  1 }
 	};
 
-	GLfloat rot_yaw[4][4] = {
+	GLfloat yaw_matrix[4][4] = {
 		{  cos(mesh->transform.yaw), 0, sin(mesh->transform.yaw), 0 },
 		{  0,       				 1, 0,      				  0 },
 		{ -sin(mesh->transform.yaw), 0, cos(mesh->transform.yaw), 0 },
@@ -262,7 +262,7 @@ void draw_mesh(const Mesh *mesh) {
 	// model matrix (converts from model space to world space)
 	GLfloat model_matrix[4][4];
 
-	mat4_mult(rot_yaw, rot_pitch, model_matrix);
+	mat4_mult(yaw_matrix, pitch_matrix, model_matrix);
 
 	model_matrix[3][0] = -mesh->transform.x;
 	model_matrix[3][1] = -mesh->transform.y;
@@ -287,10 +287,10 @@ void draw_mesh(const Mesh *mesh) {
 	float right = top * aspectRatio;         // half width of near plane
 
 	GLfloat proj_matrix[4][4] = {
-		{ front / right, 0, 		  0, 									  0   },
-		{ 0, 			front / top,  0, 									  0   },
-		{ 0, 			0, 			 -(back + front) / (back - front), 		 -1.0 },
-		{ 0, 			0, 			 -(2.0 * back * front) / (back - front),  0   }
+		{ front / right, 0, 		   0, 									   0   },
+		{ 0, 			 front / top,  0, 									   0   },
+		{ 0, 			 0, 		  -(back + front) / (back - front), 	  -1.0 },
+		{ 0, 			 0, 		  -(2.0 * back * front) / (back - front),  0   }
 	};
 
 	// final position matrix (proj_matrix * view_matrix * model_matrix)
@@ -299,15 +299,15 @@ void draw_mesh(const Mesh *mesh) {
 	mat4_mult(proj_matrix, view_matrix, position_matrix);
 	mat4_mult(position_matrix, model_matrix, position_matrix);
 
-	// normal matrix, accounts for rotation (inverse(rot_yaw) * inverse(rot_pitch))
+	// normal matrix, accounts for rotation (inverse(yaw_matrix) * inverse(pitch_matrix))
 	GLfloat normal_matrix[4][4];
 
-	rot_pitch[2][1] *= -1;
-	rot_pitch[1][2] *= -1;
-	rot_yaw[2][0] *= -1;
-	rot_yaw[0][2] *= -1;
+	pitch_matrix[2][1] *= -1;
+	pitch_matrix[1][2] *= -1;
+	yaw_matrix[2][0] *= -1;
+	yaw_matrix[0][2] *= -1;
 
-	mat4_mult(rot_yaw, rot_pitch, normal_matrix);
+	mat4_mult(yaw_matrix, pitch_matrix, normal_matrix);
 
 	// load in the matrices we just calculated as uniforms
 	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);

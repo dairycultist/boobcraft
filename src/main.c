@@ -20,7 +20,7 @@ void on_start() {
 	GLuint shader_program = load_shader_program("res/testshader.vert", "res/testshader.frag");
 	mesh = load_obj_as_mesh("res/test.obj", shader_program);
 
-	mesh->transform.z = -4.0;
+	mesh->transform.z = -2.0;
 }
 
 void on_terminate() {
