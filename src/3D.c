@@ -202,7 +202,9 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	return mesh;
 }
 
-void mat4_mult(const GLfloat a[4][4], const GLfloat b[4][4], GLfloat out[4][4]) {
+void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) {
+
+	// a (rightmost) is applied first, then b
 
 	GLfloat matrix[4][4] = {
 		{
@@ -247,26 +249,26 @@ void draw_mesh(const Mesh *mesh) {
 	// mesh->transform.yaw
 
 	GLfloat rot_pitch[4][4] = {
-		{ 1, 0,          				  0,       				      0 },
-		{ 0, cos(mesh->transform.pitch), -sin(mesh->transform.pitch), 0 },
-		{ 0, sin(mesh->transform.pitch),  cos(mesh->transform.pitch), 0 },
-		{ 0, 0,           				  0,         				  1 }
+		{ 1,  0,          				  0,       				      0 },
+		{ 0,  cos(mesh->transform.pitch), sin(mesh->transform.pitch), 0 },
+		{ 0, -sin(mesh->transform.pitch), cos(mesh->transform.pitch), 0 },
+		{ 0,  0,           				  0,         				  1 }
 	};
 
 	GLfloat rot_yaw[4][4] = {
-		{ cos(mesh->transform.yaw), 0, sin(mesh->transform.yaw), 0 },
-		{	0,        1, 0,        0 },
-		{ -sin(mesh->transform.yaw), 0, cos(mesh->transform.yaw), 0 },
-		{ 0,         0, 0,        1 }
+		{ cos(mesh->transform.yaw), 0, -sin(mesh->transform.yaw), 0 },
+		{ 0,       				 	1,  0,      				  0 },
+		{ sin(mesh->transform.yaw), 0,  cos(mesh->transform.yaw), 0 },
+		{ 0,         				 0, 0,       				  1 }
 	};
 
 	GLfloat model_matrix[4][4]; // to world space
 
 	mat4_mult(rot_yaw, rot_pitch, model_matrix);
 
-	// model_matrix[0][3] = -mesh->transform.x;
-	// model_matrix[1][3] = -mesh->transform.y;
-	// model_matrix[2][3] = mesh->transform.z;
+	model_matrix[3][0] = -mesh->transform.x;
+	model_matrix[3][1] = -mesh->transform.y;
+	model_matrix[3][2] = mesh->transform.z;
 
 	GLfloat view_matrix[4][4] = { // to view space (aka account for camera transformations)
 		{1, 0, 0, 0},
@@ -275,6 +277,7 @@ void draw_mesh(const Mesh *mesh) {
 		{0, 0, 0, 1}
 	};
 
+	// construct perspective projection matrix
 	GLfloat proj_matrix[4][4] = { // to clip space (projection)
 		{1, 0, 0, 0},
 		{0, 1, 0, 0},
@@ -282,65 +285,44 @@ void draw_mesh(const Mesh *mesh) {
 		{0, 0, 0, 1}
 	};
 
-	GLfloat position_matrix[4][4];
+	const float fovY = 90;
+	const float aspectRatio = 2.0;
+	const float front = 0.01; // near plane
+	const float back = 10;    // far plane
+
+	float tangent = tan(fovY / 2 * DEG2RAD);  // tangent of half fovY
+	float top = front * tangent;              // half height of near plane
+	float right = top * aspectRatio;          // half width of near plane
+
+	proj_matrix[0][0] =  front / right;
+	proj_matrix[1][1] =  front / top;
+	proj_matrix[2][2] = -(back + front) / (back - front);
+	proj_matrix[2][3] = -1.0;
+	proj_matrix[3][2] = -(2.0 * back * front) / (back - front);
+	proj_matrix[3][3] =  0.0;
+
+	
+
+	GLfloat position_matrix[4][4]; // position_matrix = proj_matrix * view_matrix * model_matrix;
 
 	mat4_mult(proj_matrix, view_matrix, position_matrix);
 	mat4_mult(position_matrix, model_matrix, position_matrix);
 
 	GLfloat normal_matrix[4][4] = { // for normals, inversion of perceived model rotation
-		{1, 0, 0, 0},
+		{1, 0, 0, 0},				// normal_matrix = inverse(rot_yaw) * inverse(rot_pitch);
 		{0, 1, 0, 0},
 		{0, 0, 1, 0},
 		{0, 0, 0, 1}
 	};
 
+	// load in the matrices we just calculated as uniforms
 	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
 
+	// bind the mesh and its shader
 	glBindVertexArray(mesh->vertex_array);
 	glUseProgram(mesh->shader_program);
 
+	// draw
 	glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_count);
 }
-
-
-
-// mat4 rot_pitch = mat4(
-// 	1, 0,           0,          0,
-// 	0, cos(pitch), -sin(pitch), 0,
-// 	0, sin(pitch),  cos(pitch), 0,
-// 	0, 0,           0,          1
-// );
-// mat4 rot_yaw = mat4(
-// 		cos(yaw), 0, sin(yaw), 0,
-// 		0,        1, 0,        0,
-// 	-sin(yaw), 0, cos(yaw), 0,
-// 	0,         0, 0,        1
-// );
-
-// normal_matrix = inverse(rot_pitch * rot_yaw);
-
-
-
-// // construct perspective projection matrix
-// float fovY = 90;
-// float aspectRatio = 2.0;
-// float front = 0.01; // near plane
-// float back = 10;    // far plane
-
-// const float DEG2RAD = acos(-1.0f) / 180;
-
-// float tangent = tan(fovY/2 * DEG2RAD);    // tangent of half fovY
-// float top = front * tangent;              // half height of near plane
-// float right = top * aspectRatio;          // half width of near plane
-
-// proj_matrix[0][0] =  front / right;
-// proj_matrix[1][1] =  front / top;
-// proj_matrix[2][2] = -(back + front) / (back - front);
-// proj_matrix[2][3] = -1;
-// proj_matrix[3][2] = -(2 * back * front) / (back - front);
-// proj_matrix[3][3] =  0;
-
-
-
-// position_matrix = proj_matrix * view_matrix * model_matrix;

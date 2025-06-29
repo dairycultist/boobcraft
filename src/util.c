@@ -6,6 +6,7 @@
 
 #define TRUE 1
 #define FALSE 0
+#define DEG2RAD (M_PI / 180)
 
 void log_error(const char *msg) {
 	
