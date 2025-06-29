@@ -244,6 +244,7 @@ void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) 
 
 void draw_mesh(const Mesh *mesh) {
 
+	// rotation matrices (used later)
 	GLfloat rot_pitch[4][4] = {
 		{ 1, 0,          				  0,       					  0 },
 		{ 0, cos(mesh->transform.pitch), -sin(mesh->transform.pitch), 0 },
@@ -258,7 +259,8 @@ void draw_mesh(const Mesh *mesh) {
 		{  0,         				 0, 0,       				  1 }
 	};
 
-	GLfloat model_matrix[4][4]; // to world space
+	// model matrix (converts from model space to world space)
+	GLfloat model_matrix[4][4];
 
 	mat4_mult(rot_yaw, rot_pitch, model_matrix);
 
@@ -266,45 +268,39 @@ void draw_mesh(const Mesh *mesh) {
 	model_matrix[3][1] = -mesh->transform.y;
 	model_matrix[3][2] =  mesh->transform.z;
 
-	GLfloat view_matrix[4][4] = { // to view space (aka account for camera transformations)
+	// view matrix (converts from world space to view space, aka accounts for camera transformations)
+	GLfloat view_matrix[4][4] = {
 		{1, 0, 0, 0},
 		{0, 1, 0, 0},
 		{0, 0, 1, 0},
 		{0, 0, 0, 1}
 	};
 
-	// construct perspective projection matrix
-	GLfloat proj_matrix[4][4] = { // to clip space (projection)
-		{1, 0, 0, 0},
-		{0, 1, 0, 0},
-		{0, 0, 1, 0},
-		{0, 0, 0, 1}
-	};
-
+	// perspective projection matrix (converts from view space to clip space)
 	const float fovY = 90;
 	const float aspectRatio = 2.0;
 	const float front = 0.01; // near plane
 	const float back = 10;    // far plane
 
-	float tangent = tan(fovY / 2 * DEG2RAD);  // tangent of half fovY
-	float top = front * tangent;              // half height of near plane
-	float right = top * aspectRatio;          // half width of near plane
+	float tangent = tan(fovY / 2 * DEG2RAD); // tangent of half fovY
+	float top = front * tangent;             // half height of near plane
+	float right = top * aspectRatio;         // half width of near plane
 
-	proj_matrix[0][0] =  front / right;
-	proj_matrix[1][1] =  front / top;
-	proj_matrix[2][2] = -(back + front) / (back - front);
-	proj_matrix[2][3] = -1.0;
-	proj_matrix[3][2] = -(2.0 * back * front) / (back - front);
-	proj_matrix[3][3] =  0.0;
+	GLfloat proj_matrix[4][4] = {
+		{ front / right, 0, 		  0, 									  0   },
+		{ 0, 			front / top,  0, 									  0   },
+		{ 0, 			0, 			 -(back + front) / (back - front), 		 -1.0 },
+		{ 0, 			0, 			 -(2.0 * back * front) / (back - front),  0   }
+	};
 
-	
-
-	GLfloat position_matrix[4][4]; // position_matrix = proj_matrix * view_matrix * model_matrix;
+	// final position matrix (proj_matrix * view_matrix * model_matrix)
+	GLfloat position_matrix[4][4];
 
 	mat4_mult(proj_matrix, view_matrix, position_matrix);
 	mat4_mult(position_matrix, model_matrix, position_matrix);
 
-	GLfloat normal_matrix[4][4]; // normal_matrix = inverse(rot_yaw) * inverse(rot_pitch);
+	// normal matrix, accounts for rotation (inverse(rot_yaw) * inverse(rot_pitch))
+	GLfloat normal_matrix[4][4];
 
 	rot_pitch[2][1] *= -1;
 	rot_pitch[1][2] *= -1;
