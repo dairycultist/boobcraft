@@ -1,7 +1,7 @@
 #version 150 core
 
 uniform mat4 position_matrix;
-uniform mat4 normal_matrix;  // for normals, inversion of perceived model rotation
+uniform mat4 normal_matrix;
 
 in vec3 position;
 in vec3 normal;

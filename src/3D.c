@@ -202,41 +202,106 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	return mesh;
 }
 
+void mat4_mult(const GLfloat a[4][4], const GLfloat b[4][4], GLfloat out[4][4]) {
+
+	GLfloat matrix[4][4] = {
+		{
+			a[0][0] * b[0][0] + a[0][1] * b[1][0] + a[0][2] * b[2][0] + a[0][3] * b[3][0],
+			a[0][0] * b[0][1] + a[0][1] * b[1][1] + a[0][2] * b[2][1] + a[0][3] * b[3][1],
+			a[0][0] * b[0][2] + a[0][1] * b[1][2] + a[0][2] * b[2][2] + a[0][3] * b[3][2],
+			a[0][0] * b[0][3] + a[0][1] * b[1][3] + a[0][2] * b[2][3] + a[0][3] * b[3][3],
+		},
+		{
+			a[1][0] * b[0][0] + a[1][1] * b[1][0] + a[1][2] * b[2][0] + a[1][3] * b[3][0],
+			a[1][0] * b[0][1] + a[1][1] * b[1][1] + a[1][2] * b[2][1] + a[1][3] * b[3][1],
+			a[1][0] * b[0][2] + a[1][1] * b[1][2] + a[1][2] * b[2][2] + a[1][3] * b[3][2],
+			a[1][0] * b[0][3] + a[1][1] * b[1][3] + a[1][2] * b[2][3] + a[1][3] * b[3][3],
+		},
+		{
+			a[2][0] * b[0][0] + a[2][1] * b[1][0] + a[2][2] * b[2][0] + a[2][3] * b[3][0],
+			a[2][0] * b[0][1] + a[2][1] * b[1][1] + a[2][2] * b[2][1] + a[2][3] * b[3][1],
+			a[2][0] * b[0][2] + a[2][1] * b[1][2] + a[2][2] * b[2][2] + a[2][3] * b[3][2],
+			a[2][0] * b[0][3] + a[2][1] * b[1][3] + a[2][2] * b[2][3] + a[2][3] * b[3][3],
+		},
+		{
+			a[3][0] * b[0][0] + a[3][1] * b[1][0] + a[3][2] * b[2][0] + a[3][3] * b[3][0],
+			a[3][0] * b[0][1] + a[3][1] * b[1][1] + a[3][2] * b[2][1] + a[3][3] * b[3][1],
+			a[3][0] * b[0][2] + a[3][1] * b[1][2] + a[3][2] * b[2][2] + a[3][3] * b[3][2],
+			a[3][0] * b[0][3] + a[3][1] * b[1][3] + a[3][2] * b[2][3] + a[3][3] * b[3][3],
+		},
+	};
+
+	int x, y;
+
+	for (x = 0; x < 4; x++) {
+		for (y = 0; y < 4; y++) {
+			out[x][y] = matrix[x][y];
+		}
+	}
+}
+
 void draw_mesh(const Mesh *mesh) {
 
 	// mesh->transform.x, mesh->transform.y, mesh->transform.z
 	// mesh->transform.pitch
 	// mesh->transform.yaw
 
-	// gotta construct matrices
-	GLfloat matrix[4][4] = {
+	GLfloat rot_pitch[4][4] = {
+		{ 1, 0,          				  0,       				      0 },
+		{ 0, cos(mesh->transform.pitch), -sin(mesh->transform.pitch), 0 },
+		{ 0, sin(mesh->transform.pitch),  cos(mesh->transform.pitch), 0 },
+		{ 0, 0,           				  0,         				  1 }
+	};
+
+	GLfloat rot_yaw[4][4] = {
+		{ cos(mesh->transform.yaw), 0, sin(mesh->transform.yaw), 0 },
+		{	0,        1, 0,        0 },
+		{ -sin(mesh->transform.yaw), 0, cos(mesh->transform.yaw), 0 },
+		{ 0,         0, 0,        1 }
+	};
+
+	GLfloat model_matrix[4][4]; // to world space
+
+	mat4_mult(rot_yaw, rot_pitch, model_matrix);
+
+	// model_matrix[0][3] = -mesh->transform.x;
+	// model_matrix[1][3] = -mesh->transform.y;
+	// model_matrix[2][3] = mesh->transform.z;
+
+	GLfloat view_matrix[4][4] = { // to view space (aka account for camera transformations)
 		{1, 0, 0, 0},
 		{0, 1, 0, 0},
 		{0, 0, 1, 0},
 		{0, 0, 0, 1}
 	};
 
-	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "position_matrix"), 1, GL_FALSE, &matrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "normal_matrix"), 1, GL_FALSE, &matrix[0][0]);
+	GLfloat proj_matrix[4][4] = { // to clip space (projection)
+		{1, 0, 0, 0},
+		{0, 1, 0, 0},
+		{0, 0, 1, 0},
+		{0, 0, 0, 1}
+	};
+
+	GLfloat position_matrix[4][4];
+
+	mat4_mult(proj_matrix, view_matrix, position_matrix);
+	mat4_mult(position_matrix, model_matrix, position_matrix);
+
+	GLfloat normal_matrix[4][4] = { // for normals, inversion of perceived model rotation
+		{1, 0, 0, 0},
+		{0, 1, 0, 0},
+		{0, 0, 1, 0},
+		{0, 0, 0, 1}
+	};
+
+	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
 
 	glBindVertexArray(mesh->vertex_array);
 	glUseProgram(mesh->shader_program);
 
 	glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_count);
 }
-
-
-
-// mat4 model_matrix;   // to world space
-// mat4 view_matrix;    // to view space (aka account for camera transformations)
-// mat4 proj_matrix;    // to clip space (projection)
-
-
-
-// view_matrix[0][0] = 1.;
-// view_matrix[1][1] = 1.;
-// view_matrix[2][2] = 1.;
-// view_matrix[3][3] = 1.;
 
 
 
@@ -253,14 +318,7 @@ void draw_mesh(const Mesh *mesh) {
 // 	0,         0, 0,        1
 // );
 
-
-
 // normal_matrix = inverse(rot_pitch * rot_yaw);
-
-// model_matrix = rot_yaw * rot_pitch;
-// model_matrix[3][0] = -translation.x;
-// model_matrix[3][1] = -translation.y;
-// model_matrix[3][2] = translation.z;
 
 
 
