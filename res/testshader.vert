@@ -6,13 +6,11 @@ uniform float yaw;
 
 in vec3 position;
 in vec3 normal;
-out vec3 normal_frag;
+out vec3 normal_camera;
 
 void main() {
 
-    normal_frag = normal;
-
-    // constructing matrices should probably be done once in C and passed through a uniform...
+    // constructing matrices (and inverse matrices) should probably be done once in C and passed through a uniform...
 
     mat4 rot_pitch = mat4(
         1, 0,           0,          0,
@@ -50,4 +48,6 @@ void main() {
 
     // get final position
     gl_Position = proj * (rot_yaw * rot_pitch * vec4(position.xy, -position.z, 1.0) - vec4(translation.xy, -translation.z, 0.0));
+
+    normal_camera = (inverse(rot_yaw) * vec4(normal, 1.0)).xyz;
 }

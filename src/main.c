@@ -8,6 +8,11 @@
 
 Mesh *mesh;
 
+int left  = FALSE;
+int right = FALSE;
+int up    = FALSE;
+int down  = FALSE;
+
 void on_start() {
 	
 	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
@@ -25,18 +30,47 @@ void on_terminate() {
 
 void process_tick() {
 
-	mesh->transform.yaw += 0.1;
+	if (left) {
+		mesh->transform.yaw += 0.1;
+	} else if (right) {
+		mesh->transform.yaw -= 0.1;
+	}
+
+	if (up) {
+		mesh->transform.pitch -= 0.1;
+	} else if (down) {
+		mesh->transform.pitch += 0.1;
+	}
+
 	draw_mesh(mesh);
 }
 
 void process_event(SDL_Event event) {
 
 	if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
-		printf("pressed %d\n", event.key.keysym.scancode);
+
+		if (event.key.keysym.scancode == SDL_SCANCODE_A) {
+			left = TRUE;
+		} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
+			right = TRUE;
+		} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
+			up = TRUE;
+		} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
+			down = TRUE;
+		}
 	}
 
 	else if (event.type == SDL_KEYUP) {
-		printf("lifted %d\n", event.key.keysym.scancode);
+
+		if (event.key.keysym.scancode == SDL_SCANCODE_A) {
+			left = FALSE;
+		} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
+			right = FALSE;
+		} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
+			up = FALSE;
+		} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
+			down = FALSE;
+		}
 	}
 }
 
