@@ -18,7 +18,7 @@ void log_error(const char *msg) {
 
 typedef struct {
 
-	char data[65536];
+	char data[65536 * 8];
 	int bytecount;
 
 } EZArray;

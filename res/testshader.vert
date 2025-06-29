@@ -5,11 +5,12 @@ uniform float pitch;
 uniform float yaw;
 
 in vec3 position;
-out vec3 pos;
+in vec3 normal;
+out vec3 normal_frag;
 
 void main() {
 
-    pos = position;
+    normal_frag = normal;
 
     // constructing matrices should probably be done once in C and passed through a uniform...
 

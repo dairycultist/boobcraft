@@ -16,7 +16,7 @@ typedef struct {
 	Transform transform;
 
 	GLuint vertex_array; // "VAO"
-	uint index_count;
+	uint vertex_count;
 	GLuint shader_program; // not stored by the VAO so have to include separately
 
 	// TODO store texture info (GLuint)
@@ -107,8 +107,12 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 
 	char line[1024];
 
-	EZArray vertex_data;
-	EZArray index_data; // stores combined vertex, normal, and texture data
+	EZArray position_data;
+	EZArray normal_data;
+	// EZArray texture_data;
+	EZArray composite_data; // stores combined vertex position, normal, and texture data
+
+	int vertex_count;
 
 	while (fgets(line, 1024, file)) {
 
@@ -122,26 +126,46 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 			
 			sscanf(line, "v %f %f %f", &v[0], &v[1], &v[2]);
 
-			append_ezarray(&vertex_data, v, sizeof(float) * 3);
+			append_ezarray(&position_data, v, sizeof(float) * 3);
 		}
+
+		else if (!strcmp(prefix, "vn")) {
+
+			float n[3];
+			
+			sscanf(line, "vn %f %f %f", &n[0], &n[1], &n[2]);
+
+			append_ezarray(&normal_data, n, sizeof(float) * 3);
+		}
+
+		// else if (!strcmp(prefix, "vt")) {
+
+		// }
 
 		else if (!strcmp(prefix, "f")) {
 
 			// only works with tris right now (no quads or ngons)
 
-			GLuint i[3]; // vertex indices
+			GLuint p[3]; // vertex position indices
 			GLuint t[3]; // vertex texture coordinate indices
 			GLuint n[3]; // vertex normal indices
 			
 			sscanf(line, "f %u/%u/%u %u/%u/%u %u/%u/%u",
-				&i[0], &t[0], &n[0],
-				&i[1], &t[1], &n[1],
-				&i[2], &t[2], &n[2]);
+				&p[0], &t[0], &n[0],
+				&p[1], &t[1], &n[1],
+				&p[2], &t[2], &n[2]);
 
-			// convert vertex indices to vertex data (indices start at 1 for some reason)
-			append_ezarray(&index_data, vertex_data.data + ((i[0] - 1) * sizeof(float) * 3), sizeof(float) * 3);
-			append_ezarray(&index_data, vertex_data.data + ((i[1] - 1) * sizeof(float) * 3), sizeof(float) * 3);
-			append_ezarray(&index_data, vertex_data.data + ((i[2] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			// convert vertex indices to vertex positions (indices start at 1 for some reason)
+			append_ezarray(&composite_data, position_data.data + ((p[0] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			append_ezarray(&composite_data, normal_data.data + ((n[0] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+
+			append_ezarray(&composite_data, position_data.data + ((p[1] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			append_ezarray(&composite_data, normal_data.data + ((n[1] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+
+			append_ezarray(&composite_data, position_data.data + ((p[2] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			append_ezarray(&composite_data, normal_data.data + ((n[2] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			
+			vertex_count += 3;
 		}
 	}
 
@@ -153,13 +177,17 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	// make vertex buffer (stored by vertex_array)
 	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);											// make it the active buffer
-	glBufferData(GL_ARRAY_BUFFER, index_data.bytecount, index_data.data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);													// make it the active buffer
+	glBufferData(GL_ARRAY_BUFFER, composite_data.bytecount, composite_data.data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 
 	// link active vertex data and shader attributes
 	GLint posAttrib = glGetAttribLocation(shader_program, "position");
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
 	glEnableVertexAttribArray(posAttrib); // requires a VAO to be bound
+
+	GLint normal_attrib = glGetAttribLocation(shader_program, "normal");
+	glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (GLvoid *) (sizeof(float) * 3));
+	glEnableVertexAttribArray(normal_attrib);
 
 	Mesh *mesh = malloc(sizeof(Mesh));
 	mesh->transform.x 		= 0.0f;
@@ -168,7 +196,7 @@ Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
 	mesh->transform.pitch 	= 0.0f;
 	mesh->transform.yaw 	= 0.0f;
 	mesh->vertex_array = vertex_array;
-	mesh->index_count = index_data.bytecount / sizeof(float);
+	mesh->vertex_count = vertex_count;
 	mesh->shader_program = shader_program;
 
 	return mesh;
@@ -183,5 +211,5 @@ void draw_mesh(const Mesh *mesh) {
 	glBindVertexArray(mesh->vertex_array);
 	glUseProgram(mesh->shader_program);
 
-	glDrawArrays(GL_TRIANGLES, 0, mesh->index_count);
+	glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_count);
 }
