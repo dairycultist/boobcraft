@@ -37,9 +37,9 @@ void process_tick() {
 	}
 
 	if (up) {
-		mesh->transform.pitch -= 0.1;
-	} else if (down) {
 		mesh->transform.pitch += 0.1;
+	} else if (down) {
+		mesh->transform.pitch -= 0.1;
 	}
 
 	draw_mesh(mesh);

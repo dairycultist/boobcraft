@@ -12,6 +12,16 @@ void main() {
 
     // constructing matrices (and inverse matrices) should probably be done once in C and passed through a uniform...
 
+    mat4 model_matrix;   // to world space
+    mat4 view_matrix;    // to view space (aka account for camera transformations)
+    mat4 proj_matrix;    // to clip space (projection)
+    mat4 normal_matrix;  // for normals, inversion of perceived model rotation
+
+    view_matrix[0][0] = 1.;
+    view_matrix[1][1] = 1.;
+    view_matrix[2][2] = 1.;
+    view_matrix[3][3] = 1.;
+
     mat4 rot_pitch = mat4(
         1, 0,           0,          0,
         0, cos(pitch), -sin(pitch), 0,
@@ -25,6 +35,13 @@ void main() {
         0,         0, 0,        1
     );
 
+    normal_matrix = inverse(rot_pitch * rot_yaw);
+
+    model_matrix = rot_yaw * rot_pitch;
+    model_matrix[3][0] = -translation.x;
+    model_matrix[3][1] = -translation.y;
+    model_matrix[3][2] = translation.z;
+
     // construct perspective projection matrix
     float fovY = 90;
     float aspectRatio = 2.0;
@@ -37,17 +54,15 @@ void main() {
     float top = front * tangent;              // half height of near plane
     float right = top * aspectRatio;          // half width of near plane
 
-    mat4 proj;
-
-    proj[0][0] =  front / right;
-    proj[1][1] =  front / top;
-    proj[2][2] = -(back + front) / (back - front);
-    proj[2][3] = -1;
-    proj[3][2] = -(2 * back * front) / (back - front);
-    proj[3][3] =  0;
+    proj_matrix[0][0] =  front / right;
+    proj_matrix[1][1] =  front / top;
+    proj_matrix[2][2] = -(back + front) / (back - front);
+    proj_matrix[2][3] = -1;
+    proj_matrix[3][2] = -(2 * back * front) / (back - front);
+    proj_matrix[3][3] =  0;
 
     // get final position
-    gl_Position = proj * (rot_yaw * rot_pitch * vec4(position.xy, -position.z, 1.0) - vec4(translation.xy, -translation.z, 0.0));
+    gl_Position = proj_matrix * view_matrix * model_matrix * vec4(position.xy, -position.z, 1.0);
 
-    normal_camera = (inverse(rot_yaw) * inverse(rot_pitch) * vec4(normal, 1.0)).xyz;
+    normal_camera = (normal_matrix * vec4(normal, 1.0)).xyz;
 }
