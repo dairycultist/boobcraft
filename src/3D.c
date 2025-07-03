@@ -117,7 +117,13 @@ void load_ppm(GLenum target, const char *ppm_path) {
 
 	unsigned char *pixels = malloc(width * height * 3);
 
-	fread(pixels, 3, width * height, file);
+	// ppms store pixels starting from the top left, but opengl wants them starting from the bottom left, so you need to flip it
+	int i;
+
+	for (i = (width - 1) * height * 3; i > 0; i -= width * 3) {
+		fread(&pixels[i], 3, width, file);
+	}
+
 	fclose(file);
 
 	glTexImage2D(target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
