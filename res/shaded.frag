@@ -1,5 +1,7 @@
 #version 150 core
 
+uniform sampler2D tex;
+
 in vec3 normal_camera;
 in vec2 frag_UV;
 
@@ -9,5 +11,5 @@ void main() {
 
     float c = dot(normal_camera, vec3(0, 1.0, 0)) * 0.5 + 0.5;
 
-    outColor = vec4(frag_UV.x * c, frag_UV.y * c, c, 1.0);
+    outColor = texture(tex, frag_UV * 4.0) * vec4(c, c, c, 1.0);
 }

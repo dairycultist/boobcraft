@@ -18,8 +18,8 @@ typedef struct {
 	GLuint vertex_array; // "VAO"
 	uint vertex_count;
 	GLuint shader_program; // not stored by the VAO so have to include separately
+	GLuint texture;
 
-	// TODO store texture info (GLuint)
 	// maybe also store the vertex_buffer ("VBO") if it needs to be manipulated
 
 } Mesh;
@@ -189,9 +189,9 @@ Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shade
 	glBufferData(GL_ARRAY_BUFFER, composite_data.bytecount, composite_data.data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 
 	// link active vertex data and shader attributes
-	GLint posAttrib = glGetAttribLocation(shader_program, "position");
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
-	glEnableVertexAttribArray(posAttrib); // requires a VAO to be bound
+	GLint pos_attrib = glGetAttribLocation(shader_program, "position");
+	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
+	glEnableVertexAttribArray(pos_attrib); // requires a VAO to be bound
 
 	GLint normal_attrib = glGetAttribLocation(shader_program, "normal");
 	glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 3));
@@ -201,33 +201,27 @@ Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shade
 	glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
 	glEnableVertexAttribArray(uv_attrib);
 
+	// create texture object
+	GLuint tex;
+	glGenTextures(1, &tex);
 
+	// bind tex to active texture 2D
+	glBindTexture(GL_TEXTURE_2D, tex);
 
-	// // create texture object
-	// // TODO https://open.gl/textures
+	// wrap repeat
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	// GLuint tex;
-	// glGenTextures(1, &tex);
+	// filter linear
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	// // set tex to active texture 2D
-	// glBindTexture(GL_TEXTURE_2D, tex);
-
-	// // wrap repeat
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// // filter linear
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// // generate test texture (black and white checkerboard)
-	// float pixels[] = {
-	// 	0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,
-	// 	1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f
-	// };
-	// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
-
-
+	// TEMP generate test texture (black and white checkerboard)
+	float pixels[] = {
+		0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
+	};
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
 
 	// create final mesh object to return
 	Mesh *mesh = malloc(sizeof(Mesh));
@@ -239,6 +233,7 @@ Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shade
 	mesh->vertex_array = vertex_array;
 	mesh->vertex_count = vertex_count;
 	mesh->shader_program = shader_program;
+	mesh->texture = tex;
 
 	return mesh;
 }
@@ -354,9 +349,10 @@ void draw_mesh(const Mesh *mesh) {
 	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
 
-	// bind the mesh and its shader
+	// bind the mesh, its shader, and its texture
 	glBindVertexArray(mesh->vertex_array);
 	glUseProgram(mesh->shader_program);
+	glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
 	// draw
 	glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_count);
