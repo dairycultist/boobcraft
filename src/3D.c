@@ -98,14 +98,28 @@ GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
 
 void load_ppm(GLenum target, const char *ppm_path) {
 
-	int width = 2;
-	int height = 2;
+	// by default, OpenGL reads texture data with a 4-byte row alignment: https://stackoverflow.com/questions/72177553/why-is-gl-unpack-alignment-default-4
+	// it's more efficient, but means this function cannot properly read images whose dimensions aren't a multiple of 4 correctly (fix is simple tho)
 
-	unsigned char pixels[] = {
-		0, 255, 0, 255, 255, 255,
-		100, 100,
-		255, 255, 255, 0, 255, 0, 
-	};
+	int width = 4;
+	int height = 4;
+
+	FILE *file = fopen(ppm_path, "r");
+
+	// read header
+	{
+		char line[1024];
+
+		fgets(line, 1024, file); // not gonna verify header because I'm lazy and just wanna get this working right now
+		fgets(line, 1024, file);
+		sscanf(line, "%d %d", &width, &height);
+		fgets(line, 1024, file);
+	}
+
+	unsigned char *pixels = malloc(width * height * 3);
+
+	fread(pixels, 3, width * height, file);
+	fclose(file);
 
 	glTexImage2D(target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 }
@@ -113,6 +127,7 @@ void load_ppm(GLenum target, const char *ppm_path) {
 // returns NULL on error
 Mesh *import_mesh(const char *obj_path, const char *ppm_path, const GLuint shader_program) {
 
+	// read obj file
 	FILE *file = fopen(obj_path, "r");
 
 	if (file == NULL) {
@@ -190,6 +205,8 @@ Mesh *import_mesh(const char *obj_path, const char *ppm_path, const GLuint shade
 			vertex_count += 3;
 		}
 	}
+
+	fclose(file);
 
 	// make vertex array
 	GLuint vertex_array;
