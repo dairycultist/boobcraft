@@ -5,7 +5,10 @@ uniform mat4 normal_matrix;
 
 in vec3 position;
 in vec3 normal;
+in vec2 UV;
+
 out vec3 normal_camera;
+out vec2 frag_UV;
 
 void main() {
 
@@ -14,4 +17,7 @@ void main() {
 
     // get final normal
     normal_camera = (normal_matrix * vec4(normal, 1.0)).xyz;
+
+    // pass along UV
+    frag_UV = UV;
 }

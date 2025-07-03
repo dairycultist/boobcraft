@@ -109,7 +109,7 @@ Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shade
 
 	EZArray position_data;
 	EZArray normal_data;
-	// EZArray texture_data;
+	EZArray texture_data;
 	EZArray composite_data; // stores combined vertex position, normal, and texture data
 
 	int vertex_count;
@@ -138,9 +138,14 @@ Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shade
 			append_ezarray(&normal_data, n, sizeof(float) * 3);
 		}
 
-		// else if (!strcmp(prefix, "vt")) {
+		else if (!strcmp(prefix, "vt")) {
 
-		// }
+			float n[2];
+			
+			sscanf(line, "vt %f %f", &n[0], &n[1]);
+
+			append_ezarray(&texture_data, n, sizeof(float) * 2);
+		}
 
 		else if (!strcmp(prefix, "f")) {
 
@@ -157,13 +162,16 @@ Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shade
 
 			// convert vertex indices to vertex positions (indices start at 1 for some reason)
 			append_ezarray(&composite_data, position_data.data + ((p[0] - 1) * sizeof(float) * 3), sizeof(float) * 3);
-			append_ezarray(&composite_data, normal_data.data + ((n[0] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			append_ezarray(&composite_data, normal_data.data +   ((n[0] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			append_ezarray(&composite_data, texture_data.data +  ((t[0] - 1) * sizeof(float) * 2), sizeof(float) * 2);
 
 			append_ezarray(&composite_data, position_data.data + ((p[1] - 1) * sizeof(float) * 3), sizeof(float) * 3);
-			append_ezarray(&composite_data, normal_data.data + ((n[1] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			append_ezarray(&composite_data, normal_data.data +   ((n[1] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			append_ezarray(&composite_data, texture_data.data +  ((t[1] - 1) * sizeof(float) * 2), sizeof(float) * 2);
 
 			append_ezarray(&composite_data, position_data.data + ((p[2] - 1) * sizeof(float) * 3), sizeof(float) * 3);
-			append_ezarray(&composite_data, normal_data.data + ((n[2] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			append_ezarray(&composite_data, normal_data.data +   ((n[2] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			append_ezarray(&composite_data, texture_data.data +  ((t[2] - 1) * sizeof(float) * 2), sizeof(float) * 2);
 			
 			vertex_count += 3;
 		}
@@ -182,13 +190,46 @@ Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shade
 
 	// link active vertex data and shader attributes
 	GLint posAttrib = glGetAttribLocation(shader_program, "position");
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
 	glEnableVertexAttribArray(posAttrib); // requires a VAO to be bound
 
 	GLint normal_attrib = glGetAttribLocation(shader_program, "normal");
-	glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (GLvoid *) (sizeof(float) * 3));
+	glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 3));
 	glEnableVertexAttribArray(normal_attrib);
 
+	GLint uv_attrib = glGetAttribLocation(shader_program, "UV");
+	glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
+	glEnableVertexAttribArray(uv_attrib);
+
+
+
+	// // create texture object
+	// // TODO https://open.gl/textures
+
+	// GLuint tex;
+	// glGenTextures(1, &tex);
+
+	// // set tex to active texture 2D
+	// glBindTexture(GL_TEXTURE_2D, tex);
+
+	// // wrap repeat
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// // filter linear
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// // generate test texture (black and white checkerboard)
+	// float pixels[] = {
+	// 	0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,
+	// 	1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f
+	// };
+	// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
+
+
+
+	// create final mesh object to return
 	Mesh *mesh = malloc(sizeof(Mesh));
 	mesh->transform.x 		= 0.0f;
 	mesh->transform.y 		= 0.0f;
