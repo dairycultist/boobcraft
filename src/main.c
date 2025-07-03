@@ -35,6 +35,9 @@ void on_terminate() {
 	free(mesh2);
 }
 
+// TODO make this take a (Transform camera)
+// TODO mess with Transform polarity so that it's the same as Blender (+y is up, handedness, etc)
+
 void process_tick() {
 
 	if (left) {
