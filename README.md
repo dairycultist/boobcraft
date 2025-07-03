@@ -2,6 +2,8 @@
 
 Making a 3D game like it's 1998(ish). Working title.
 
+[Miku model](https://sketchfab.com/3d-models/hatsune-miku-low-poly-6668784e9dfa46ba92bc28f85d8154e5)
+
 ### References
 
 minimal and lightweight with no static dependencies

@@ -23,7 +23,10 @@ void on_start() {
 	mesh2 = import_mesh("res/test.obj", "res/test.ppm", shader_program);
 
 	mesh1->transform.z = -2.0;
-	mesh2->transform.z = -4.0;
+	mesh1->transform.yaw = M_PI * 0.75;
+
+	mesh2->transform.z = -2.0;
+	mesh2->transform.y = 2.3;
 }
 
 void on_terminate() {
