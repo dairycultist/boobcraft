@@ -142,10 +142,10 @@ Mesh *import_mesh(const char *obj_path, const char *ppm_path, const GLuint shade
 
 	char line[1024];
 
-	EZArray position_data;
-	EZArray normal_data;
-	EZArray texture_data;
-	EZArray composite_data; // stores combined vertex position, normal, and texture data
+	EZArray position_data  = {0};
+	EZArray normal_data    = {0};
+	EZArray texture_data   = {0};
+	EZArray composite_data = {0}; // stores combined vertex position, normal, and texture data
 
 	int vertex_count;
 
@@ -237,6 +237,9 @@ Mesh *import_mesh(const char *obj_path, const char *ppm_path, const GLuint shade
 	GLint uv_attrib = glGetAttribLocation(shader_program, "UV");
 	glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
 	glEnableVertexAttribArray(uv_attrib);
+
+	// debind vertex array
+	glBindVertexArray(0);
 
 	// create texture object
 	GLuint texture;

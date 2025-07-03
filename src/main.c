@@ -6,7 +6,8 @@
 #include "app.c"
 #include "3D.c"
 
-Mesh *mesh;
+Mesh *mesh1;
+Mesh *mesh2;
 
 int left  = FALSE;
 int right = FALSE;
@@ -18,31 +19,35 @@ void on_start() {
 	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
 
 	GLuint shader_program = load_shader_program("res/shaded.vert", "res/shaded.frag");
-	mesh = import_mesh("res/test.obj", "res/test.ppm", shader_program);
+	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm", shader_program);
+	mesh2 = import_mesh("res/test.obj", "res/test.ppm", shader_program);
 
-	mesh->transform.z = -4.0;
+	mesh1->transform.z = -2.0;
+	mesh2->transform.z = -4.0;
 }
 
 void on_terminate() {
 
-	free(mesh);
+	free(mesh1);
+	free(mesh2);
 }
 
 void process_tick() {
 
 	if (left) {
-		mesh->transform.yaw += 0.1;
+		mesh1->transform.yaw += 0.1;
 	} else if (right) {
-		mesh->transform.yaw -= 0.1;
+		mesh1->transform.yaw -= 0.1;
 	}
 
 	if (up) {
-		mesh->transform.pitch += 0.1;
+		mesh1->transform.pitch += 0.1;
 	} else if (down) {
-		mesh->transform.pitch -= 0.1;
+		mesh1->transform.pitch -= 0.1;
 	}
 
-	draw_mesh(mesh);
+	draw_mesh(mesh1);
+	draw_mesh(mesh2);
 }
 
 void process_event(SDL_Event event) {
