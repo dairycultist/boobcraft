@@ -8,6 +8,8 @@ minimal and lightweight with no static dependencies
 
 trying to use only snake case and failing
 
+[cool asf lowpoly miku model](https://www.newgrounds.com/art/view/violxiv/hatsune-miku-lowpoly)
+
 **OpenGL**
 
 https://open.gl/

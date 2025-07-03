@@ -97,9 +97,9 @@ GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
 }
 
 // returns NULL on error
-Mesh *load_obj_as_mesh(const char *path, const GLuint shader_program) {
+Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shader_program) {
 
-	FILE *file = fopen(path, "r");
+	FILE *file = fopen(obj_path, "r");
 
 	if (file == NULL) {
 		return NULL;
