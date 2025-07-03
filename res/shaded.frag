@@ -11,5 +11,5 @@ void main() {
 
     float c = dot(normal_camera, vec3(0, 1.0, 0)) * 0.5 + 0.5;
 
-    outColor = texture(tex, frag_UV * 4.0) * vec4(c, c, c, 1.0);
+    outColor = texture(tex, frag_UV) * vec4(c, c, c, 1.0);
 }

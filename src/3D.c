@@ -101,8 +101,7 @@ void load_ppm(GLenum target, const char *ppm_path) {
 	// by default, OpenGL reads texture data with a 4-byte row alignment: https://stackoverflow.com/questions/72177553/why-is-gl-unpack-alignment-default-4
 	// it's more efficient, but means this function cannot properly read images whose dimensions aren't a multiple of 4 correctly (fix is simple tho)
 
-	int width = 4;
-	int height = 4;
+	int width, height;
 
 	FILE *file = fopen(ppm_path, "r");
 
