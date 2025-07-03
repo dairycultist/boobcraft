@@ -18,7 +18,7 @@ void on_start() {
 	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
 
 	GLuint shader_program = load_shader_program("res/shaded.vert", "res/shaded.frag");
-	mesh = import_mesh("res/test.obj", "res/test.jpg", shader_program);
+	mesh = import_mesh("res/test.obj", "res/test.ppm", shader_program);
 
 	mesh->transform.z = -2.0;
 }

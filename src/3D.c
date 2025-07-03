@@ -96,8 +96,22 @@ GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
 	return shader_program;
 }
 
+void load_ppm(GLenum target, const char *ppm_path) {
+
+	int width = 2;
+	int height = 2;
+
+	unsigned char pixels[] = {
+		0, 255, 0, 255, 255, 255,
+		100, 100,
+		255, 255, 255, 0, 255, 0, 
+	};
+
+	glTexImage2D(target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+}
+
 // returns NULL on error
-Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shader_program) {
+Mesh *import_mesh(const char *obj_path, const char *ppm_path, const GLuint shader_program) {
 
 	FILE *file = fopen(obj_path, "r");
 
@@ -202,11 +216,11 @@ Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shade
 	glEnableVertexAttribArray(uv_attrib);
 
 	// create texture object
-	GLuint tex;
-	glGenTextures(1, &tex);
+	GLuint texture;
+	glGenTextures(1, &texture);
 
-	// bind tex to active texture 2D
-	glBindTexture(GL_TEXTURE_2D, tex);
+	// bind texture (to active texture 2D)
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	// wrap repeat
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -216,12 +230,8 @@ Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shade
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	// TEMP generate test texture (black and white checkerboard)
-	float pixels[] = {
-		0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f
-	};
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
+	// write texture data
+	load_ppm(GL_TEXTURE_2D, ppm_path);
 
 	// create final mesh object to return
 	Mesh *mesh = malloc(sizeof(Mesh));
@@ -233,7 +243,7 @@ Mesh *import_mesh(const char *obj_path, const char *tex_path, const GLuint shade
 	mesh->vertex_array = vertex_array;
 	mesh->vertex_count = vertex_count;
 	mesh->shader_program = shader_program;
-	mesh->texture = tex;
+	mesh->texture = texture;
 
 	return mesh;
 }
