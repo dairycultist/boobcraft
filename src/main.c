@@ -10,10 +10,15 @@ Transform *camera;
 Mesh *mesh1;
 Mesh *mesh2;
 
-int left  = FALSE;
-int right = FALSE;
-int up    = FALSE;
-int down  = FALSE;
+int left     = FALSE;
+int right    = FALSE;
+int forward  = FALSE;
+int backward = FALSE;
+int up       = FALSE;
+int down     = FALSE;
+
+// TODO backface culling
+// TODO mouse locking/hiding
 
 void on_start() {
 	
@@ -48,12 +53,18 @@ void process_tick() {
 		camera->x += cos(camera->yaw) * 0.1;
 	}
 
-	if (up) {
+	if (forward) {
 		camera->z -= cos(camera->yaw) * 0.1;
 		camera->x += sin(camera->yaw) * 0.1;
-	} else if (down) {
+	} else if (backward) {
 		camera->z += cos(camera->yaw) * 0.1;
 		camera->x -= sin(camera->yaw) * 0.1;
+	}
+
+	if (up) {
+		camera->y += 0.1;
+	} else if (down) {
+		camera->y -= 0.1;
 	}
 
 	draw_mesh(camera, mesh1);
@@ -75,8 +86,12 @@ void process_event(SDL_Event event) {
 		} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
 			right = TRUE;
 		} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
-			up = TRUE;
+			forward = TRUE;
 		} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
+			backward = TRUE;
+		} else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+			up = TRUE;
+		} else if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
 			down = TRUE;
 		}
 	}
@@ -88,8 +103,12 @@ void process_event(SDL_Event event) {
 		} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
 			right = FALSE;
 		} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
-			up = FALSE;
+			forward = FALSE;
 		} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
+			backward = FALSE;
+		} else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+			up = FALSE;
+		} else if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
 			down = FALSE;
 		}
 	}

@@ -359,11 +359,14 @@ void generate_rotation_matrices(GLfloat pitch_matrix[4][4], float pitch, GLfloat
 
 void draw_mesh(const Transform *camera, const Mesh *mesh) {
 
-	// model matrix (converts from model space to world space)
-	GLfloat pitch_matrix[4][4];
+	GLfloat pitch_matrix[4][4]; // rotation buffers that get reused
 	GLfloat yaw_matrix[4][4];
 
-	generate_rotation_matrices(pitch_matrix, mesh->transform.pitch, yaw_matrix, mesh->transform.yaw);
+	// model matrix (converts from model space to world space)
+	generate_rotation_matrices(
+		pitch_matrix, mesh->transform.pitch,
+		yaw_matrix, mesh->transform.yaw
+	);
 
 	GLfloat model_matrix[4][4];
 
@@ -375,10 +378,10 @@ void draw_mesh(const Transform *camera, const Mesh *mesh) {
 
 	// view matrix (converts from world space to view space, aka accounts for camera transformations)
 	// must apply translations before rotations this time, unlike model matrix!
-	GLfloat view_pitch_matrix[4][4];
-	GLfloat view_yaw_matrix[4][4];
-
-	generate_rotation_matrices(view_pitch_matrix, -camera->pitch, view_yaw_matrix, -camera->yaw);
+	generate_rotation_matrices(
+		pitch_matrix, -camera->pitch,
+		yaw_matrix, -camera->yaw
+	);
 
 	GLfloat view_matrix[4][4] = {
 		{1, 0, 0, 0},
@@ -387,8 +390,8 @@ void draw_mesh(const Transform *camera, const Mesh *mesh) {
 		{-camera->x, -camera->y, -camera->z, 1}
 	};
 
-	mat4_mult(view_yaw_matrix, view_matrix, view_matrix);
-	mat4_mult(view_pitch_matrix, view_matrix, view_matrix);
+	mat4_mult(yaw_matrix, view_matrix, view_matrix);
+	mat4_mult(pitch_matrix, view_matrix, view_matrix);
 
 	// perspective projection matrix (converts from view space to clip space)
 	const float fovY = 90;
@@ -413,14 +416,13 @@ void draw_mesh(const Transform *camera, const Mesh *mesh) {
 	mat4_mult(proj_matrix, view_matrix, position_matrix);
 	mat4_mult(position_matrix, model_matrix, position_matrix);
 
-	// normal matrix, accounts for rotation we calculated previously
-	// normal_matrix = inverse(yaw_matrix) * inverse(pitch_matrix)
+	// normal matrix (applied to normals to account for model rotation)
 	GLfloat normal_matrix[4][4];
 
-	pitch_matrix[2][1] *= -1;
-	pitch_matrix[1][2] *= -1;
-	yaw_matrix[2][0] *= -1;
-	yaw_matrix[0][2] *= -1;
+	generate_rotation_matrices(
+		pitch_matrix, -mesh->transform.pitch,
+		yaw_matrix, -mesh->transform.yaw
+	);
 
 	mat4_mult(yaw_matrix, pitch_matrix, normal_matrix);
 
