@@ -314,7 +314,7 @@ void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) 
 	}
 }
 
-void draw_mesh(const Mesh *mesh) {
+void draw_mesh(const Transform *camera, const Mesh *mesh) {
 
 	// rotation matrices (used later)
 	GLfloat pitch_matrix[4][4] = {
@@ -345,7 +345,7 @@ void draw_mesh(const Mesh *mesh) {
 		{1, 0, 0, 0},
 		{0, 1, 0, 0},
 		{0, 0, 1, 0},
-		{0, 0, 0, 1}
+		{-camera->x, -camera->y, -camera->z, 1}
 	};
 
 	// perspective projection matrix (converts from view space to clip space)

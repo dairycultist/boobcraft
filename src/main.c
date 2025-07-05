@@ -6,6 +6,7 @@
 #include "app.c"
 #include "3D.c"
 
+Transform *camera;
 Mesh *mesh1;
 Mesh *mesh2;
 
@@ -17,6 +18,8 @@ int down  = FALSE;
 void on_start() {
 	
 	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
+
+	camera = calloc(sizeof(Transform), 1);
 
 	GLuint shader_program = load_shader_program("res/shaded.vert", "res/shaded.frag");
 	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm", shader_program);
@@ -35,25 +38,22 @@ void on_terminate() {
 	free(mesh2);
 }
 
-// TODO make this take a (Transform camera)
-// TODO mess with Transform polarity so that it's the same as Blender (+y is up, handedness, etc)
-
 void process_tick() {
 
 	if (left) {
-		mesh1->transform.x -= 0.1;
+		camera->x -= 0.1;
 	} else if (right) {
-		mesh1->transform.x += 0.1;
+		camera->x += 0.1;
 	}
 
 	if (up) {
-		mesh1->transform.y += 0.1;
+		camera->z -= 0.1;
 	} else if (down) {
-		mesh1->transform.y -= 0.1;
+		camera->z += 0.1;
 	}
 
-	draw_mesh(mesh1);
-	draw_mesh(mesh2);
+	draw_mesh(camera, mesh1);
+	draw_mesh(camera, mesh2);
 }
 
 void process_event(SDL_Event event) {
