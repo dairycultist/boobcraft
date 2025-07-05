@@ -18,10 +18,10 @@ int backward = FALSE;
 int up       = FALSE;
 int down     = FALSE;
 
-// TODO backface culling
-
 void on_start() {
 	
+	glEnable(GL_CULL_FACE); // idk if enabling settings like backface culling should be done here or by default in app.c
+	glFrontFace(GL_CW);
 	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
