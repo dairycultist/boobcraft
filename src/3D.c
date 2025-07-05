@@ -397,7 +397,7 @@ void draw_mesh(const Transform *camera, const Mesh *mesh) {
 	const float fovY = 90;
 	const float aspectRatio = 2.0;
 	const float front = 0.01; // near plane
-	const float back = 10;    // far plane
+	const float back = 100;   // far plane
 
 	float tangent = tan(fovY / 2 * DEG2RAD); // tangent of half fovY
 	float top = front * tangent;             // half height of near plane

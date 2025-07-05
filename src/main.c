@@ -10,6 +10,7 @@
 Transform *camera;
 Mesh *mesh1;
 Mesh *mesh2;
+Mesh *sky;
 
 int left     = FALSE;
 int right    = FALSE;
@@ -27,9 +28,14 @@ void on_start() {
 
 	camera = calloc(sizeof(Transform), 1);
 
-	GLuint shader_program = load_shader_program("res/shaded.vert", "res/shaded.frag");
-	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm", shader_program);
-	mesh2 = import_mesh("res/test.obj", "res/test.ppm", shader_program);
+	GLuint shaded = load_shader_program("res/shaded.vert", "res/shaded.frag");
+	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm", shaded);
+	mesh2 = import_mesh("res/test.obj", "res/test.ppm", shaded);
+
+	// TODO add unshaded sky material (and maybe a draw_sky function that only provides texture data, no matrices)
+	// TODO maybe stop using glGetAttribLocation/glGetUniformLocation (if we want to have arbitrary shaders allowed)
+	// TODO fix bug where having two shaders messes with matrices (somehow)
+	sky = import_mesh("res/sky.obj", "res/sky.ppm", shaded);
 
 	mesh1->transform.z = -2.0;
 	mesh1->transform.yaw = M_PI * 0.75;
@@ -42,6 +48,7 @@ void on_terminate() {
 
 	free(mesh1);
 	free(mesh2);
+	free(sky);
 }
 
 void process_tick() {
@@ -68,6 +75,7 @@ void process_tick() {
 		camera->y -= 0.1;
 	}
 
+	draw_mesh(camera, sky);
 	draw_mesh(camera, mesh1);
 	draw_mesh(camera, mesh2);
 }
