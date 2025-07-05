@@ -36,8 +36,8 @@ void on_start() {
 	// TODO maybe stop using glGetAttribLocation/glGetUniformLocation (IF we want to have arbitrary shaders allowed,
 	// OTHERWISE just have shaded.vert/frag and sky.vert/frag to correspond to draw_shaded and draw_sky, and create
 	// some constants, MESH_SHADED and MESH_SKY, to pass to import_mesh)
-	// TODO fix bug where having two shaders messes with matrices (somehow)
-	sky = import_mesh("res/sky.obj", "res/sky.ppm", shaded);
+	GLuint s = load_shader_program("res/shaded.vert", "res/shaded.frag");
+	sky = import_mesh("res/sky.obj", "res/sky.ppm", s);
 
 	mesh1->transform.z = -2.0;
 	mesh1->transform.yaw = M_PI * 0.75;

@@ -426,14 +426,14 @@ void draw_mesh(const Transform *camera, const Mesh *mesh) {
 
 	mat4_mult(yaw_matrix, pitch_matrix, normal_matrix);
 
-	// load in the matrices we just calculated as uniforms
-	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
-
 	// bind the mesh, its shader, and its texture
 	glBindVertexArray(mesh->vertex_array);
 	glUseProgram(mesh->shader_program);
 	glBindTexture(GL_TEXTURE_2D, mesh->texture);
+
+	// load in the matrices we just calculated as uniforms
+	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
 
 	// draw
 	glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_count);
