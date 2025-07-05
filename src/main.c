@@ -2,6 +2,7 @@
 #include "../GLEW/glew.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
+#include <SDL2/SDL_mouse.h>
 
 #include "app.c"
 #include "3D.c"
@@ -18,11 +19,11 @@ int up       = FALSE;
 int down     = FALSE;
 
 // TODO backface culling
-// TODO mouse locking/hiding
 
 void on_start() {
 	
 	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
+	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	camera = calloc(sizeof(Transform), 1);
 
@@ -77,6 +78,12 @@ void process_event(SDL_Event event) {
 
 		camera->pitch += event.motion.yrel * 0.01;
 		camera->yaw += event.motion.xrel * 0.01;
+
+		if (camera->pitch > M_PI / 2) {
+			camera->pitch = M_PI / 2;
+		} else if (camera->pitch < -M_PI / 2) {
+			camera->pitch = -M_PI / 2;
+		}
 	}
 
 	else if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
@@ -93,6 +100,8 @@ void process_event(SDL_Event event) {
 			up = TRUE;
 		} else if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
 			down = TRUE;
+		} else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+			SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
 		}
 	}
 
