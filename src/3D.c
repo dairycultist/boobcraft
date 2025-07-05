@@ -314,24 +314,57 @@ void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) 
 	}
 }
 
+void generate_rotation_matrices(GLfloat pitch_matrix[4][4], float pitch, GLfloat yaw_matrix[4][4], float yaw) {
+
+	pitch_matrix[0][0] = 1;
+	pitch_matrix[0][1] = 0;
+	pitch_matrix[0][2] = 0;
+	pitch_matrix[0][3] = 0;
+
+	pitch_matrix[1][0] = 0;
+	pitch_matrix[1][1] = cos(pitch);
+	pitch_matrix[1][2] = -sin(pitch);
+	pitch_matrix[1][3] = 0;
+
+	pitch_matrix[2][0] = 0;
+	pitch_matrix[2][1] = sin(pitch);
+	pitch_matrix[2][2] = cos(pitch);
+	pitch_matrix[2][3] = 0;
+
+	pitch_matrix[3][0] = 0;
+	pitch_matrix[3][1] = 0;
+	pitch_matrix[3][2] = 0;
+	pitch_matrix[3][3] = 1;
+
+	yaw_matrix[0][0] = cos(yaw);
+	yaw_matrix[0][1] = 0;
+	yaw_matrix[0][2] = sin(yaw);
+	yaw_matrix[0][3] = 0;
+
+	yaw_matrix[1][0] = 0;
+	yaw_matrix[1][1] = 1;
+	yaw_matrix[1][2] = 0;
+	yaw_matrix[1][3] = 0;
+
+	yaw_matrix[2][0] = -sin(yaw);
+	yaw_matrix[2][1] = 0;
+	yaw_matrix[2][2] = cos(yaw);
+	yaw_matrix[2][3] = 0;
+
+	yaw_matrix[3][0] = 0;
+	yaw_matrix[3][1] = 0;
+	yaw_matrix[3][2] = 0;
+	yaw_matrix[3][3] = 1;
+}
+
 void draw_mesh(const Transform *camera, const Mesh *mesh) {
 
-	// rotation matrices (used later)
-	GLfloat pitch_matrix[4][4] = {
-		{ 1, 0,          				  0,       					  0 },
-		{ 0, cos(mesh->transform.pitch), -sin(mesh->transform.pitch), 0 },
-		{ 0, sin(mesh->transform.pitch),  cos(mesh->transform.pitch), 0 },
-		{ 0, 0,           				  0,         				  1 }
-	};
-
-	GLfloat yaw_matrix[4][4] = {
-		{  cos(mesh->transform.yaw), 0, sin(mesh->transform.yaw), 0 },
-		{  0,       				 1, 0,      				  0 },
-		{ -sin(mesh->transform.yaw), 0, cos(mesh->transform.yaw), 0 },
-		{  0,         				 0, 0,       				  1 }
-	};
-
 	// model matrix (converts from model space to world space)
+	GLfloat pitch_matrix[4][4];
+	GLfloat yaw_matrix[4][4];
+
+	generate_rotation_matrices(pitch_matrix, mesh->transform.pitch, yaw_matrix, mesh->transform.yaw);
+
 	GLfloat model_matrix[4][4];
 
 	mat4_mult(yaw_matrix, pitch_matrix, model_matrix); // rotation
@@ -341,12 +374,21 @@ void draw_mesh(const Transform *camera, const Mesh *mesh) {
 	model_matrix[3][2] = mesh->transform.z;
 
 	// view matrix (converts from world space to view space, aka accounts for camera transformations)
+	// must apply translations before rotations this time, unlike model matrix!
+	GLfloat view_pitch_matrix[4][4];
+	GLfloat view_yaw_matrix[4][4];
+
+	generate_rotation_matrices(view_pitch_matrix, -camera->pitch, view_yaw_matrix, -camera->yaw);
+
 	GLfloat view_matrix[4][4] = {
 		{1, 0, 0, 0},
 		{0, 1, 0, 0},
 		{0, 0, 1, 0},
 		{-camera->x, -camera->y, -camera->z, 1}
 	};
+
+	mat4_mult(view_yaw_matrix, view_matrix, view_matrix);
+	mat4_mult(view_pitch_matrix, view_matrix, view_matrix);
 
 	// perspective projection matrix (converts from view space to clip space)
 	const float fovY = 90;
@@ -371,7 +413,8 @@ void draw_mesh(const Transform *camera, const Mesh *mesh) {
 	mat4_mult(proj_matrix, view_matrix, position_matrix);
 	mat4_mult(position_matrix, model_matrix, position_matrix);
 
-	// normal matrix, accounts for rotation (inverse(yaw_matrix) * inverse(pitch_matrix))
+	// normal matrix, accounts for rotation we calculated previously
+	// normal_matrix = inverse(yaw_matrix) * inverse(pitch_matrix)
 	GLfloat normal_matrix[4][4];
 
 	pitch_matrix[2][1] *= -1;

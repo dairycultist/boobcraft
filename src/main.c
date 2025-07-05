@@ -41,15 +41,19 @@ void on_terminate() {
 void process_tick() {
 
 	if (left) {
-		camera->x -= 0.1;
+		camera->z -= sin(camera->yaw) * 0.1;
+		camera->x -= cos(camera->yaw) * 0.1;
 	} else if (right) {
-		camera->x += 0.1;
+		camera->z += sin(camera->yaw) * 0.1;
+		camera->x += cos(camera->yaw) * 0.1;
 	}
 
 	if (up) {
-		camera->z -= 0.1;
+		camera->z -= cos(camera->yaw) * 0.1;
+		camera->x += sin(camera->yaw) * 0.1;
 	} else if (down) {
-		camera->z += 0.1;
+		camera->z += cos(camera->yaw) * 0.1;
+		camera->x -= sin(camera->yaw) * 0.1;
 	}
 
 	draw_mesh(camera, mesh1);
@@ -58,7 +62,13 @@ void process_tick() {
 
 void process_event(SDL_Event event) {
 
-	if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
+	if (event.type == SDL_MOUSEMOTION) {
+
+		camera->pitch += event.motion.yrel * 0.01;
+		camera->yaw += event.motion.xrel * 0.01;
+	}
+
+	else if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
 
 		if (event.key.keysym.scancode == SDL_SCANCODE_A) {
 			left = TRUE;
