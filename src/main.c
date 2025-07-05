@@ -33,7 +33,9 @@ void on_start() {
 	mesh2 = import_mesh("res/test.obj", "res/test.ppm", shaded);
 
 	// TODO add unshaded sky material (and maybe a draw_sky function that only provides texture data, no matrices)
-	// TODO maybe stop using glGetAttribLocation/glGetUniformLocation (if we want to have arbitrary shaders allowed)
+	// TODO maybe stop using glGetAttribLocation/glGetUniformLocation (IF we want to have arbitrary shaders allowed,
+	// OTHERWISE just have shaded.vert/frag and sky.vert/frag to correspond to draw_shaded and draw_sky, and create
+	// some constants, MESH_SHADED and MESH_SKY, to pass to import_mesh)
 	// TODO fix bug where having two shaders messes with matrices (somehow)
 	sky = import_mesh("res/sky.obj", "res/sky.ppm", shaded);
 
