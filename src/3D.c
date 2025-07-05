@@ -334,11 +334,11 @@ void draw_mesh(const Mesh *mesh) {
 	// model matrix (converts from model space to world space)
 	GLfloat model_matrix[4][4];
 
-	mat4_mult(yaw_matrix, pitch_matrix, model_matrix);
+	mat4_mult(yaw_matrix, pitch_matrix, model_matrix); // rotation
 
-	model_matrix[3][0] = -mesh->transform.x;
-	model_matrix[3][1] = -mesh->transform.y;
-	model_matrix[3][2] =  mesh->transform.z;
+	model_matrix[3][0] = mesh->transform.x; // translation
+	model_matrix[3][1] = mesh->transform.y;
+	model_matrix[3][2] = mesh->transform.z;
 
 	// view matrix (converts from world space to view space, aka accounts for camera transformations)
 	GLfloat view_matrix[4][4] = {

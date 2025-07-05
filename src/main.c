@@ -26,7 +26,7 @@ void on_start() {
 	mesh1->transform.yaw = M_PI * 0.75;
 
 	mesh2->transform.z = -2.0;
-	mesh2->transform.y = 2.3;
+	mesh2->transform.y = -2.3;
 }
 
 void on_terminate() {
@@ -41,15 +41,15 @@ void on_terminate() {
 void process_tick() {
 
 	if (left) {
-		mesh1->transform.yaw += 0.1;
+		mesh1->transform.x -= 0.1;
 	} else if (right) {
-		mesh1->transform.yaw -= 0.1;
+		mesh1->transform.x += 0.1;
 	}
 
 	if (up) {
-		mesh1->transform.pitch += 0.1;
+		mesh1->transform.y += 0.1;
 	} else if (down) {
-		mesh1->transform.pitch -= 0.1;
+		mesh1->transform.y -= 0.1;
 	}
 
 	draw_mesh(mesh1);
