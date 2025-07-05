@@ -20,6 +20,8 @@ int up       = FALSE;
 int down     = FALSE;
 
 void on_start() {
+
+	initialize_3D();
 	
 	glEnable(GL_CULL_FACE); // idk if enabling settings like backface culling should be done here or by default in app.c
 	glFrontFace(GL_CW);
@@ -28,16 +30,10 @@ void on_start() {
 
 	camera = calloc(sizeof(Transform), 1);
 
-	GLuint shaded = load_shader_program("res/shaded.vert", "res/shaded.frag");
-	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm", shaded);
-	mesh2 = import_mesh("res/test.obj", "res/test.ppm", shaded);
+	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm", MESH_SHADED);
+	mesh2 = import_mesh("res/test.obj", "res/test.ppm", MESH_SHADED);
 
-	// TODO add unshaded sky material (and maybe a draw_sky function that only provides texture data, no matrices)
-	// TODO maybe stop using glGetAttribLocation/glGetUniformLocation (IF we want to have arbitrary shaders allowed,
-	// OTHERWISE just have shaded.vert/frag and sky.vert/frag to correspond to draw_shaded and draw_sky, and create
-	// some constants, MESH_SHADED and MESH_SKY, to pass to import_mesh)
-	GLuint s = load_shader_program("res/shaded.vert", "res/shaded.frag");
-	sky = import_mesh("res/sky.obj", "res/sky.ppm", s);
+	sky = import_mesh("res/sky.obj", "res/sky.ppm", MESH_SHADED);
 
 	mesh1->transform.z = -2.0;
 	mesh1->transform.yaw = M_PI * 0.75;

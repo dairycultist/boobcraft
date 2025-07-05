@@ -1,5 +1,15 @@
 #include "util.c"
 
+static GLuint shader_program_shaded;
+static GLuint shader_program_sky;
+
+typedef enum {
+
+  MESH_SHADED,
+  MESH_SKY
+
+} MeshShader;
+
 typedef struct {
 
 	float x;
@@ -17,15 +27,13 @@ typedef struct {
 
 	GLuint vertex_array; // "VAO"
 	uint vertex_count;
-	GLuint shader_program; // not stored by the VAO so have to include separately
+	MeshShader shader;
 	GLuint texture;
-
-	// maybe also store the vertex_buffer ("VBO") if it needs to be manipulated
 
 } Mesh;
 
 // returns -1 on error
-GLuint load_shader(const char* path, GLenum shader_type) {
+static GLuint load_shader(const char* path, GLenum shader_type) {
 
 	FILE *file = fopen(path, "r");
 	if (file == NULL) {
@@ -83,17 +91,22 @@ GLuint load_shader(const char* path, GLenum shader_type) {
 	return shader;
 }
 
-GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
+static GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
 	
 	GLuint shader_program = glCreateProgram();
 	glAttachShader(shader_program, load_shader(vertex_path, GL_VERTEX_SHADER)); // does not catch errors load_shader makes lol
 	glAttachShader(shader_program, load_shader(fragment_path, GL_FRAGMENT_SHADER));
 	glLinkProgram(shader_program); // apply changes to shader program, not gonna call "glUseProgram" yet bc not drawing
 
-	// TODO you should stop using glGetAttribLocation/glGetUniformLocation
+	// IF you want to have arbitrary shaders allowed, you should stop using glGetAttribLocation/glGetUniformLocation, but I don't so I won't
 	// https://stackoverflow.com/questions/15639957/glgetattriblocation-returns-1-when-retrieving-existing-shader-attribute
 
 	return shader_program;
+}
+
+void initialize_3D() {
+	shader_program_shaded = load_shader_program("res/shaded.vert", "res/shaded.frag");
+	shader_program_sky = load_shader_program("res/shaded.vert", "res/shaded.frag");
 }
 
 void load_ppm(GLenum target, const char *ppm_path) {
@@ -131,7 +144,7 @@ void load_ppm(GLenum target, const char *ppm_path) {
 }
 
 // returns NULL on error
-Mesh *import_mesh(const char *obj_path, const char *ppm_path, const GLuint shader_program) {
+Mesh *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader shader) {
 
 	// read obj file
 	FILE *file = fopen(obj_path, "r");
@@ -226,17 +239,20 @@ Mesh *import_mesh(const char *obj_path, const char *ppm_path, const GLuint shade
 	glBufferData(GL_ARRAY_BUFFER, composite_data.bytecount, composite_data.data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 
 	// link active vertex data and shader attributes
-	GLint pos_attrib = glGetAttribLocation(shader_program, "position");
-	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
-	glEnableVertexAttribArray(pos_attrib); // requires a VAO to be bound
+	if (shader == MESH_SHADED) {
 
-	GLint normal_attrib = glGetAttribLocation(shader_program, "normal");
-	glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 3));
-	glEnableVertexAttribArray(normal_attrib);
+		GLint pos_attrib = glGetAttribLocation(shader_program_shaded, "position");
+		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
+		glEnableVertexAttribArray(pos_attrib); // requires a VAO to be bound
 
-	GLint uv_attrib = glGetAttribLocation(shader_program, "UV");
-	glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
-	glEnableVertexAttribArray(uv_attrib);
+		GLint normal_attrib = glGetAttribLocation(shader_program_shaded, "normal");
+		glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 3));
+		glEnableVertexAttribArray(normal_attrib);
+
+		GLint uv_attrib = glGetAttribLocation(shader_program_shaded, "UV");
+		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
+		glEnableVertexAttribArray(uv_attrib);
+	}
 
 	// debind vertex array
 	glBindVertexArray(0);
@@ -268,7 +284,7 @@ Mesh *import_mesh(const char *obj_path, const char *ppm_path, const GLuint shade
 	mesh->transform.yaw 	= 0.0f;
 	mesh->vertex_array = vertex_array;
 	mesh->vertex_count = vertex_count;
-	mesh->shader_program = shader_program;
+	mesh->shader = shader;
 	mesh->texture = texture;
 
 	return mesh;
@@ -426,14 +442,17 @@ void draw_mesh(const Transform *camera, const Mesh *mesh) {
 
 	mat4_mult(yaw_matrix, pitch_matrix, normal_matrix);
 
-	// bind the mesh, its shader, and its texture
+	// bind the mesh and its texture
 	glBindVertexArray(mesh->vertex_array);
-	glUseProgram(mesh->shader_program);
 	glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
-	// load in the matrices we just calculated as uniforms
-	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(mesh->shader_program, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
+	// load in the matrices we just calculated as uniforms into the mesh's shader program
+	if (mesh->shader == MESH_SHADED) {
+
+		glUseProgram(shader_program_shaded);
+		glUniformMatrix4fv(glGetUniformLocation(shader_program_shaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(shader_program_shaded, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
+	}
 
 	// draw
 	glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_count);
