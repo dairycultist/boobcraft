@@ -1,8 +1,6 @@
 #define GLEW_STATIC
 #include "../GLEW/glew.h"
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL_mouse.h>
 
 #include "util.c"
 #include "3D.c"
