@@ -10,6 +10,11 @@ int backward = FALSE;
 int up       = FALSE;
 int down     = FALSE;
 
+char *get_title() {
+
+	return "Boobcraft";
+}
+
 void on_start() {
 	
 	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
@@ -30,6 +35,7 @@ void on_start() {
 
 void on_terminate() {
 
+	free(camera);
 	free(mesh1);
 	free(mesh2);
 	free(sky);
@@ -71,6 +77,7 @@ void process_event(SDL_Event event) {
 		camera->pitch += event.motion.yrel * 0.01;
 		camera->yaw += event.motion.xrel * 0.01;
 
+		// clamp camera pitch
 		if (camera->pitch > M_PI / 2) {
 			camera->pitch = M_PI / 2;
 		} else if (camera->pitch < -M_PI / 2) {

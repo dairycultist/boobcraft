@@ -8,11 +8,9 @@
 #include "3D.c"
 #include "game.c"
 
-#define TITLE "Boobcraft"
-
 int main() {
 
-	printf("Starting %s\n", TITLE);
+	printf("Starting %s\n", get_title());
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		log_error("Could not initialize SDL");
@@ -26,7 +24,7 @@ int main() {
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 	// create the window
-	SDL_Window *window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 400, SDL_WINDOW_OPENGL);
+	SDL_Window *window = SDL_CreateWindow(get_title(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 400, SDL_WINDOW_OPENGL);
 
 	if (!window) {
         log_error("Could not create window");
