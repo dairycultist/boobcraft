@@ -104,9 +104,9 @@ static GLuint load_shader_program(const char *vertex_path, const char *fragment_
 	return shader_program;
 }
 
-void initialize_3D() {
+void initialize_shaders() {
 	shader_program_shaded = load_shader_program("res/shaded.vert", "res/shaded.frag");
-	shader_program_sky = load_shader_program("res/shaded.vert", "res/shaded.frag");
+	shader_program_sky = load_shader_program("res/sky.vert", "res/sky.frag");
 }
 
 void load_ppm(GLenum target, const char *ppm_path) {
@@ -252,6 +252,16 @@ Mesh *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader s
 		GLint uv_attrib = glGetAttribLocation(shader_program_shaded, "UV");
 		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
 		glEnableVertexAttribArray(uv_attrib);
+
+	} else if (shader == MESH_SKY) {
+
+		GLint pos_attrib = glGetAttribLocation(shader_program_sky, "position");
+		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
+		glEnableVertexAttribArray(pos_attrib);
+
+		GLint uv_attrib = glGetAttribLocation(shader_program_sky, "UV");
+		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
+		glEnableVertexAttribArray(uv_attrib);
 	}
 
 	// debind vertex array
@@ -375,40 +385,6 @@ void generate_rotation_matrices(GLfloat pitch_matrix[4][4], float pitch, GLfloat
 
 void draw_mesh(const Transform *camera, const Mesh *mesh) {
 
-	GLfloat pitch_matrix[4][4]; // rotation buffers that get reused
-	GLfloat yaw_matrix[4][4];
-
-	// model matrix (converts from model space to world space)
-	generate_rotation_matrices(
-		pitch_matrix, mesh->transform.pitch,
-		yaw_matrix, mesh->transform.yaw
-	);
-
-	GLfloat model_matrix[4][4];
-
-	mat4_mult(yaw_matrix, pitch_matrix, model_matrix); // rotation
-
-	model_matrix[3][0] = mesh->transform.x; // translation
-	model_matrix[3][1] = mesh->transform.y;
-	model_matrix[3][2] = mesh->transform.z;
-
-	// view matrix (converts from world space to view space, aka accounts for camera transformations)
-	// must apply translations before rotations this time, unlike model matrix!
-	generate_rotation_matrices(
-		pitch_matrix, -camera->pitch,
-		yaw_matrix, -camera->yaw
-	);
-
-	GLfloat view_matrix[4][4] = {
-		{1, 0, 0, 0},
-		{0, 1, 0, 0},
-		{0, 0, 1, 0},
-		{-camera->x, -camera->y, -camera->z, 1}
-	};
-
-	mat4_mult(yaw_matrix, view_matrix, view_matrix);
-	mat4_mult(pitch_matrix, view_matrix, view_matrix);
-
 	// perspective projection matrix (converts from view space to clip space)
 	const float fovY = 90;
 	const float aspectRatio = 2.0;
@@ -426,32 +402,84 @@ void draw_mesh(const Transform *camera, const Mesh *mesh) {
 		{ 0, 			 0, 		  -(2.0 * back * front) / (back - front),  0   }
 	};
 
-	// final position matrix (proj_matrix * view_matrix * model_matrix)
+	// shared buffers
+	GLfloat pitch_matrix[4][4];
+	GLfloat yaw_matrix[4][4];
+
 	GLfloat position_matrix[4][4];
-
-	mat4_mult(proj_matrix, view_matrix, position_matrix);
-	mat4_mult(position_matrix, model_matrix, position_matrix);
-
-	// normal matrix (applied to normals to account for model rotation)
-	GLfloat normal_matrix[4][4];
-
-	generate_rotation_matrices(
-		pitch_matrix, -mesh->transform.pitch,
-		yaw_matrix, -mesh->transform.yaw
-	);
-
-	mat4_mult(yaw_matrix, pitch_matrix, normal_matrix);
 
 	// bind the mesh and its texture
 	glBindVertexArray(mesh->vertex_array);
 	glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
-	// load in the matrices we just calculated as uniforms into the mesh's shader program
+	// do different stuff depending on which shader a mesh uses
 	if (mesh->shader == MESH_SHADED) {
 
+		// model matrix (converts from model space to world space)
+		generate_rotation_matrices(
+			pitch_matrix, mesh->transform.pitch,
+			yaw_matrix, mesh->transform.yaw
+		);
+
+		GLfloat model_matrix[4][4];
+
+		mat4_mult(yaw_matrix, pitch_matrix, model_matrix); // rotation
+
+		model_matrix[3][0] = mesh->transform.x; // translation
+		model_matrix[3][1] = mesh->transform.y;
+		model_matrix[3][2] = mesh->transform.z;
+
+		// view matrix (converts from world space to view space, aka accounts for camera transformations)
+		// must apply translations before rotations this time, unlike model matrix!
+		generate_rotation_matrices(
+			pitch_matrix, -camera->pitch,
+			yaw_matrix, -camera->yaw
+		);
+
+		GLfloat view_matrix[4][4] = {
+			{1, 0, 0, 0},
+			{0, 1, 0, 0},
+			{0, 0, 1, 0},
+			{-camera->x, -camera->y, -camera->z, 1}
+		};
+
+		mat4_mult(yaw_matrix, view_matrix, view_matrix);
+		mat4_mult(pitch_matrix, view_matrix, view_matrix);
+
+		// final position matrix (proj_matrix * view_matrix * model_matrix)
+		mat4_mult(proj_matrix, view_matrix, position_matrix);
+		mat4_mult(position_matrix, model_matrix, position_matrix);
+
+		// normal matrix (applied to normals to account for model rotation)
+		GLfloat normal_matrix[4][4];
+
+		generate_rotation_matrices(
+			pitch_matrix, -mesh->transform.pitch,
+			yaw_matrix, -mesh->transform.yaw
+		);
+
+		mat4_mult(yaw_matrix, pitch_matrix, normal_matrix);
+
+		// load the shader program and the uniforms we just calculated
 		glUseProgram(shader_program_shaded);
 		glUniformMatrix4fv(glGetUniformLocation(shader_program_shaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(shader_program_shaded, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
+
+	} else if (mesh->shader == MESH_SKY) {
+
+		// view matrix (converts from world space to view space, aka accounts for camera transformations)
+		// must apply translations before rotations this time, unlike model matrix!
+		generate_rotation_matrices(
+			pitch_matrix, -camera->pitch,
+			yaw_matrix, -camera->yaw
+		);
+
+		mat4_mult(pitch_matrix, yaw_matrix, position_matrix);
+		mat4_mult(proj_matrix, position_matrix, position_matrix);
+
+		// load the shader program and the uniforms we just calculated
+		glUseProgram(shader_program_sky);
+		glUniformMatrix4fv(glGetUniformLocation(shader_program_sky, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
 	}
 
 	// draw

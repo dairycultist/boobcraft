@@ -20,8 +20,6 @@ int up       = FALSE;
 int down     = FALSE;
 
 void on_start() {
-
-	initialize_3D();
 	
 	glEnable(GL_CULL_FACE); // idk if enabling settings like backface culling should be done here or by default in app.c
 	glFrontFace(GL_CW);
@@ -30,10 +28,11 @@ void on_start() {
 
 	camera = calloc(sizeof(Transform), 1);
 
+	initialize_shaders();
+
 	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm", MESH_SHADED);
 	mesh2 = import_mesh("res/test.obj", "res/test.ppm", MESH_SHADED);
-
-	sky = import_mesh("res/sky.obj", "res/sky.ppm", MESH_SHADED);
+	sky = import_mesh("res/sky.obj", "res/sky.ppm", MESH_SKY);
 
 	mesh1->transform.z = -2.0;
 	mesh1->transform.yaw = M_PI * 0.75;
