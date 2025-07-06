@@ -4,131 +4,74 @@
 #include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_mouse.h>
 
-#include "app.c"
+#include "util.c"
 #include "3D.c"
+#include "game.c"
 
-Transform *camera;
-Mesh *mesh1;
-Mesh *mesh2;
-Mesh *sky;
-
-int left     = FALSE;
-int right    = FALSE;
-int forward  = FALSE;
-int backward = FALSE;
-int up       = FALSE;
-int down     = FALSE;
-
-void on_start() {
-	
-	glEnable(GL_CULL_FACE); // idk if enabling settings like backface culling should be done here or by default in app.c
-	glFrontFace(GL_CW);
-	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
-	SDL_SetRelativeMouseMode(SDL_TRUE);
-
-	camera = calloc(sizeof(Transform), 1);
-
-	initialize_shaders();
-
-	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm", MESH_SHADED);
-	mesh2 = import_mesh("res/test.obj", "res/test.ppm", MESH_SHADED);
-	sky = import_mesh("res/sky.obj", "res/sky.ppm", MESH_SKY);
-
-	mesh1->transform.z = -2.0;
-	mesh1->transform.yaw = M_PI * 0.75;
-
-	mesh2->transform.z = -2.0;
-	mesh2->transform.y = -2.3;
-}
-
-void on_terminate() {
-
-	free(mesh1);
-	free(mesh2);
-	free(sky);
-}
-
-void process_tick() {
-
-	if (left) {
-		camera->z -= sin(camera->yaw) * 0.1;
-		camera->x -= cos(camera->yaw) * 0.1;
-	} else if (right) {
-		camera->z += sin(camera->yaw) * 0.1;
-		camera->x += cos(camera->yaw) * 0.1;
-	}
-
-	if (forward) {
-		camera->z -= cos(camera->yaw) * 0.1;
-		camera->x += sin(camera->yaw) * 0.1;
-	} else if (backward) {
-		camera->z += cos(camera->yaw) * 0.1;
-		camera->x -= sin(camera->yaw) * 0.1;
-	}
-
-	if (up) {
-		camera->y += 0.1;
-	} else if (down) {
-		camera->y -= 0.1;
-	}
-
-	draw_mesh(camera, sky);
-	draw_mesh(camera, mesh1);
-	draw_mesh(camera, mesh2);
-}
-
-void process_event(SDL_Event event) {
-
-	if (event.type == SDL_MOUSEMOTION) {
-
-		camera->pitch += event.motion.yrel * 0.01;
-		camera->yaw += event.motion.xrel * 0.01;
-
-		if (camera->pitch > M_PI / 2) {
-			camera->pitch = M_PI / 2;
-		} else if (camera->pitch < -M_PI / 2) {
-			camera->pitch = -M_PI / 2;
-		}
-	}
-
-	else if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
-
-		if (event.key.keysym.scancode == SDL_SCANCODE_A) {
-			left = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
-			right = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
-			forward = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
-			backward = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-			up = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
-			down = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-			SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
-		}
-	}
-
-	else if (event.type == SDL_KEYUP) {
-
-		if (event.key.keysym.scancode == SDL_SCANCODE_A) {
-			left = FALSE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
-			right = FALSE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
-			forward = FALSE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
-			backward = FALSE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-			up = FALSE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
-			down = FALSE;
-		}
-	}
-}
+#define TITLE "Boobcraft"
 
 int main() {
 
-    return app("Boobcraft", 800, 400, on_start, on_terminate, process_tick, process_event);
+	printf("Starting %s\n", TITLE);
+
+	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+		log_error("Could not initialize SDL");
+		return 1;
+	}
+
+	// init OpenGL
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
+	// create the window
+	SDL_Window *window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 400, SDL_WINDOW_OPENGL);
+
+	if (!window) {
+        log_error("Could not create window");
+		return 1;
+    }
+
+	SDL_GLContext context = SDL_GL_CreateContext(window);
+
+	glewExperimental = GL_TRUE;
+	glewInit();
+
+	// enable depth buffer
+	glEnable(GL_DEPTH_TEST);
+	
+	// let programmer initialize stuff
+	on_start();
+
+	// process events until window is closed
+	SDL_Event event;
+	int running = TRUE;
+
+	while (running) {
+
+		while (SDL_PollEvent(&event)) {
+
+			if (event.type == SDL_QUIT) {
+				running = FALSE;
+			} else {
+				process_event(event);
+			}
+		}
+
+		process_tick();
+
+		SDL_GL_SwapWindow(window);
+		SDL_Delay(1000 / 60);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	// free everything
+	on_terminate();
+
+	SDL_DestroyWindow(window);
+	SDL_GL_DeleteContext(context);
+	SDL_Quit();
+
+	return 0;
 }
