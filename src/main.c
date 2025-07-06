@@ -40,6 +40,13 @@ int main() {
 
 	// enable depth buffer
 	glEnable(GL_DEPTH_TEST);
+
+	// enable backface culling
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CW);
+
+	// initialize shaders
+	initialize_shaders();
 	
 	// let programmer initialize stuff
 	on_start();

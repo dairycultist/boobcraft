@@ -12,17 +12,13 @@ int down     = FALSE;
 
 void on_start() {
 	
-	glEnable(GL_CULL_FACE); // idk if enabling settings like backface culling should be done here or by default in app.c
-	glFrontFace(GL_CW);
 	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	camera = calloc(sizeof(Transform), 1);
 
-	initialize_shaders();
-
 	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm", MESH_SHADED);
-	mesh2 = import_mesh("res/test.obj", "res/test.ppm", MESH_SHADED);
+	mesh2 = import_mesh("res/block.obj", "res/block.ppm", MESH_SHADED);
 	sky = import_mesh("res/sky.obj", "res/sky.ppm", MESH_SKY);
 
 	mesh1->transform.z = -2.0;
