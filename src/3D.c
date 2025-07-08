@@ -139,8 +139,6 @@ void load_ppm(GLenum target, const char *ppm_path) {
 	glTexImage2D(target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 }
 
-// TODO obj vertices are either loaded, or rendered, with reverse xz
-
 // returns NULL on error
 Mesh *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader shader) {
 
@@ -171,6 +169,10 @@ Mesh *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader s
 			float v[3];
 			
 			sscanf(line, "v %f %f %f", &v[0], &v[1], &v[2]);
+
+			// obj vertices have reverse xz
+			v[0] = -v[0];
+			v[2] = -v[2];
 
 			append_ezarray(&position_data, v, sizeof(float) * 3);
 		}

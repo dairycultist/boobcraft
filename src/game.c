@@ -27,7 +27,7 @@ void on_start() {
 	sky = import_mesh("res/sky.obj", "res/sky.ppm", MESH_SKY);
 
 	mesh1->transform.z = -2.0;
-	mesh1->transform.yaw = M_PI * 0.75;
+	mesh1->transform.yaw = M_PI * -0.2;
 
 	mesh2->transform.z = -2.0;
 	mesh2->transform.y = -2.3;
