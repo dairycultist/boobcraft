@@ -2,6 +2,7 @@
 
 static GLuint shader_program_shaded;
 static GLuint shader_program_sky;
+static GLfloat proj_matrix[4][4] = {0};
 
 typedef enum {
 
@@ -104,11 +105,6 @@ static GLuint load_shader_program(const char *vertex_path, const char *fragment_
 	return shader_program;
 }
 
-void initialize_shaders() {
-	shader_program_shaded = load_shader_program("res/shaded.vert", "res/shaded.frag");
-	shader_program_sky = load_shader_program("res/sky.vert", "res/sky.frag");
-}
-
 void load_ppm(GLenum target, const char *ppm_path) {
 
 	// by default, OpenGL reads texture data with a 4-byte row alignment: https://stackoverflow.com/questions/72177553/why-is-gl-unpack-alignment-default-4
@@ -142,6 +138,8 @@ void load_ppm(GLenum target, const char *ppm_path) {
 	// write texture data to target buffer
 	glTexImage2D(target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 }
+
+// TODO obj vertices are either loaded, or rendered, with reverse xz
 
 // returns NULL on error
 Mesh *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader shader) {
@@ -385,23 +383,6 @@ void generate_rotation_matrices(GLfloat pitch_matrix[4][4], float pitch, GLfloat
 
 void draw_mesh(const Transform *camera, const Mesh *mesh) {
 
-	// perspective projection matrix (converts from view space to clip space)
-	const float fovY = 90;
-	const float aspectRatio = 2.0;
-	const float front = 0.01; // near plane
-	const float back = 100;   // far plane
-
-	float tangent = tan(fovY / 2 * DEG2RAD); // tangent of half fovY
-	float top = front * tangent;             // half height of near plane
-	float right = top * aspectRatio;         // half width of near plane
-
-	GLfloat proj_matrix[4][4] = {
-		{ front / right, 0, 		   0, 									   0   },
-		{ 0, 			 front / top,  0, 									   0   },
-		{ 0, 			 0, 		  -(back + front) / (back - front), 	  -1.0 },
-		{ 0, 			 0, 		  -(2.0 * back * front) / (back - front),  0   }
-	};
-
 	// shared buffers
 	GLfloat pitch_matrix[4][4];
 	GLfloat yaw_matrix[4][4];
@@ -484,4 +465,27 @@ void draw_mesh(const Transform *camera, const Mesh *mesh) {
 
 	// draw
 	glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_count);
+}
+
+void initialize_3D_static_values() {
+
+	// shader programs
+	shader_program_shaded = load_shader_program("res/shaded.vert", "res/shaded.frag");
+	shader_program_sky = load_shader_program("res/sky.vert", "res/sky.frag");
+
+	// perspective projection matrix (converts from view space to clip space)
+	const float fovY = 90;
+	const float aspectRatio = 2.0;
+	const float front = 0.01; // near plane
+	const float back = 100;   // far plane
+
+	float tangent = tan(fovY / 2 * DEG2RAD); // tangent of half fovY
+	float top = front * tangent;             // half height of near plane
+	float right = top * aspectRatio;         // half width of near plane
+
+	proj_matrix[0][0] = front / right;
+	proj_matrix[1][1] = front / top;
+	proj_matrix[2][2] = -(back + front) / (back - front);
+	proj_matrix[2][3] = -1.0;
+	proj_matrix[3][2] = -(2.0 * back * front) / (back - front);
 }

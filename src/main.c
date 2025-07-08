@@ -41,8 +41,8 @@ int main() {
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 
-	// initialize shaders
-	initialize_shaders();
+	// initialize static values used by 3D.c
+	initialize_3D_static_values();
 	
 	// let programmer initialize stuff
 	on_start();
