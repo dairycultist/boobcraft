@@ -57,6 +57,8 @@ int main() {
 
 			if (event.type == SDL_QUIT) {
 				running = FALSE;
+			} else if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+				SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
 			} else {
 				process_event(event);
 			}

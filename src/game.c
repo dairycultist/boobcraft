@@ -1,3 +1,5 @@
+#include "engine.h"
+
 Transform *camera;
 Mesh *mesh1;
 Mesh *mesh2;
@@ -99,8 +101,6 @@ void process_event(SDL_Event event) {
 			up = TRUE;
 		} else if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
 			down = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-			SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
 		}
 	}
 
