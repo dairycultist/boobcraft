@@ -24,11 +24,13 @@ typedef struct {
  * engine-side implemented
  * game-side will reference these headers upon linkage
  */
+void set_skybox_color(float r, float g, float b);
+
 void *import_mesh(const char *obj_path, const char *ppm_path);
+void *make_sky_mesh(const char *ppm_path);
+
 void draw_mesh(const Transform *camera, const void *mesh);
 Transform *get_mesh_transform(void *mesh);
-void *make_sky_mesh(const char *ppm_path);
-void set_skybox_color(float r, float g, float b);
 
 /*
  * game-side implemented
