@@ -2,7 +2,12 @@
 
 static GLuint shader_program_shaded;
 static GLuint shader_program_sky;
-static GLfloat proj_matrix[4][4] = {0};
+static GLfloat proj_matrix[4][4] = {
+	{0, 0, 0, 0},
+	{0, 0, 0, 0},
+	{0, 0, 0, 0},
+	{0, 0, 0, 0},
+};
 
 typedef enum {
 
@@ -476,14 +481,13 @@ void initialize_3D_static_values() {
 	shader_program_sky = load_shader_program("res/sky.vert", "res/sky.frag");
 
 	// perspective projection matrix (converts from view space to clip space)
-	const float fovY = 90;
-	const float aspectRatio = 2.0;
+	const float fovY = 40;
+	const float aspectRatio = 400. / 240;
 	const float front = 0.01; // near plane
 	const float back = 100;   // far plane
 
-	float tangent = tan(fovY / 2 * DEG2RAD); // tangent of half fovY
-	float top = front * tangent;             // half height of near plane
-	float right = top * aspectRatio;         // half width of near plane
+	float top = front * tan(fovY / 2 * DEG2RAD); // half height of near plane
+	float right = top * aspectRatio;             // half width of near plane
 
 	proj_matrix[0][0] = front / right;
 	proj_matrix[1][1] = front / top;

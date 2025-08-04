@@ -69,7 +69,7 @@ int main() {
 		process_tick();
 
 		SDL_GL_SwapWindow(window);
-		SDL_Delay(1000 / 60);
+		SDL_Delay(1000 / 30);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 

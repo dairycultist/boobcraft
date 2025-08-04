@@ -2,15 +2,20 @@
 
 simple 3D engine written in C + OpenGL
 
-3DS vibes
+3DS vibes. or HL vibes idk
 
 Making a 3D game (moreso engine...) like it's 1998(ish). Minimal and lightweight with no static dependencies. Trying to use only snake case and failing.
 
-im not adding multiplayer. I might also fix the resolution at 400x240 we'll see :3
+im not adding multiplayer
 
-I'll need to make a header file for all the "implement these" parts of the game engine. including for informing resource incorperation...
+I'll need to make a header file for all the "implement these" parts of the game engine (abstraction yay). including for informing resource incorperation...
 
-GLEW is installed and compiled as part of the program, but the other libraries must be present on your machine already.
+GLEW is installed and compiled as part of the program, but the other libraries (OpenGL, SDL2) must be present on your machine already.
+
+| Specs      |         |
+|------------|---------|
+| Resolution | 400x240 |
+| Framerate  | 30fps   |
 
 ### References
 

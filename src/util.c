@@ -1,4 +1,3 @@
-// isolation/abstraction is good :)
 
 #ifndef UTIL_DEFINED
 
