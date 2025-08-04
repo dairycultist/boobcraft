@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <math.h>
 #include "engine.h"
 
 Transform *camera;
@@ -49,6 +51,12 @@ void process(int up, int down, int left, int right, int trigger_1, int trigger_2
 	} else if (down) {
 		camera->z += cos(camera->yaw) * 0.1;
 		camera->x -= sin(camera->yaw) * 0.1;
+	}
+
+	if (trigger_1) {
+		camera->yaw -= 0.1;
+	} else if (trigger_2) {
+		camera->yaw += 0.1;
 	}
 
 	draw_mesh(camera, sky);

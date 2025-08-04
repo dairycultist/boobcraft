@@ -79,27 +79,35 @@ int main() {
 
 				if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
 
-					if (event.key.keysym.scancode == SDL_SCANCODE_A) {
+					if (event.key.keysym.scancode == SDL_SCANCODE_LEFT) {
 						left = TRUE;
-					} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT) {
 						right = TRUE;
-					} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
 						up = TRUE;
-					} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_DOWN) {
 						down = TRUE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_Z) {
+						trigger_1 = TRUE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_X) {
+						trigger_2 = TRUE;
 					}
 				}
 
 				else if (event.type == SDL_KEYUP) {
 
-					if (event.key.keysym.scancode == SDL_SCANCODE_A) {
+					if (event.key.keysym.scancode == SDL_SCANCODE_LEFT) {
 						left = FALSE;
-					} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT) {
 						right = FALSE;
-					} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
 						up = FALSE;
-					} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_DOWN) {
 						down = FALSE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_Z) {
+						trigger_1 = FALSE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_X) {
+						trigger_2 = FALSE;
 					}
 				}
 			}
