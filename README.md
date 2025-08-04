@@ -8,6 +8,10 @@ Making a 3D game (moreso engine...) like it's 1998(ish). Minimal and lightweight
 
 im not adding multiplayer. I might also fix the resolution at 400x240 we'll see :3
 
+I'll need to make a header file for all the "implement these" parts of the game engine. including for informing resource incorperation...
+
+GLEW is installed and compiled as part of the program, but the other libraries must be present on your machine already.
+
 ### References
 
 [Miku model used for testing](https://sketchfab.com/3d-models/hatsune-miku-low-poly-6668784e9dfa46ba92bc28f85d8154e5)
@@ -19,8 +23,6 @@ im not adding multiplayer. I might also fix the resolution at 400x240 we'll see 
 https://github.com/martincohen/Punity
 
 http://mgarcia.org/Blog/3DS
-
-The following libraries are installed and compiled as part of the program:
 
 **OpenGL**
 
