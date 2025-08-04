@@ -1,8 +1,8 @@
 #include "engine.h"
 
 Transform *camera;
-Mesh *mesh1;
-Mesh *mesh2;
+void *mesh1;
+void *mesh2;
 Mesh *sky;
 
 int left     = FALSE;
@@ -28,11 +28,11 @@ void on_start() {
 	mesh2 = import_mesh("res/block.obj", "res/block.ppm", MESH_SHADED);
 	sky = import_mesh("res/sky.obj", "res/sky.ppm", MESH_SKY);
 
-	mesh1->transform.z = -2.0;
-	mesh1->transform.yaw = M_PI * -0.2;
+	get_mesh_transform(mesh1)->z = -2.0;
+	get_mesh_transform(mesh1)->yaw = M_PI * -0.2;
 
-	mesh2->transform.z = -2.0;
-	mesh2->transform.y = -2.3;
+	get_mesh_transform(mesh2)->z = -2.0;
+	get_mesh_transform(mesh2)->y = -2.3;
 }
 
 void on_terminate() {

@@ -22,17 +22,6 @@ typedef enum {
 
 typedef struct {
 
-	float x;
-	float y;
-	float z;
-	float pitch;
-	// no one needs roll
-	float yaw;
-
-} Transform;
-
-typedef struct {
-
 	Transform transform;
 
 	GLuint vertex_array; // "VAO"
@@ -41,6 +30,11 @@ typedef struct {
 	GLuint texture;
 
 } Mesh;
+
+Transform *get_mesh_transform(void *mesh) {
+
+	return &((Mesh *) mesh)->transform;
+}
 
 // returns -1 on error
 static GLuint load_shader(const char* path, GLenum shader_type) {

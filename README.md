@@ -1,10 +1,12 @@
 # boobcraft (working title!!)
 
-simple 3D engine written in C + OpenGL
+simple 3D engine/framework written in C + OpenGL
 
 3DS vibes. or HL vibes idk
 
-Making a 3D game (moreso engine...) like it's 1998(ish). Minimal and lightweight with no static dependencies. Trying to use only snake case and failing.
+the game programmer doesn't even have to think about OpenGL and all that; it's all handled by the engine!
+
+Making a 3D game (moreso engine...) like it's 1998(ish). Minimal and lightweight. Trying to use only snake case and failing.
 
 im not adding multiplayer
 
