@@ -5,7 +5,6 @@
 #include "engine.h"
 #include "util.c"
 #include "3D.c"
-#include "game.c"
 
 int main() {
 

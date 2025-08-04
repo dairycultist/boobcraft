@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "engine.h"
@@ -5,7 +6,7 @@
 Transform *camera;
 void *mesh1;
 void *mesh2;
-Mesh *sky;
+void *sky;
 
 char *get_title() {
 
