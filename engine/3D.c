@@ -246,11 +246,18 @@ void *import_mesh(const char *obj_path, const char *ppm_path) {
 
 void *make_sky_mesh(const char *ppm_path) {
 
-	const int data_bytecount = 0;
-	const int data_vertcount = 0;
+	const int data_vertcount = 6;
+	const int data_bytecount = sizeof(float) * 5 * data_vertcount;
 
-	const char data[] = {
+	const float data[] = {
 
+		// +z
+		50, 50, 50, 0.5, 0.75,
+		-50, -50, 50, 0.25, 0.5,
+		-50, 50, 50, 0.25, 0.75,
+		50, 50, 50, 0.5, 0.75,
+		50, -50, 50, 0.5, 0.5,
+		-50, -50, 50, 0.25, 0.5,
 	};
 
 	// make vertex array
