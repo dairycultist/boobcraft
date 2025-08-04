@@ -246,9 +246,6 @@ void *import_mesh(const char *obj_path, const char *ppm_path) {
 
 void *make_sky_mesh(const char *ppm_path) {
 
-	const int data_vertcount = 24;
-	const int data_bytecount = sizeof(float) * 5 * data_vertcount;
-
 	// hardcoded inverted cube with sidelength 100 units (aka a cheap skybox)
 	const float data[] = {
 		// +z
@@ -279,6 +276,20 @@ void *make_sky_mesh(const char *ppm_path) {
 		-50, 50, 50, 0.25, 0.75,
 		-50, -50, 50, 0.25, 0.5,
 		-50, -50, -50, 0, 0.5,
+		// +y
+		50, 50, 50, 0.5, 0.75,
+		-50, 50, 50, 0.25, 0.75,
+		-50, 50, -50, 0.25, 1,
+		50, 50, 50, 0.5, 0.75,
+		-50, 50, -50, 0.25, 1,
+		50, 50, -50, 0.5, 1,
+		// -y
+		50, -50, 50, 0.5, 0.5,
+		-50, -50, -50, 0.25, 0.25,
+		-50, -50, 50, 0.25, 0.5,
+		50, -50, 50, 0.5, 0.5,
+		50, -50, -50, 0.5, 0.25,
+		-50, -50, -50, 0.25, 0.25,
 	};
 
 	// make vertex array
@@ -289,8 +300,8 @@ void *make_sky_mesh(const char *ppm_path) {
 	// make vertex buffer (stored by vertex_array)
 	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);							// make it the active buffer
-	glBufferData(GL_ARRAY_BUFFER, data_bytecount, data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);									// make it the active buffer
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 5 * 36, data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 
 	// link active vertex data and shader attributes (for MESH_SKY)
 	GLint pos_attrib = glGetAttribLocation(shader_program_sky, "position");
@@ -330,7 +341,7 @@ void *make_sky_mesh(const char *ppm_path) {
 	mesh->transform.pitch 	= 0.0f;
 	mesh->transform.yaw 	= 0.0f;
 	mesh->vertex_array = vertex_array;
-	mesh->vertex_count = data_vertcount;
+	mesh->vertex_count = 36;
 	mesh->shader = MESH_SKY;
 	mesh->texture = texture;
 
