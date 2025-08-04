@@ -13,13 +13,6 @@ static GLfloat proj_matrix[4][4] = {
 	{0, 0, -0.02, 0},
 };
 
-typedef enum {
-
-  MESH_SHADED,
-  MESH_SKY
-
-} MeshShader;
-
 typedef struct {
 
 	Transform transform;
@@ -143,7 +136,7 @@ void load_ppm(GLenum target, const char *ppm_path) {
 }
 
 // returns NULL on error
-Mesh *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader shader) {
+void *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader shader) {
 
 	// read obj file
 	FILE *file = fopen(obj_path, "r");
@@ -386,7 +379,9 @@ void generate_rotation_matrices(GLfloat pitch_matrix[4][4], float pitch, GLfloat
 	yaw_matrix[3][3] = 1;
 }
 
-void draw_mesh(const Transform *camera, const Mesh *mesh) {
+void draw_mesh(const Transform *camera, const void *void_mesh) {
+
+	const Mesh *mesh = (Mesh *) void_mesh;
 
 	// shared buffers
 	GLfloat pitch_matrix[4][4];

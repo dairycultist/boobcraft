@@ -42,6 +42,10 @@ int main() {
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 
+	// other opengl stuff
+	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+
 	// initialize static values used by 3D.c
 	initialize_3D_static_values();
 	
@@ -52,20 +56,56 @@ int main() {
 	SDL_Event event;
 	int running = TRUE;
 
+	int up        = FALSE;
+	int down      = FALSE;
+	int left      = FALSE;
+	int right     = FALSE;
+	int trigger_1 = FALSE;
+	int trigger_2 = FALSE;
+
 	while (running) {
 
 		while (SDL_PollEvent(&event)) {
 
 			if (event.type == SDL_QUIT) {
+
 				running = FALSE;
+
 			} else if (event.type == SDL_KEYDOWN && event.key.repeat == 0 && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+
 				SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
-			} else {
-				process_event(event);
+
+			} else if (SDL_GetRelativeMouseMode()) {
+
+				if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
+
+					if (event.key.keysym.scancode == SDL_SCANCODE_A) {
+						left = TRUE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
+						right = TRUE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
+						up = TRUE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
+						down = TRUE;
+					}
+				}
+
+				else if (event.type == SDL_KEYUP) {
+
+					if (event.key.keysym.scancode == SDL_SCANCODE_A) {
+						left = FALSE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
+						right = FALSE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
+						up = FALSE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
+						down = FALSE;
+					}
+				}
 			}
 		}
 
-		process_tick();
+		process(up, down, left, right, trigger_1, trigger_2);
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1000 / 30);

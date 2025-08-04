@@ -6,6 +6,13 @@
 #define TRUE 1
 #define FALSE 0
 
+typedef enum {
+
+  MESH_SHADED,
+  MESH_SKY
+
+} MeshShader;
+
 typedef struct {
 
 	float x;
@@ -20,6 +27,9 @@ typedef struct {
 #endif
 
 // need to include all engine-side implemented stuff so the game-side can correctly call those upon linkage
+void *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader shader);
+void draw_mesh(const Transform *camera, const void *mesh);
+
 Transform *get_mesh_transform(void *mesh);
 
 // game-side implemented
@@ -29,6 +39,4 @@ void on_start();
 
 void on_terminate();
 
-void process_tick();
-
-void process_event(SDL_Event event);
+void process(int up, int down, int left, int right, int trigger_1, int trigger_2);

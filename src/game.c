@@ -5,22 +5,12 @@ void *mesh1;
 void *mesh2;
 Mesh *sky;
 
-int left     = FALSE;
-int right    = FALSE;
-int forward  = FALSE;
-int backward = FALSE;
-int up       = FALSE;
-int down     = FALSE;
-
 char *get_title() {
 
 	return "Boobcraft";
 }
 
 void on_start() {
-	
-	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
-	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	camera = calloc(sizeof(Transform), 1);
 
@@ -43,7 +33,7 @@ void on_terminate() {
 	free(sky);
 }
 
-void process_tick() {
+void process(int up, int down, int left, int right, int trigger_1, int trigger_2) {
 
 	if (left) {
 		camera->z -= sin(camera->yaw) * 0.1;
@@ -53,71 +43,15 @@ void process_tick() {
 		camera->x += cos(camera->yaw) * 0.1;
 	}
 
-	if (forward) {
+	if (up) {
 		camera->z -= cos(camera->yaw) * 0.1;
 		camera->x += sin(camera->yaw) * 0.1;
-	} else if (backward) {
+	} else if (down) {
 		camera->z += cos(camera->yaw) * 0.1;
 		camera->x -= sin(camera->yaw) * 0.1;
-	}
-
-	if (up) {
-		camera->y += 0.1;
-	} else if (down) {
-		camera->y -= 0.1;
 	}
 
 	draw_mesh(camera, sky);
 	draw_mesh(camera, mesh1);
 	draw_mesh(camera, mesh2);
-}
-
-void process_event(SDL_Event event) {
-
-	if (event.type == SDL_MOUSEMOTION) {
-
-		camera->pitch += event.motion.yrel * 0.01;
-		camera->yaw += event.motion.xrel * 0.01;
-
-		// clamp camera pitch
-		if (camera->pitch > M_PI / 2) {
-			camera->pitch = M_PI / 2;
-		} else if (camera->pitch < -M_PI / 2) {
-			camera->pitch = -M_PI / 2;
-		}
-	}
-
-	else if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
-
-		if (event.key.keysym.scancode == SDL_SCANCODE_A) {
-			left = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
-			right = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
-			forward = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
-			backward = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-			up = TRUE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
-			down = TRUE;
-		}
-	}
-
-	else if (event.type == SDL_KEYUP) {
-
-		if (event.key.keysym.scancode == SDL_SCANCODE_A) {
-			left = FALSE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
-			right = FALSE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
-			forward = FALSE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
-			backward = FALSE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-			up = FALSE;
-		} else if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
-			down = FALSE;
-		}
-	}
 }
