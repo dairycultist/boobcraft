@@ -1,3 +1,5 @@
+// I'm tempted to fabricate my own preprocessor directives for telling the compiler what resources to compile as part of the program
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
