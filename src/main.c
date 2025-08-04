@@ -1,5 +1,5 @@
 #define GLEW_STATIC
-#include "../GLEW/glew.h"
+#include <GL/glew.h>
 #include <SDL2/SDL.h>
 
 #include "engine.h"
