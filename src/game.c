@@ -12,7 +12,7 @@ void *sky;
 
 char *get_title() {
 
-	return "Boobcraft";
+	return "Example Game";
 }
 
 void on_start() {

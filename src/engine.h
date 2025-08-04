@@ -34,6 +34,8 @@ typedef struct {
 void *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader shader);
 void draw_mesh(const Transform *camera, const void *mesh);
 Transform *get_mesh_transform(void *mesh);
+// void set_skybox_texture()
+// void set_skybox_color()
 
 /*
  * game-side implemented

@@ -29,70 +29,20 @@ Transform *get_mesh_transform(void *mesh) {
 	return &((Mesh *) mesh)->transform;
 }
 
-// returns -1 on error
-static GLuint load_shader(const char* path, GLenum shader_type) {
-
-	FILE *file = fopen(path, "r");
-	if (file == NULL) {
-		return -1; // file IO error
-	}
-  
-	// determine file size
-	fseek(file, 0, SEEK_END);
-	long file_size = ftell(file);
-	fseek(file, 0, SEEK_SET);
-  
-	// allocate memory for the string (+1 for null terminator)
-	char *shadercode = (char *) malloc(file_size + 1);
-	if (shadercode == NULL) {
-		fclose(file);
-		return -1; // memory allocation error
-	}
-	
-	// read file content
-	size_t bytes_read = fread(shadercode, 1, file_size, file);
-	if (bytes_read != file_size) {
-		fclose(file);
-		free(shadercode);
-		return -1; // read error or incomplete read
-	}
-	
-	shadercode[file_size] = '\0';
-  
-	fclose(file);
-
-	// use shadercode to create shader
-	const char *const_shadercode = shadercode;
+static GLuint load_shader(const char *shadercode, GLenum shader_type) {
 
 	GLuint shader = glCreateShader(shader_type);
-	glShaderSource(shader, 1, &const_shadercode, NULL);
+	glShaderSource(shader, 1, &shadercode, NULL);
 	glCompileShader(shader);
-
-    // check for compilation log
-    char compile_log[512];
-    glGetShaderInfoLog(shader, 512, NULL, compile_log);
-
-    if (compile_log[0] != '\0') {
-        printf("'%s' provided a compilation log: %s\n", path, compile_log);
-    }
-
-    // check if it compiled successfully
-    GLint status;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-
-    if (status != GL_TRUE) {
-        log_error("A shader failed to compile");
-		return -1;
-    }
 
 	return shader;
 }
 
-static GLuint load_shader_program(const char *vertex_path, const char *fragment_path) {
+static GLuint load_shader_program(const char *vertex_shadercode, const char *fragment_shadercode) {
 	
 	GLuint shader_program = glCreateProgram();
-	glAttachShader(shader_program, load_shader(vertex_path, GL_VERTEX_SHADER)); // does not catch errors load_shader makes lol
-	glAttachShader(shader_program, load_shader(fragment_path, GL_FRAGMENT_SHADER));
+	glAttachShader(shader_program, load_shader(vertex_shadercode, GL_VERTEX_SHADER)); // does not catch errors load_shader makes lol
+	glAttachShader(shader_program, load_shader(fragment_shadercode, GL_FRAGMENT_SHADER));
 	glLinkProgram(shader_program); // apply changes to shader program, not gonna call "glUseProgram" yet bc not drawing
 
 	// IF you want to have arbitrary shaders allowed, you should stop using glGetAttribLocation/glGetUniformLocation, but I don't so I won't
@@ -470,6 +420,49 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 void initialize_3D_static_values() {
 
 	// shader programs
-	shader_program_shaded = load_shader_program("res/shaded.vert", "res/shaded.frag");
-	shader_program_sky = load_shader_program("res/sky.vert", "res/sky.frag");
+	shader_program_shaded = load_shader_program(
+		"#version 150 core\n"
+		"uniform mat4 position_matrix;"
+		"uniform mat4 normal_matrix;"
+		"in vec3 position;"
+		"in vec3 normal;"
+		"in vec2 UV;"
+		"out vec3 normal_camera;"
+		"out vec2 frag_UV;"
+		"void main() {"
+			"gl_Position = position_matrix * vec4(position.xy, -position.z, 1.0);"// get final position
+			"normal_camera = (normal_matrix * vec4(normal, 1.0)).xyz;"// get final normal
+			"frag_UV = UV;"// pass along UV
+		"}"
+		,
+		"#version 150 core\n"
+		"uniform sampler2D tex;"
+		"in vec3 normal_camera;"
+		"in vec2 frag_UV;"
+		"out vec4 outColor;"
+		"void main() {"
+			"float c = dot(normal_camera, vec3(0.7, 0.7, 0)) * 0.5 + 0.5;"
+			"outColor = texture(tex, frag_UV) * vec4(c, c, c, 1.0);"
+		"}"
+	);
+
+	shader_program_sky = load_shader_program(
+		"#version 150 core\n"
+		"uniform mat4 position_matrix;"
+		"in vec3 position;"
+		"in vec2 UV;"
+		"out vec2 frag_UV;"
+		"void main() {"
+			"gl_Position = position_matrix * vec4(position.xy, -position.z, 1.0);"// get final position
+			"frag_UV = UV;"// pass along UV
+		"}"
+		,
+		"#version 150 core\n"
+		"uniform sampler2D tex;"
+		"in vec2 frag_UV;"
+		"out vec4 outColor;"
+		"void main() {"
+			"outColor = texture(tex, frag_UV);"
+		"}"
+	);
 }
