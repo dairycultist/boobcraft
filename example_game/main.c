@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "engine.h"
+#include "../engine/engine.h"
 
 Transform *camera;
 void *mesh1;
@@ -19,9 +19,9 @@ void on_start() {
 
 	camera = calloc(sizeof(Transform), 1);
 
-	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm", MESH_SHADED);
-	mesh2 = import_mesh("res/block.obj", "res/block.ppm", MESH_SHADED);
-	sky = import_mesh("res/sky.obj", "res/sky.ppm", MESH_SKY);
+	mesh1 = import_mesh("example_game/res/miku.obj", "example_game/res/miku.ppm", MESH_SHADED);
+	mesh2 = import_mesh("example_game/res/block.obj", "example_game/res/block.ppm", MESH_SHADED);
+	sky = import_mesh("example_game/res/sky.obj", "example_game/res/sky.ppm", MESH_SKY);
 
 	get_mesh_transform(mesh1)->z = -2.0;
 	get_mesh_transform(mesh1)->yaw = M_PI * -0.2;
