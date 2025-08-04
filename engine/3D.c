@@ -99,8 +99,6 @@ void load_ppm(GLenum target, const char *ppm_path) {
 // returns NULL on error
 void *import_mesh(const char *obj_path, const char *ppm_path) {
 
-	const MeshShader shader = MESH_SHADED;
-
 	// read obj file
 	FILE *file = fopen(obj_path, "r");
 
@@ -197,31 +195,18 @@ void *import_mesh(const char *obj_path, const char *ppm_path) {
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);													// make it the active buffer
 	glBufferData(GL_ARRAY_BUFFER, composite_data.bytecount, composite_data.data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 
-	// link active vertex data and shader attributes
-	if (shader == MESH_SHADED) {
+	// link active vertex data and shader attributes (for MESH_SHADED)
+	GLint pos_attrib = glGetAttribLocation(shader_program_shaded, "position");
+	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
+	glEnableVertexAttribArray(pos_attrib); // requires a VAO to be bound
 
-		GLint pos_attrib = glGetAttribLocation(shader_program_shaded, "position");
-		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
-		glEnableVertexAttribArray(pos_attrib); // requires a VAO to be bound
+	GLint normal_attrib = glGetAttribLocation(shader_program_shaded, "normal");
+	glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 3));
+	glEnableVertexAttribArray(normal_attrib);
 
-		GLint normal_attrib = glGetAttribLocation(shader_program_shaded, "normal");
-		glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 3));
-		glEnableVertexAttribArray(normal_attrib);
-
-		GLint uv_attrib = glGetAttribLocation(shader_program_shaded, "UV");
-		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
-		glEnableVertexAttribArray(uv_attrib);
-
-	} else if (shader == MESH_SKY) {
-
-		GLint pos_attrib = glGetAttribLocation(shader_program_sky, "position");
-		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
-		glEnableVertexAttribArray(pos_attrib);
-
-		GLint uv_attrib = glGetAttribLocation(shader_program_sky, "UV");
-		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
-		glEnableVertexAttribArray(uv_attrib);
-	}
+	GLint uv_attrib = glGetAttribLocation(shader_program_shaded, "UV");
+	glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
+	glEnableVertexAttribArray(uv_attrib);
 
 	// debind vertex array
 	glBindVertexArray(0);
@@ -253,7 +238,72 @@ void *import_mesh(const char *obj_path, const char *ppm_path) {
 	mesh->transform.yaw 	= 0.0f;
 	mesh->vertex_array = vertex_array;
 	mesh->vertex_count = vertex_count;
-	mesh->shader = shader;
+	mesh->shader = MESH_SHADED;
+	mesh->texture = texture;
+
+	return mesh;
+}
+
+void *make_sky_mesh(const char *ppm_path) {
+
+	const int data_bytecount = 0;
+	const int data_vertcount = 0;
+
+	const char data[] = {
+
+	};
+
+	// make vertex array
+	GLuint vertex_array;
+	glGenVertexArrays(1, &vertex_array);
+	glBindVertexArray(vertex_array);
+
+	// make vertex buffer (stored by vertex_array)
+	GLuint vertexBuffer;
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);							// make it the active buffer
+	glBufferData(GL_ARRAY_BUFFER, data_bytecount, data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
+
+	// link active vertex data and shader attributes (for MESH_SKY)
+	GLint pos_attrib = glGetAttribLocation(shader_program_sky, "position");
+	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glEnableVertexAttribArray(pos_attrib);
+
+	GLint uv_attrib = glGetAttribLocation(shader_program_sky, "UV");
+	glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid *) (sizeof(float) * 3));
+	glEnableVertexAttribArray(uv_attrib);
+
+	// debind vertex array
+	glBindVertexArray(0);
+
+	// create texture object
+	GLuint texture;
+	glGenTextures(1, &texture);
+
+	// bind texture (to active texture 2D)
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// wrap repeat
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// filter linear
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// write texture data
+	load_ppm(GL_TEXTURE_2D, ppm_path);
+
+	// create final mesh object to return
+	Mesh *mesh = malloc(sizeof(Mesh));
+	mesh->transform.x 		= 0.0f;
+	mesh->transform.y 		= 0.0f;
+	mesh->transform.z 		= 0.0f;
+	mesh->transform.pitch 	= 0.0f;
+	mesh->transform.yaw 	= 0.0f;
+	mesh->vertex_array = vertex_array;
+	mesh->vertex_count = data_vertcount;
+	mesh->shader = MESH_SKY;
 	mesh->texture = texture;
 
 	return mesh;

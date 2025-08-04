@@ -23,7 +23,7 @@ void on_start() {
 
 	mesh1 = import_mesh("example_game/res/miku.obj", "example_game/res/miku.ppm");
 	mesh2 = import_mesh("example_game/res/block.obj", "example_game/res/block.ppm");
-	sky = import_mesh("example_game/res/sky.obj", "example_game/res/sky.ppm");
+	// sky = make_sky_mesh("example_game/res/sky.ppm");
 
 	get_mesh_transform(mesh1)->yaw = 3.14 * -0.2;
 
@@ -35,7 +35,7 @@ void on_terminate() {
 	free(camera);
 	free(mesh1);
 	free(mesh2);
-	free(sky);
+	// free(sky);
 }
 
 void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool menu) {
@@ -64,7 +64,7 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 		camera->yaw += 0.02;
 	}
 
-	draw_mesh(camera, sky);
+	// draw_mesh(camera, sky);
 	draw_mesh(camera, mesh1);
 	draw_mesh(camera, mesh2);
 }
