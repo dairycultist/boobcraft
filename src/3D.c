@@ -2,11 +2,15 @@
 
 static GLuint shader_program_shaded;
 static GLuint shader_program_sky;
+
+// perspective projection matrix (converts from view space to clip space)
+// hardcoded with FOV=40 aspect=1.666 near=0.01 far=100
+// https://www.songho.ca/opengl/gl_projectionmatrix.html#fov
 static GLfloat proj_matrix[4][4] = {
-	{0, 0, 0, 0},
-	{0, 0, 0, 0},
-	{0, 0, 0, 0},
-	{0, 0, 0, 0},
+	{1.6485, 0, 0, 0},
+	{0, 2.7475, 0, 0},
+	{0, 0, -1.0, -1.0},
+	{0, 0, -0.02, 0},
 };
 
 typedef enum {
@@ -479,19 +483,4 @@ void initialize_3D_static_values() {
 	// shader programs
 	shader_program_shaded = load_shader_program("res/shaded.vert", "res/shaded.frag");
 	shader_program_sky = load_shader_program("res/sky.vert", "res/sky.frag");
-
-	// perspective projection matrix (converts from view space to clip space)
-	const float fovY = 40;
-	const float aspectRatio = 400. / 240;
-	const float front = 0.01; // near plane
-	const float back = 100;   // far plane
-
-	float top = front * tan(fovY / 2 * DEG2RAD); // half height of near plane
-	float right = top * aspectRatio;             // half width of near plane
-
-	proj_matrix[0][0] = front / right;
-	proj_matrix[1][1] = front / top;
-	proj_matrix[2][2] = -(back + front) / (back - front);
-	proj_matrix[2][3] = -1.0;
-	proj_matrix[3][2] = -(2.0 * back * front) / (back - front);
 }

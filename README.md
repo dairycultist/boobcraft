@@ -12,10 +12,11 @@ I'll need to make a header file for all the "implement these" parts of the game 
 
 GLEW is installed and compiled as part of the program, but the other libraries (OpenGL, SDL2) must be present on your machine already.
 
-| Specs      |         |
-|------------|---------|
-| Resolution | 400x240 |
-| Framerate  | 30fps   |
+| Specs      |                    |
+|------------|--------------------|
+| Resolution | 400x240            |
+| Framerate  | 30fps              |
+| Camera     | 40°, 0.01-100units |
 
 ### References
 

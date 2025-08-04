@@ -22,7 +22,7 @@ int main() {
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 	// create the window
-	SDL_Window *window = SDL_CreateWindow(get_title(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 400, 240, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	SDL_Window *window = SDL_CreateWindow(get_title(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 400, 240, SDL_WINDOW_OPENGL);
 
 	if (!window) {
         log_error("Could not create window");
@@ -57,10 +57,6 @@ int main() {
 
 			if (event.type == SDL_QUIT) {
 				running = FALSE;
-			} else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
-
-				printf("Window has been resized to %dx%d\n", event.window.data1, event.window.data2);
-			
 			} else {
 				process_event(event);
 			}
