@@ -13,6 +13,13 @@ static GLfloat proj_matrix[4][4] = {
 	{0, 0, -0.02, 0},
 };
 
+typedef enum {
+
+  MESH_SHADED,
+  MESH_SKY
+
+} MeshShader;
+
 typedef struct {
 
 	Transform transform;
@@ -90,7 +97,9 @@ void load_ppm(GLenum target, const char *ppm_path) {
 }
 
 // returns NULL on error
-void *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader shader) {
+void *import_mesh(const char *obj_path, const char *ppm_path) {
+
+	const MeshShader shader = MESH_SHADED;
 
 	// read obj file
 	FILE *file = fopen(obj_path, "r");

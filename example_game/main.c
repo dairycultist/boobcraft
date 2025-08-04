@@ -7,7 +7,7 @@
 Transform *camera;
 void *mesh1;
 void *mesh2;
-// void *sky;
+void *sky;
 
 char *get_title() {
 
@@ -21,9 +21,9 @@ void on_start() {
 	camera = calloc(sizeof(Transform), 1);
 	camera->z = 5;
 
-	mesh1 = import_mesh("example_game/res/miku.obj", "example_game/res/miku.ppm", MESH_SHADED);
-	mesh2 = import_mesh("example_game/res/block.obj", "example_game/res/block.ppm", MESH_SHADED);
-	// sky = import_mesh("example_game/res/sky.obj", "example_game/res/sky.ppm", MESH_SKY);
+	mesh1 = import_mesh("example_game/res/miku.obj", "example_game/res/miku.ppm");
+	mesh2 = import_mesh("example_game/res/block.obj", "example_game/res/block.ppm");
+	sky = import_mesh("example_game/res/sky.obj", "example_game/res/sky.ppm");
 
 	get_mesh_transform(mesh1)->yaw = 3.14 * -0.2;
 
@@ -35,7 +35,7 @@ void on_terminate() {
 	free(camera);
 	free(mesh1);
 	free(mesh2);
-	// free(sky);
+	free(sky);
 }
 
 void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool menu) {
@@ -58,11 +58,13 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 
 	if (action_1) {
 		get_mesh_transform(mesh1)->yaw += 0.1;
+		camera->yaw -= 0.02;
 	} else if (action_2) {
 		get_mesh_transform(mesh1)->yaw -= 0.1;
+		camera->yaw += 0.02;
 	}
 
-	// draw_mesh(camera, sky);
+	draw_mesh(camera, sky);
 	draw_mesh(camera, mesh1);
 	draw_mesh(camera, mesh2);
 }

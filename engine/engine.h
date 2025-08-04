@@ -7,13 +7,6 @@ typedef char bool;
 #define TRUE 1
 #define FALSE 0
 
-typedef enum {
-
-  MESH_SHADED,
-  MESH_SKY
-
-} MeshShader;
-
 typedef struct {
 
 	float x;
@@ -31,7 +24,7 @@ typedef struct {
  * engine-side implemented
  * game-side will reference these headers upon linkage
  */
-void *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader shader);
+void *import_mesh(const char *obj_path, const char *ppm_path);
 void draw_mesh(const Transform *camera, const void *mesh);
 Transform *get_mesh_transform(void *mesh);
 // void set_skybox_texture()
