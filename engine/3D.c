@@ -29,6 +29,10 @@ Transform *get_mesh_transform(void *mesh) {
 	return &((Mesh *) mesh)->transform;
 }
 
+void set_skybox_color(float r, float g, float b) {
+	glClearColor(r, g, b, 1.0f);
+}
+
 static GLuint load_shader(const char *shadercode, GLenum shader_type) {
 
 	GLuint shader = glCreateShader(shader_type);

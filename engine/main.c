@@ -41,8 +41,7 @@ int main() {
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 
-	// other opengl stuff
-	glClearColor(0.2f, 0.2f, 0.23f, 1.0f);
+	// lock mouse
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	// initialize static values used by 3D.c

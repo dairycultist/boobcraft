@@ -35,7 +35,7 @@ void *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader s
 void draw_mesh(const Transform *camera, const void *mesh);
 Transform *get_mesh_transform(void *mesh);
 // void set_skybox_texture()
-// void set_skybox_color()
+void set_skybox_color(float r, float g, float b);
 
 /*
  * game-side implemented
