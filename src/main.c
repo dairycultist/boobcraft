@@ -53,15 +53,15 @@ int main() {
 
 	// process events until window is closed
 	SDL_Event event;
-	int running = TRUE;
+	bool running = TRUE;
 
-	int up        = FALSE;
-	int down      = FALSE;
-	int left      = FALSE;
-	int right     = FALSE;
-	int trigger_1 = FALSE;
-	int trigger_2 = FALSE;
-	int menu      = FALSE;
+	bool up       = FALSE;
+	bool down     = FALSE;
+	bool left     = FALSE;
+	bool right    = FALSE;
+	bool action_1 = FALSE;
+	bool action_2 = FALSE;
+	bool menu     = FALSE;
 
 	while (running) {
 
@@ -88,9 +88,9 @@ int main() {
 					} else if (event.key.keysym.scancode == SDL_SCANCODE_DOWN) {
 						down = TRUE;
 					} else if (event.key.keysym.scancode == SDL_SCANCODE_Z) {
-						trigger_1 = TRUE;
+						action_1 = TRUE;
 					} else if (event.key.keysym.scancode == SDL_SCANCODE_X) {
-						trigger_2 = TRUE;
+						action_2 = TRUE;
 					} else if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
 						menu = TRUE;
 					}
@@ -107,15 +107,15 @@ int main() {
 					} else if (event.key.keysym.scancode == SDL_SCANCODE_DOWN) {
 						down = FALSE;
 					} else if (event.key.keysym.scancode == SDL_SCANCODE_Z) {
-						trigger_1 = FALSE;
+						action_1 = FALSE;
 					} else if (event.key.keysym.scancode == SDL_SCANCODE_X) {
-						trigger_2 = FALSE;
+						action_2 = FALSE;
 					}
 				}
 			}
 		}
 
-		process(up, down, left, right, trigger_1, trigger_2, menu);
+		process(up, down, left, right, action_1, action_2, menu);
 		menu = FALSE; // automatically goes back after one frame
 
 		SDL_GL_SwapWindow(window);

@@ -38,7 +38,7 @@ void on_terminate() {
 	free(sky);
 }
 
-void process(bool up, bool down, bool left, bool right, bool trigger_1, bool trigger_2, bool menu) {
+void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool menu) {
 
 	if (menu) {
 		printf("Menu!\n");
@@ -60,9 +60,9 @@ void process(bool up, bool down, bool left, bool right, bool trigger_1, bool tri
 		camera->x -= sin(camera->yaw) * 0.1;
 	}
 
-	if (trigger_1) {
+	if (action_1) {
 		camera->yaw -= 0.1;
-	} else if (trigger_2) {
+	} else if (action_2) {
 		camera->yaw += 0.1;
 	}
 

@@ -41,4 +41,4 @@ Transform *get_mesh_transform(void *mesh);
 char *get_title();
 void on_start();
 void on_terminate();
-void process(bool up, bool down, bool left, bool right, bool trigger_1, bool trigger_2, bool menu);
+void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool menu);
