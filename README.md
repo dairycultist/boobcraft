@@ -1,5 +1,16 @@
 # boobcraft (working title!!)
 
+Simple 3D engine/framework written in C + OpenGL for retro singleplayer games.
+
+| Specs      |                                        |
+|------------|----------------------------------------|
+| Resolution | 400x240                                |
+| Framerate  | 30fps                                  |
+| Camera     | 40°, 0.01-100units                     |
+| Input      | D-pad, 2 action buttons, 1 menu button |
+
+## Installation
+
 ```
 brew install sdl2
 brew install glew
@@ -8,23 +19,13 @@ cd boobcraft
 make run
 ```
 
-simple 3D engine/framework written in C + OpenGL
-
-3DS vibes. or HL vibes idk
+## References
 
 the game programmer doesn't even have to think about OpenGL and all that; it's all handled by the engine!
 
 Making a 3D game (moreso engine...) like it's 1998(ish). Minimal and lightweight. Trying to use only snake case and failing.
 
-im not adding multiplayer
-
-| Specs      |                    |
-|------------|--------------------|
-| Resolution | 400x240            |
-| Framerate  | 30fps              |
-| Camera     | 40°, 0.01-100units |
-
-### References
+3DS vibes. or HL vibes idk
 
 [Miku model used for testing](https://sketchfab.com/3d-models/hatsune-miku-low-poly-6668784e9dfa46ba92bc28f85d8154e5)
 
