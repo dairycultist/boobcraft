@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include "../engine/engine.h"
 
 Transform *camera;
@@ -18,15 +17,14 @@ char *get_title() {
 void on_start() {
 
 	camera = calloc(sizeof(Transform), 1);
+	camera->z = 5;
 
 	mesh1 = import_mesh("example_game/res/miku.obj", "example_game/res/miku.ppm", MESH_SHADED);
 	mesh2 = import_mesh("example_game/res/block.obj", "example_game/res/block.ppm", MESH_SHADED);
 	sky = import_mesh("example_game/res/sky.obj", "example_game/res/sky.ppm", MESH_SKY);
 
-	get_mesh_transform(mesh1)->z = -2.0;
-	get_mesh_transform(mesh1)->yaw = M_PI * -0.2;
+	get_mesh_transform(mesh1)->yaw = 3.14 * -0.2;
 
-	get_mesh_transform(mesh2)->z = -2.0;
 	get_mesh_transform(mesh2)->y = -2.3;
 }
 
@@ -45,25 +43,21 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 	}
 
 	if (left) {
-		camera->z -= sin(camera->yaw) * 0.1;
-		camera->x -= cos(camera->yaw) * 0.1;
+		get_mesh_transform(mesh1)->x -= 0.1;
 	} else if (right) {
-		camera->z += sin(camera->yaw) * 0.1;
-		camera->x += cos(camera->yaw) * 0.1;
+		get_mesh_transform(mesh1)->x += 0.1;
 	}
 
 	if (up) {
-		camera->z -= cos(camera->yaw) * 0.1;
-		camera->x += sin(camera->yaw) * 0.1;
+		get_mesh_transform(mesh1)->z -= 0.1;
 	} else if (down) {
-		camera->z += cos(camera->yaw) * 0.1;
-		camera->x -= sin(camera->yaw) * 0.1;
+		get_mesh_transform(mesh1)->z += 0.1;
 	}
 
 	if (action_1) {
-		camera->yaw -= 0.1;
+		get_mesh_transform(mesh1)->yaw += 0.1;
 	} else if (action_2) {
-		camera->yaw += 0.1;
+		get_mesh_transform(mesh1)->yaw -= 0.1;
 	}
 
 	draw_mesh(camera, sky);
