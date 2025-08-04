@@ -45,23 +45,25 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 	}
 
 	if (left) {
-		get_mesh_transform(mesh1)->x -= 0.1;
+		// get_mesh_transform(mesh1)->x -= 0.1;
+		camera->yaw -= 0.05;
 	} else if (right) {
-		get_mesh_transform(mesh1)->x += 0.1;
+		// get_mesh_transform(mesh1)->x += 0.1;
+		camera->yaw += 0.05;
 	}
 
 	if (up) {
-		get_mesh_transform(mesh1)->z -= 0.1;
+		// get_mesh_transform(mesh1)->z -= 0.1;
+		camera->pitch -= 0.05;
 	} else if (down) {
-		get_mesh_transform(mesh1)->z += 0.1;
+		// get_mesh_transform(mesh1)->z += 0.1;
+		camera->pitch += 0.05;
 	}
 
 	if (action_1) {
 		get_mesh_transform(mesh1)->yaw += 0.1;
-		camera->yaw -= 0.02;
 	} else if (action_2) {
 		get_mesh_transform(mesh1)->yaw -= 0.1;
-		camera->yaw += 0.02;
 	}
 
 	draw_mesh(camera, sky);
