@@ -3,6 +3,7 @@
 
 #define ENGINE_DEFINED
 
+typedef char bool;
 #define TRUE 1
 #define FALSE 0
 
@@ -39,4 +40,4 @@ void on_start();
 
 void on_terminate();
 
-void process(int up, int down, int left, int right, int trigger_1, int trigger_2);
+void process(bool up, bool down, bool left, bool right, bool trigger_1, bool trigger_2, bool menu);

@@ -62,6 +62,7 @@ int main() {
 	int right     = FALSE;
 	int trigger_1 = FALSE;
 	int trigger_2 = FALSE;
+	int menu      = FALSE;
 
 	while (running) {
 
@@ -91,6 +92,8 @@ int main() {
 						trigger_1 = TRUE;
 					} else if (event.key.keysym.scancode == SDL_SCANCODE_X) {
 						trigger_2 = TRUE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
+						menu = TRUE;
 					}
 				}
 
@@ -113,7 +116,8 @@ int main() {
 			}
 		}
 
-		process(up, down, left, right, trigger_1, trigger_2);
+		process(up, down, left, right, trigger_1, trigger_2, menu);
+		menu = FALSE; // automatically goes back after one frame
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1000 / 30);
