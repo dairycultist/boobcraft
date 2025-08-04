@@ -37,6 +37,10 @@ void on_terminate() {
 
 void process(bool up, bool down, bool left, bool right, bool trigger_1, bool trigger_2, bool menu) {
 
+	if (menu) {
+		printf("Menu!\n");
+	}
+
 	if (left) {
 		camera->z -= sin(camera->yaw) * 0.1;
 		camera->x -= cos(camera->yaw) * 0.1;

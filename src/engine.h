@@ -27,17 +27,18 @@ typedef struct {
 
 #endif
 
-// need to include all engine-side implemented stuff so the game-side can correctly call those upon linkage
+/*
+ * engine-side implemented
+ * game-side will reference these headers upon linkage
+ */
 void *import_mesh(const char *obj_path, const char *ppm_path, const MeshShader shader);
 void draw_mesh(const Transform *camera, const void *mesh);
-
 Transform *get_mesh_transform(void *mesh);
 
-// game-side implemented
+/*
+ * game-side implemented
+ */
 char *get_title();
-
 void on_start();
-
 void on_terminate();
-
 void process(bool up, bool down, bool left, bool right, bool trigger_1, bool trigger_2, bool menu);
