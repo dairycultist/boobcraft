@@ -1,4 +1,7 @@
 
+#define TRUE 1
+#define FALSE 0
+
 // need to include all engine-side implemented stuff so the game-side can correctly call those upon linkage
 
 

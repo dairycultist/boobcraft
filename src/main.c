@@ -2,6 +2,7 @@
 #include "../GLEW/glew.h"
 #include <SDL2/SDL.h>
 
+#include "engine.h"
 #include "util.c"
 #include "3D.c"
 #include "game.c"
@@ -57,7 +58,7 @@ int main() {
 
 			if (event.type == SDL_QUIT) {
 				running = FALSE;
-			} else if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+			} else if (event.type == SDL_KEYDOWN && event.key.repeat == 0 && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
 				SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
 			} else {
 				process_event(event);
