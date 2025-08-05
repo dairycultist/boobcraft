@@ -16,7 +16,8 @@ static GLfloat proj_matrix[4][4] = {
 typedef enum {
 
   MESH_SHADED,
-  MESH_SKY
+  MESH_SKY,
+  MESH_SPRITE // 2D
 
 } MeshType;
 
@@ -26,11 +27,12 @@ typedef enum {
 // generic struct for all types of mesh (2D, 3D, sky, etc)
 typedef struct {
 
+	MeshType type;
+
 	Transform transform;
 
 	GLuint vertex_array; // "VAO"
 	uint vertex_count;
-	MeshType shader;
 	GLuint texture;
 
 } Mesh;
@@ -242,7 +244,7 @@ void *import_mesh(const char *obj_path, const char *ppm_path) {
 	mesh->transform.yaw 	= 0.0f;
 	mesh->vertex_array = vertex_array;
 	mesh->vertex_count = vertex_count;
-	mesh->shader = MESH_SHADED;
+	mesh->type = MESH_SHADED;
 	mesh->texture = texture;
 
 	return mesh;
@@ -346,10 +348,14 @@ void *make_sky_mesh(const char *ppm_path) {
 	mesh->transform.yaw 	= 0.0f;
 	mesh->vertex_array = vertex_array;
 	mesh->vertex_count = 36;
-	mesh->shader = MESH_SKY;
+	mesh->type = MESH_SKY;
 	mesh->texture = texture;
 
 	return mesh;
+}
+
+void *make_sprite_mesh() {
+	return NULL;
 }
 
 void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) {
@@ -450,7 +456,7 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 	glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
 	// do different stuff depending on which shader a mesh uses
-	if (mesh->shader == MESH_SHADED) {
+	if (mesh->type == MESH_SHADED) {
 
 		// model matrix (converts from model space to world space)
 		generate_rotation_matrices(
@@ -502,7 +508,7 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 		glUniformMatrix4fv(glGetUniformLocation(shader_program_shaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(shader_program_shaded, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
 
-	} else if (mesh->shader == MESH_SKY) {
+	} else if (mesh->type == MESH_SKY) {
 
 		// view matrix (converts from world space to view space, aka accounts for camera transformations)
 		// must apply translations before rotations this time, unlike model matrix!
@@ -521,6 +527,14 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 
 	// draw
 	glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_count);
+}
+
+// TODO proper OpenGL-compliant freeing of meshes
+void free_mesh(void *void_mesh) {
+
+	Mesh *mesh = (Mesh *) void_mesh;
+
+	free(mesh);
 }
 
 void initialize_3D_static_values() {

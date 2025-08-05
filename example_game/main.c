@@ -33,9 +33,9 @@ void on_start() {
 void on_terminate() {
 
 	free(camera);
-	free(mesh1);
-	free(mesh2);
-	free(sky);
+	free_mesh(mesh1);
+	free_mesh(mesh2);
+	free_mesh(sky);
 }
 
 void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool menu) {

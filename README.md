@@ -23,7 +23,6 @@ make run
 
 - put 2D logic in render.c
 - pixel-perfect GUI sprite mesh creation
-- proper OpenGL-compliant freeing of meshes
 - function to retexture a mesh
 - add a factory function for creating text meshes, which are rendered through the existing render_mesh function
 
