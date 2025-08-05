@@ -18,15 +18,19 @@ typedef enum {
   MESH_SHADED,
   MESH_SKY
 
-} MeshShader;
+} MeshType;
 
+// TODO render an image to the screen (remember to disable depth writing!)
+// TODO create a simple spritemap for text
+
+// generic struct for all types of mesh (2D, 3D, sky, etc)
 typedef struct {
 
 	Transform transform;
 
 	GLuint vertex_array; // "VAO"
 	uint vertex_count;
-	MeshShader shader;
+	MeshType shader;
 	GLuint texture;
 
 } Mesh;

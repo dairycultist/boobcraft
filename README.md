@@ -19,6 +19,14 @@ cd boobcraft
 make run
 ```
 
+## TO-DO
+
+- put 2D logic in render.c
+- pixel-perfect GUI sprite mesh creation
+- proper OpenGL-compliant freeing of meshes
+- function to retexture a mesh
+- add a factory function for creating text meshes, which are rendered through the existing render_mesh function
+
 ## References
 
 the game programmer doesn't even have to think about OpenGL and all that; it's all handled by the engine!
