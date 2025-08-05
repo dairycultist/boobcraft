@@ -1,5 +1,7 @@
 #include "util.c"
 
+// this file handles both 2D and 3D mesh data creation, rendering, manipulation, and destruction
+
 static GLuint shader_program_shaded;
 static GLuint shader_program_sky;
 
@@ -358,6 +360,10 @@ void *make_sprite_mesh() {
 	return NULL;
 }
 
+void *make_text_sprite_mesh() {
+	return NULL;
+}
+
 void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) {
 
 	// a (rightmost) is applied first, then b
@@ -455,7 +461,7 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 	glBindVertexArray(mesh->vertex_array);
 	glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
-	// do different stuff depending on which shader a mesh uses
+	// do different stuff depending on mesh type (informing what shaders, matrices, etc to use)
 	if (mesh->type == MESH_SHADED) {
 
 		// model matrix (converts from model space to world space)
@@ -523,6 +529,9 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 		// load the shader program and the uniforms we just calculated
 		glUseProgram(shader_program_sky);
 		glUniformMatrix4fv(glGetUniformLocation(shader_program_sky, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
+
+	} else if (mesh->type == MESH_SPRITE) {
+
 	}
 
 	// draw
