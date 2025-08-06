@@ -344,6 +344,7 @@ void *make_sprite_mesh(const char *ppm_path) {
 	float w = width * 2 / 400.;
 	float h = height * 2 / 240.;
 
+	// sprite mesh is now initialized with bottom left corner in center, and moved to screen bottom left corner by transformations
 	const float data[] = {
 		0, 0, 1,	0, 0,
 		0, h, 1,	0, 1,
@@ -529,12 +530,14 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 
 	} else if (mesh->type == MESH_SPRITE) {
 
-		// ignore view matrix for now
 		memset(position_matrix, 0, sizeof(GLfloat) * 16);
 		position_matrix[0][0] = 1;
 		position_matrix[1][1] = 1;
 		position_matrix[2][2] = 1;
 		position_matrix[3][3] = 1;
+
+		position_matrix[3][0] = mesh->transform.x / 200 - 1; // translation (converted from screen [0,400]x[0,240] to UV [-1,1]x[-1,1])
+		position_matrix[3][1] = mesh->transform.y / 120 - 1;
 
 		// load the shader program and the uniforms we just calculated
 		glUseProgram(shader_program_unshaded);

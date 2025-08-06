@@ -66,8 +66,10 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 
 	if (action_1) {
 		get_mesh_transform(mesh1)->yaw += 0.1;
+		get_mesh_transform(sprite)->x -= 10;
 	} else if (action_2) {
 		get_mesh_transform(mesh1)->yaw -= 0.1;
+		get_mesh_transform(sprite)->x += 10;
 	}
 
 	draw_mesh(camera, sky);
