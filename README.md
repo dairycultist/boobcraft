@@ -22,6 +22,7 @@ make run
 ## TO-DO
 
 - function to retexture a mesh
+- texture clip transparency
 
 ## References
 

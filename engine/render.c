@@ -71,15 +71,12 @@ static void get_ppm_resolution(const char *ppm_path, int *width, int *height) {
 
 	FILE *file = fopen(ppm_path, "r");
 
-	// read header
-	{
-		char line[1024];
+	char line[1024];
 
-		fgets(line, 1024, file);
-		fgets(line, 1024, file);
-		sscanf(line, "%d %d", width, height);
-		fgets(line, 1024, file);
-	}
+	// read header
+	fgets(line, 1024, file);
+	fgets(line, 1024, file);
+	sscanf(line, "%d %d", width, height);
 
 	fclose(file);
 }

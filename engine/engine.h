@@ -26,7 +26,7 @@ typedef struct {
  */
 void set_skybox_color(float r, float g, float b);
 
-void *import_mesh(const char *obj_path, const char *ppm_path); // eventually will be replaced by make_generic_mesh or something
+void *import_mesh(const char *obj_path, const char *ppm_path); // eventually will be replaced by make_generic_mesh or something, taking raw data instead of a filepath
 void *make_sky_mesh(const char *ppm_path);
 void *make_sprite_mesh(const char *ppm_path);
 
