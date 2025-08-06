@@ -67,7 +67,7 @@ static GLuint load_shader_program(const char *vertex_shadercode, const char *fra
 	return shader_program;
 }
 
-void load_ppm(GLenum target, const char *ppm_path) {
+static void import_ppm(GLenum target, const char *ppm_path) {
 
 	// by default, OpenGL reads texture data with a 4-byte row alignment: https://stackoverflow.com/questions/72177553/why-is-gl-unpack-alignment-default-4
 	// it's more efficient, but means this function cannot properly read images whose dimensions aren't a multiple of 4 correctly (fix is simple tho)
@@ -160,7 +160,7 @@ static void *mesh_builder(const float data[], const int byte_count, const int ve
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	// write texture data
-	load_ppm(GL_TEXTURE_2D, ppm_path);
+	import_ppm(GL_TEXTURE_2D, ppm_path);
 
 	// create final mesh object to return
 	Mesh *mesh = malloc(sizeof(Mesh));
