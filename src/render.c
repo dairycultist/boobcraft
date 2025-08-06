@@ -366,34 +366,37 @@ void *make_text_sprite_mesh(const char *text, const char *ppm_path, const int gl
 	float w = glyph_width * 2 / 400.;
 	float h = glyph_height * 2 / 240.;
 
-	float w_off = 0, h_off = 0;
+	float x = 0, y = 0;
 
-	float uw = glyph_width / (float) width;
-	float uh = glyph_height / (float) height;
+	float uv_w = glyph_width / (float) width;
+	float uv_h = glyph_height / (float) height;
 
-	float uw_off, uh_off;
+	float uv_x, uv_y;
 
 	int i;
 
 	for (i = 0; text[i]; i++) {
 
-		uw_off = i * uw;
-		uh_off = 0;
+		if (text[i] != ' ') {
 
-		const float data[] = {
-			w_off, 		h_off, 		1,		uw_off, 		uh_off,
-			w_off, 		h_off + h, 	1,		uw_off, 		uh_off + uh,
-			w_off + w, 	h_off + h, 	1,		uw_off + uw, 	uh_off + uh,
+			uv_x = ((int) text[i] - 65) * uv_w;
+			uv_y = 0;
 
-			w_off, 		h_off, 		1,		uw_off, 		uh_off,
-			w_off + w, 	h_off + h, 	1,		uw_off + uw, 	uh_off + uh,
-			w_off + w, 	h_off, 		1,		uw_off + uw, 	uh_off,
-		};
+			const float data[] = {
+				x, 		y, 		1,		uv_x, 			uv_y,
+				x, 		y + h, 	1,		uv_x, 			uv_y + uv_h,
+				x + w, 	y + h, 	1,		uv_x + uv_w, 	uv_y + uv_h,
 
-		append_ezarray(&vertices, (void *) data, sizeof(float) * 5 * 6);
-		vertex_count += 6;
+				x, 		y, 		1,		uv_x, 			uv_y,
+				x + w, 	y + h, 	1,		uv_x + uv_w, 	uv_y + uv_h,
+				x + w, 	y, 		1,		uv_x + uv_w, 	uv_y,
+			};
 
-		w_off += w;
+			append_ezarray(&vertices, (void *) data, sizeof(float) * 5 * 6);
+			vertex_count += 6;
+		}
+
+		x += w;
 	}
 
 	return mesh_builder((const float *) vertices.data, vertices.byte_count, vertex_count, ppm_path, MESH_SPRITE);
