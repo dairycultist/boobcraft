@@ -8,7 +8,9 @@ Simple 3D framework written in C + OpenGL for retro singleplayer games.
 | Framerate  | 30fps                                  |
 | Camera     | 40°, 0.01-100units                     |
 | Input      | D-pad, 2 action buttons, 1 menu button |
-| Color      | -                                      |
+| Color      | 24 bit*, full black is transparent     |
+
+_*May quantize later._
 
 ## Installation
 
