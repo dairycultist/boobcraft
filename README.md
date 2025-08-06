@@ -1,6 +1,6 @@
 # boobcraft (working title!!)
 
-Simple 3D engine/framework written in C + OpenGL for retro singleplayer games.
+Simple 3D framework written in C + OpenGL for retro singleplayer games.
 
 | Specs      |                                        |
 |------------|----------------------------------------|
@@ -8,6 +8,7 @@ Simple 3D engine/framework written in C + OpenGL for retro singleplayer games.
 | Framerate  | 30fps                                  |
 | Camera     | 40°, 0.01-100units                     |
 | Input      | D-pad, 2 action buttons, 1 menu button |
+| Color      | -                                      |
 
 ## Installation
 
@@ -21,16 +22,15 @@ make run
 
 ## TO-DO
 
-- function to retexture a mesh
-- texture clip transparency
+- make meshes "singletons," requiring an external transform to be rendered (may be expanded to also externalize the texture, unsure yet)
+- texture clip transparency (discard any fully black pixels in unshaded)
+- switch to opengl 1.1 for minimalism (and comparability to 3DS/HL1)
 
 ## References
 
-the game programmer doesn't even have to think about OpenGL and all that; it's all handled by the engine!
+the game programmer doesn't even have to think about OpenGL and all that; it's all handled by the engine! abstraction!
 
-Making a 3D game (moreso engine...) like it's 1998(ish). Minimal and lightweight. Trying to use only snake case and failing.
-
-3DS vibes. or HL vibes idk
+Minimal and lightweight. Trying to use only snake case and failing.
 
 [Miku model used for testing](https://sketchfab.com/3d-models/hatsune-miku-low-poly-6668784e9dfa46ba92bc28f85d8154e5)
 
