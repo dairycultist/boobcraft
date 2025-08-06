@@ -35,9 +35,10 @@ void on_start() {
 void on_terminate() {
 
 	free(camera);
+
+	free_mesh(sky);
 	free_mesh(mesh1);
 	free_mesh(mesh2);
-	free_mesh(sky);
 	free_mesh(sprite);
 }
 

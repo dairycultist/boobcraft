@@ -67,6 +67,23 @@ static GLuint load_shader_program(const char *vertex_shadercode, const char *fra
 	return shader_program;
 }
 
+static void get_ppm_resolution(const char *ppm_path, int *width, int *height) {
+
+	FILE *file = fopen(ppm_path, "r");
+
+	// read header
+	{
+		char line[1024];
+
+		fgets(line, 1024, file);
+		fgets(line, 1024, file);
+		sscanf(line, "%d %d", width, height);
+		fgets(line, 1024, file);
+	}
+
+	fclose(file);
+}
+
 static void import_ppm(GLenum target, const char *ppm_path) {
 
 	// by default, OpenGL reads texture data with a 4-byte row alignment: https://stackoverflow.com/questions/72177553/why-is-gl-unpack-alignment-default-4
@@ -321,13 +338,23 @@ void *make_sky_mesh(const char *ppm_path) {
 
 void *make_sprite_mesh(const char *ppm_path) {
 
+	int width, height;
+	get_ppm_resolution(ppm_path, &width, &height);
+
+	float w = width * 2 / 400.;
+	float h = height * 2 / 240.;
+
 	const float data[] = {
-		-1, -1, 1,	0, 0,
-		-1, 1, 1,	0, 1,
-		1, 1, 1,	1, 1,
+		0, 0, 1,	0, 0,
+		0, h, 1,	0, 1,
+		w, h, 1,	1, 1,
+
+		0, 0, 1,	0, 0,
+		w, h, 1,	1, 1,
+		w, 0, 1,	1, 0,
 	};
 	
-	return mesh_builder((const float *) data, sizeof(float) * 5 * 3, 3, ppm_path, MESH_SPRITE);
+	return mesh_builder((const float *) data, sizeof(float) * 5 * 6, 6, ppm_path, MESH_SPRITE);
 }
 
 void *make_text_sprite_mesh() {
