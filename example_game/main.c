@@ -30,6 +30,9 @@ void on_start() {
 	get_mesh_transform(mesh1)->yaw = 3.14 * -0.2;
 
 	get_mesh_transform(mesh2)->y = -2.3;
+
+	get_mesh_transform(sprite)->x = 60;
+	get_mesh_transform(sprite)->y = 60;
 }
 
 void on_terminate() {
@@ -66,10 +69,8 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 
 	if (action_1) {
 		get_mesh_transform(mesh1)->yaw += 0.1;
-		get_mesh_transform(sprite)->x -= 10;
 	} else if (action_2) {
 		get_mesh_transform(mesh1)->yaw -= 0.1;
-		get_mesh_transform(sprite)->x += 10;
 	}
 
 	draw_mesh(camera, sky);
