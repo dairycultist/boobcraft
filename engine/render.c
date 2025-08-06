@@ -101,6 +101,82 @@ void load_ppm(GLenum target, const char *ppm_path) {
 	glTexImage2D(target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 }
 
+static void *mesh_builder(const float data[], const int bytecount, const int vertcount, const char *ppm_path, MeshType type) {
+
+	// make vertex array
+	GLuint vertex_array;
+	glGenVertexArrays(1, &vertex_array);
+	glBindVertexArray(vertex_array);
+
+	// make vertex buffer (stored by vertex_array)
+	GLuint vertexBuffer;
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);					// make it the active buffer
+	glBufferData(GL_ARRAY_BUFFER, bytecount, data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
+
+	// link active vertex data and shader attributes (for MESH_SHADED)
+	if (type == MESH_SHADED) {
+
+		GLint pos_attrib = glGetAttribLocation(shader_program_shaded, "position");
+		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
+		glEnableVertexAttribArray(pos_attrib); // requires a VAO to be bound
+
+		GLint normal_attrib = glGetAttribLocation(shader_program_shaded, "normal");
+		glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 3));
+		glEnableVertexAttribArray(normal_attrib);
+
+		GLint uv_attrib = glGetAttribLocation(shader_program_shaded, "UV");
+		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
+		glEnableVertexAttribArray(uv_attrib);
+
+	} else if (type == MESH_SKY || type == MESH_SPRITE) {
+
+		GLint pos_attrib = glGetAttribLocation(shader_program_unshaded, "position");
+		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+		glEnableVertexAttribArray(pos_attrib);
+
+		GLint uv_attrib = glGetAttribLocation(shader_program_unshaded, "UV");
+		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid *) (sizeof(float) * 3));
+		glEnableVertexAttribArray(uv_attrib);
+
+	}
+
+	// debind vertex array
+	glBindVertexArray(0);
+
+	// create texture object
+	GLuint texture;
+	glGenTextures(1, &texture);
+
+	// bind texture (to active texture 2D)
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// wrap repeat
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// filter linear
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// write texture data
+	load_ppm(GL_TEXTURE_2D, ppm_path);
+
+	// create final mesh object to return
+	Mesh *mesh = malloc(sizeof(Mesh));
+	mesh->transform.x 		= 0.0f;
+	mesh->transform.y 		= 0.0f;
+	mesh->transform.z 		= 0.0f;
+	mesh->transform.pitch 	= 0.0f;
+	mesh->transform.yaw 	= 0.0f;
+	mesh->vertex_array = vertex_array;
+	mesh->vertex_count = vertcount;
+	mesh->type = type;
+	mesh->texture = texture;
+
+	return mesh;
+}
+
 // returns NULL on error
 void *import_mesh(const char *obj_path, const char *ppm_path) {
 
@@ -189,64 +265,7 @@ void *import_mesh(const char *obj_path, const char *ppm_path) {
 
 	fclose(file);
 
-	// make vertex array
-	GLuint vertex_array;
-	glGenVertexArrays(1, &vertex_array);
-	glBindVertexArray(vertex_array);
-
-	// make vertex buffer (stored by vertex_array)
-	GLuint vertexBuffer;
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);													// make it the active buffer
-	glBufferData(GL_ARRAY_BUFFER, composite_data.bytecount, composite_data.data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
-
-	// link active vertex data and shader attributes (for MESH_SHADED)
-	GLint pos_attrib = glGetAttribLocation(shader_program_shaded, "position");
-	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
-	glEnableVertexAttribArray(pos_attrib); // requires a VAO to be bound
-
-	GLint normal_attrib = glGetAttribLocation(shader_program_shaded, "normal");
-	glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 3));
-	glEnableVertexAttribArray(normal_attrib);
-
-	GLint uv_attrib = glGetAttribLocation(shader_program_shaded, "UV");
-	glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
-	glEnableVertexAttribArray(uv_attrib);
-
-	// debind vertex array
-	glBindVertexArray(0);
-
-	// create texture object
-	GLuint texture;
-	glGenTextures(1, &texture);
-
-	// bind texture (to active texture 2D)
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	// wrap repeat
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// filter linear
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	// write texture data
-	load_ppm(GL_TEXTURE_2D, ppm_path);
-
-	// create final mesh object to return
-	Mesh *mesh = malloc(sizeof(Mesh));
-	mesh->transform.x 		= 0.0f;
-	mesh->transform.y 		= 0.0f;
-	mesh->transform.z 		= 0.0f;
-	mesh->transform.pitch 	= 0.0f;
-	mesh->transform.yaw 	= 0.0f;
-	mesh->vertex_array = vertex_array;
-	mesh->vertex_count = vertex_count;
-	mesh->type = MESH_SHADED;
-	mesh->texture = texture;
-
-	return mesh;
+	return mesh_builder((const float *) composite_data.data, composite_data.bytecount, vertex_count, ppm_path, MESH_SHADED);
 }
 
 void *make_sky_mesh(const char *ppm_path) {
@@ -297,60 +316,7 @@ void *make_sky_mesh(const char *ppm_path) {
 		-50, -50, -50, 0.25, 0.25,
 	};
 
-	// make vertex array
-	GLuint vertex_array;
-	glGenVertexArrays(1, &vertex_array);
-	glBindVertexArray(vertex_array);
-
-	// make vertex buffer (stored by vertex_array)
-	GLuint vertexBuffer;
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);									// make it the active buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 5 * 36, data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
-
-	// link active vertex data and shader attributes (for MESH_SKY)
-	GLint pos_attrib = glGetAttribLocation(shader_program_unshaded, "position");
-	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
-	glEnableVertexAttribArray(pos_attrib);
-
-	GLint uv_attrib = glGetAttribLocation(shader_program_unshaded, "UV");
-	glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid *) (sizeof(float) * 3));
-	glEnableVertexAttribArray(uv_attrib);
-
-	// debind vertex array
-	glBindVertexArray(0);
-
-	// create texture object
-	GLuint texture;
-	glGenTextures(1, &texture);
-
-	// bind texture (to active texture 2D)
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	// wrap repeat
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// filter linear
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	// write texture data
-	load_ppm(GL_TEXTURE_2D, ppm_path);
-
-	// create final mesh object to return
-	Mesh *mesh = malloc(sizeof(Mesh));
-	mesh->transform.x 		= 0.0f;
-	mesh->transform.y 		= 0.0f;
-	mesh->transform.z 		= 0.0f;
-	mesh->transform.pitch 	= 0.0f;
-	mesh->transform.yaw 	= 0.0f;
-	mesh->vertex_array = vertex_array;
-	mesh->vertex_count = 36;
-	mesh->type = MESH_SKY;
-	mesh->texture = texture;
-
-	return mesh;
+	return mesh_builder((const float *) data, sizeof(float) * 5 * 36, 36, ppm_path, MESH_SKY);
 }
 
 void *make_sprite_mesh() {
@@ -536,11 +502,12 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 		position_matrix[2][2] = 1;
 		position_matrix[3][3] = 1;
 
+		// load the shader program and the uniforms we just calculated
 		glUseProgram(shader_program_unshaded);
 		glUniformMatrix4fv(glGetUniformLocation(shader_program_unshaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
 	}
 
-	// disable depth buffer testing/writing and backface culling for sprites ONLY
+	// for sprites ONLY - disable depth buffer testing/writing and backface culling
 	if (mesh->type == MESH_SPRITE) {
 
 		glDisable(GL_DEPTH_TEST);
@@ -549,7 +516,6 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 	} else {
 
 		glEnable(GL_DEPTH_TEST);
-
 		glEnable(GL_CULL_FACE);
 		glFrontFace(GL_CW);
 	}
