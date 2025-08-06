@@ -532,7 +532,12 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 
 	} else if (mesh->type == MESH_SPRITE) {
 
+		// ignore view matrix for now
 		memset(position_matrix, 0, sizeof(GLfloat) * 16);
+		position_matrix[0][0] = 1;
+		position_matrix[1][1] = 1;
+		position_matrix[2][2] = 1;
+		position_matrix[3][3] = 1;
 
 		glUseProgram(shader_program_unshaded);
 		glUniformMatrix4fv(glGetUniformLocation(shader_program_unshaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
@@ -550,7 +555,7 @@ void free_mesh(void *void_mesh) {
 	free(mesh);
 }
 
-void initialize_3D_static_values() {
+void initialize_shaders() {
 
 	// shader programs
 	shader_program_shaded = load_shader_program(

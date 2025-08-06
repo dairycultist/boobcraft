@@ -43,8 +43,8 @@ int main() {
 	// lock mouse
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
-	// initialize static values used by 3D.c
-	initialize_3D_static_values();
+	// initialize shaders
+	initialize_shaders();
 	
 	// let programmer initialize stuff
 	on_start();
