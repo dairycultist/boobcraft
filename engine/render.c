@@ -23,9 +23,6 @@ typedef enum {
 
 } MeshType;
 
-// TODO render an image to the screen (remember to disable depth writing!)
-// TODO create a simple spritemap for text
-
 // generic struct for all types of mesh (2D, 3D, sky, etc)
 typedef struct {
 
@@ -541,6 +538,20 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 
 		glUseProgram(shader_program_unshaded);
 		glUniformMatrix4fv(glGetUniformLocation(shader_program_unshaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
+	}
+
+	// disable depth buffer testing/writing and backface culling for sprites ONLY
+	if (mesh->type == MESH_SPRITE) {
+
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+
+	} else {
+
+		glEnable(GL_DEPTH_TEST);
+
+		glEnable(GL_CULL_FACE);
+		glFrontFace(GL_CW);
 	}
 
 	// draw

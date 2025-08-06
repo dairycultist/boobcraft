@@ -33,13 +33,6 @@ int main() {
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	// enable depth buffer
-	glEnable(GL_DEPTH_TEST);
-
-	// enable backface culling
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CW);
-
 	// lock mouse
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
