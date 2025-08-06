@@ -338,13 +338,14 @@ void *make_sky_mesh(const char *ppm_path) {
 
 void *make_sprite_mesh(const char *ppm_path) {
 
+	// sprite mesh is pixel-perfect - every pixel in the texture lines up with one on the screen
 	int width, height;
 	get_ppm_resolution(ppm_path, &width, &height);
 
 	float w = width * 2 / 400.;
 	float h = height * 2 / 240.;
 
-	// sprite mesh is now initialized with bottom left corner in center, and moved to screen bottom left corner by transformations
+	// sprite mesh is initialized with bottom left corner in center, and moved to screen bottom left corner by transformations
 	const float data[] = {
 		0, 0, 1,	0, 0,
 		0, h, 1,	0, 1,

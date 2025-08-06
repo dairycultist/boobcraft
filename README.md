@@ -21,7 +21,6 @@ make run
 
 ## TO-DO
 
-- pixel-perfect GUI sprite mesh creation
 - function to retexture a mesh
 
 ## References
