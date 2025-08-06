@@ -105,9 +105,8 @@ static void import_ppm(GLenum target, const char *ppm_path) {
 	// ppms store pixels starting from the top left, but opengl wants them starting from the bottom left, so you need to flip the "layers"
 	int i;
 
-	for (i = (width - 1) * height * 3; i > 0; i -= width * 3) {
-		fread(pixels + i, 3, width, file);
-	}
+	for (i = height - 1; i >= 0; i--)
+		fread(pixels + i * width * 3, 3, width, file);
 
 	fclose(file);
 
