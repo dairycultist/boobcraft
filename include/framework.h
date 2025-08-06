@@ -29,6 +29,7 @@ void set_skybox_color(float r, float g, float b);
 void *import_mesh(const char *obj_path, const char *ppm_path); // eventually will be replaced by make_generic_mesh or something, taking raw data instead of a filepath
 void *make_sky_mesh(const char *ppm_path);
 void *make_sprite_mesh(const char *ppm_path);
+void *make_text_sprite_mesh(const char *text, const char *ppm_path, const int glyph_width, const int glyph_height);
 
 void draw_mesh(const Transform *camera, const void *void_mesh);
 Transform *get_mesh_transform(void *mesh);

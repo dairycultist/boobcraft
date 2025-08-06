@@ -355,8 +355,36 @@ void *make_sprite_mesh(const char *ppm_path) {
 	return mesh_builder((const float *) data, sizeof(float) * 5 * 6, 6, ppm_path, MESH_SPRITE);
 }
 
-void *make_text_sprite_mesh() {
-	return NULL;
+void *make_text_sprite_mesh(const char *text, const char *ppm_path, const int glyph_width, const int glyph_height) {
+	
+	EZArray vertices = {0};
+	int vertex_count = 0;
+
+	int width, height;
+	get_ppm_resolution(ppm_path, &width, &height);
+
+	float w = glyph_width * 2 / 400.;
+	float h = glyph_height * 2 / 240.;
+
+	float uw = glyph_width / (float) width;
+	float uh = glyph_height / (float) height;
+
+	{
+		const float data[] = {
+			0, 0, 1,	0, 0,
+			0, h, 1,	0, uh,
+			w, h, 1,	uw, uh,
+
+			0, 0, 1,	0, 0,
+			w, h, 1,	uw, uh,
+			w, 0, 1,	uw, 0,
+		};
+
+		append_ezarray(&vertices, (void *) data, sizeof(float) * 5 * 6);
+		vertex_count += 6;
+	}
+
+	return mesh_builder((const float *) vertices.data, vertices.byte_count, vertex_count, ppm_path, MESH_SPRITE);
 }
 
 void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) {
