@@ -101,7 +101,7 @@ void load_ppm(GLenum target, const char *ppm_path) {
 	glTexImage2D(target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 }
 
-static void *mesh_builder(const float data[], const int bytecount, const int vertcount, const char *ppm_path, MeshType type) {
+static void *mesh_builder(const float data[], const int byte_count, const int vertex_count, const char *ppm_path, MeshType type) {
 
 	// make vertex array
 	GLuint vertex_array;
@@ -112,7 +112,7 @@ static void *mesh_builder(const float data[], const int bytecount, const int ver
 	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);					// make it the active buffer
-	glBufferData(GL_ARRAY_BUFFER, bytecount, data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
+	glBufferData(GL_ARRAY_BUFFER, byte_count, data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 
 	// link active vertex data and shader attributes (for MESH_SHADED)
 	if (type == MESH_SHADED) {
@@ -170,7 +170,7 @@ static void *mesh_builder(const float data[], const int bytecount, const int ver
 	mesh->transform.pitch 	= 0.0f;
 	mesh->transform.yaw 	= 0.0f;
 	mesh->vertex_array = vertex_array;
-	mesh->vertex_count = vertcount;
+	mesh->vertex_count = vertex_count;
 	mesh->type = type;
 	mesh->texture = texture;
 
@@ -265,7 +265,7 @@ void *import_mesh(const char *obj_path, const char *ppm_path) {
 
 	fclose(file);
 
-	return mesh_builder((const float *) composite_data.data, composite_data.bytecount, vertex_count, ppm_path, MESH_SHADED);
+	return mesh_builder((const float *) composite_data.data, composite_data.byte_count, vertex_count, ppm_path, MESH_SHADED);
 }
 
 void *make_sky_mesh(const char *ppm_path) {
