@@ -25,7 +25,7 @@ void on_start() {
 	mesh1 = import_mesh("example_game/res/miku.obj", "example_game/res/miku.ppm");
 	mesh2 = import_mesh("example_game/res/block.obj", "example_game/res/block.ppm");
 	sky = make_sky_mesh("example_game/res/sky.ppm");
-	sprite = make_text_sprite_mesh("HELLO WORLD", "example_game/res/font.ppm", 6, 6);
+	sprite = make_text_sprite_mesh("HELLO WORLD\nNEW LINE", "example_game/res/font.ppm", 6, 7);
 
 	get_mesh_transform(mesh1)->yaw = 3.14 * -0.2;
 

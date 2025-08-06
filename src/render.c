@@ -377,7 +377,16 @@ void *make_text_sprite_mesh(const char *text, const char *ppm_path, const int gl
 
 	for (i = 0; text[i]; i++) {
 
-		if (text[i] != ' ') {
+		if (text[i] == ' ') {
+
+			x += w;
+
+		} else if (text[i] == '\n') {
+
+			x = 0;
+			y -= h;
+
+		} else {
 
 			uv_x = ((int) text[i] - 65) * uv_w;
 			uv_y = 0;
@@ -394,9 +403,9 @@ void *make_text_sprite_mesh(const char *text, const char *ppm_path, const int gl
 
 			append_ezarray(&vertices, (void *) data, sizeof(float) * 5 * 6);
 			vertex_count += 6;
-		}
 
-		x += w;
+			x += w;
+		}
 	}
 
 	return mesh_builder((const float *) vertices.data, vertices.byte_count, vertex_count, ppm_path, MESH_SPRITE);
