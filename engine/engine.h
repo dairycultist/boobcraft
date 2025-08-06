@@ -26,11 +26,11 @@ typedef struct {
  */
 void set_skybox_color(float r, float g, float b);
 
-void *import_mesh(const char *obj_path, const char *ppm_path);
+void *import_mesh(const char *obj_path, const char *ppm_path); // eventually will be replaced by make_generic_mesh or something
 void *make_sky_mesh(const char *ppm_path);
 // make_sprite_mesh
 
-void draw_mesh(const Transform *camera, const void *mesh);
+void draw_mesh(const Transform *camera, const void *void_mesh);
 Transform *get_mesh_transform(void *mesh);
 
 void free_mesh(void *void_mesh);

@@ -3,7 +3,7 @@
 // this file handles both 2D and 3D mesh data creation, rendering, manipulation, and destruction
 
 static GLuint shader_program_shaded;
-static GLuint shader_program_sky;
+static GLuint shader_program_unshaded;
 
 // perspective projection matrix (converts from view space to clip space)
 // hardcoded with FOV=40 aspect=1.666 near=0.01 far=100
@@ -312,11 +312,11 @@ void *make_sky_mesh(const char *ppm_path) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 5 * 36, data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
 
 	// link active vertex data and shader attributes (for MESH_SKY)
-	GLint pos_attrib = glGetAttribLocation(shader_program_sky, "position");
+	GLint pos_attrib = glGetAttribLocation(shader_program_unshaded, "position");
 	glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
 	glEnableVertexAttribArray(pos_attrib);
 
-	GLint uv_attrib = glGetAttribLocation(shader_program_sky, "UV");
+	GLint uv_attrib = glGetAttribLocation(shader_program_unshaded, "UV");
 	glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid *) (sizeof(float) * 3));
 	glEnableVertexAttribArray(uv_attrib);
 
@@ -527,11 +527,15 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 		mat4_mult(proj_matrix, position_matrix, position_matrix);
 
 		// load the shader program and the uniforms we just calculated
-		glUseProgram(shader_program_sky);
-		glUniformMatrix4fv(glGetUniformLocation(shader_program_sky, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
+		glUseProgram(shader_program_unshaded);
+		glUniformMatrix4fv(glGetUniformLocation(shader_program_unshaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
 
 	} else if (mesh->type == MESH_SPRITE) {
 
+		memset(position_matrix, 0, sizeof(GLfloat) * 16);
+
+		glUseProgram(shader_program_unshaded);
+		glUniformMatrix4fv(glGetUniformLocation(shader_program_unshaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
 	}
 
 	// draw
@@ -575,7 +579,7 @@ void initialize_3D_static_values() {
 		"}"
 	);
 
-	shader_program_sky = load_shader_program(
+	shader_program_unshaded = load_shader_program(
 		"#version 150 core\n"
 		"uniform mat4 position_matrix;"
 		"in vec3 position;"
