@@ -319,8 +319,15 @@ void *make_sky_mesh(const char *ppm_path) {
 	return mesh_builder((const float *) data, sizeof(float) * 5 * 36, 36, ppm_path, MESH_SKY);
 }
 
-void *make_sprite_mesh() {
-	return NULL;
+void *make_sprite_mesh(const char *ppm_path) {
+
+	const float data[] = {
+		-1, -1, 1,	0, 0,
+		-1, 1, 1,	0, 1,
+		1, 1, 1,	1, 1,
+	};
+	
+	return mesh_builder((const float *) data, sizeof(float) * 5 * 3, 3, ppm_path, MESH_SPRITE);
 }
 
 void *make_text_sprite_mesh() {

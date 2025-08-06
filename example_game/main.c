@@ -8,6 +8,7 @@ Transform *camera;
 void *mesh1;
 void *mesh2;
 void *sky;
+void *sprite;
 
 char *get_title() {
 
@@ -24,6 +25,7 @@ void on_start() {
 	mesh1 = import_mesh("example_game/res/miku.obj", "example_game/res/miku.ppm");
 	mesh2 = import_mesh("example_game/res/block.obj", "example_game/res/block.ppm");
 	sky = make_sky_mesh("example_game/res/sky.ppm");
+	sprite = make_sprite_mesh("example_game/res/block.ppm");
 
 	get_mesh_transform(mesh1)->yaw = 3.14 * -0.2;
 
@@ -36,6 +38,7 @@ void on_terminate() {
 	free_mesh(mesh1);
 	free_mesh(mesh2);
 	free_mesh(sky);
+	free_mesh(sprite);
 }
 
 void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool menu) {
@@ -69,4 +72,5 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 	draw_mesh(camera, sky);
 	draw_mesh(camera, mesh1);
 	draw_mesh(camera, mesh2);
+	draw_mesh(camera, sprite);
 }
