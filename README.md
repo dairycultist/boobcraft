@@ -23,7 +23,6 @@ make run
 ## TO-DO
 
 - make meshes "singletons," requiring an external transform to be rendered (may be expanded to also externalize the texture, unsure yet)
-- texture clip transparency (discard any fully black pixels in unshaded)
 - switch to opengl 1.1 for minimalism (and comparability to 3DS/HL1)
 
 ## References

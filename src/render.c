@@ -579,9 +579,9 @@ void initialize_shaders() {
 		"out vec3 normal_camera;"
 		"out vec2 frag_UV;"
 		"void main() {"
-			"gl_Position = position_matrix * vec4(position.xy, -position.z, 1.0);"// get final position
-			"normal_camera = (normal_matrix * vec4(normal, 1.0)).xyz;"// get final normal
-			"frag_UV = UV;"// pass along UV
+			"gl_Position = position_matrix * vec4(position.xy, -position.z, 1.0);" // get final position
+			"normal_camera = (normal_matrix * vec4(normal, 1.0)).xyz;" // get final normal
+			"frag_UV = UV;" // pass along UV
 		"}"
 		,
 		"#version 150 core\n"
@@ -602,8 +602,8 @@ void initialize_shaders() {
 		"in vec2 UV;"
 		"out vec2 frag_UV;"
 		"void main() {"
-			"gl_Position = position_matrix * vec4(position.xy, -position.z, 1.0);"// get final position
-			"frag_UV = UV;"// pass along UV
+			"gl_Position = position_matrix * vec4(position.xy, -position.z, 1.0);" // get final position
+			"frag_UV = UV;" // pass along UV
 		"}"
 		,
 		"#version 150 core\n"
@@ -612,6 +612,7 @@ void initialize_shaders() {
 		"out vec4 outColor;"
 		"void main() {"
 			"outColor = texture(tex, frag_UV);"
+			"if (outColor == vec4(0, 0, 0, 1)) { discard; }" // texture clip transparency (discard any fully black pixels in unshaded)
 		"}"
 	);
 }
