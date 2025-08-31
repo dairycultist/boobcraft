@@ -8,9 +8,9 @@ Simple 3D framework written in C + OpenGL for retro singleplayer games.
 | Framerate  | 30fps                                  |
 | Camera     | 40°, 0.01-100units                     |
 | Input      | D-pad, 2 action buttons, 1 menu button |
-| Color      | 24 bit*, full black is transparent     |
+| Color      | 24 bit, full black is transparent      |
 
-_*May quantize later._
+*I may remove some of the spec restrictions later to make the framework more generalized.*
 
 ## Installation
 
@@ -26,6 +26,7 @@ make run
 
 - make meshes "singletons," requiring an external transform to be rendered (may be expanded to also externalize the texture, unsure yet)
 - switch to opengl 1.1 for minimalism (and comparability to 3DS/HL1)
+- make a full-blown engine that recreates the technical and aesthetic aspects of games like the first Doom, Quake, and Half-Life
 
 ## References
 
