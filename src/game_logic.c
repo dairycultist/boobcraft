@@ -35,7 +35,7 @@ void on_start() {
 
 	mesh1_transform.yaw = 3.14 * -0.2;
 
-	sprite_transform.x = 400 / 2 - 64;
+	sprite_transform.x = 136;
 	sprite_transform.y = -20;
 }
 
@@ -69,6 +69,7 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 
 		if (left || right || up || down) {
 			move_time++;
+			sprite_transform.x = 136 + sin(move_time * 0.2) * 3;
 			sprite_transform.y = -20 + sin(move_time * 0.4) * 3;
 		}
 

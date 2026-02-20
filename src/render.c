@@ -385,16 +385,24 @@ Mesh *make_map_mesh(const char *ppm_path, tile* map, int w, int h) {
 		for (int x = 0; x < w * 2; x += 2) {
 		
 			float rect[] = {
+				// floor
 				x + 1, -1, z + 1, 0, 0, 1, 0, 0,
 				x - 1, -1, z - 1, 0, 0, 1, 1, 1,
 				x - 1, -1, z + 1, 0, 0, 1, 1, 0,
 				x + 1, -1, z + 1, 0, 0, 1, 0, 0,
 				x + 1, -1, z - 1, 0, 0, 1, 0, 1,
-				x - 1, -1, z - 1, 0, 0, 1, 1, 1
+				x - 1, -1, z - 1, 0, 0, 1, 1, 1,
+				// ceiling
+				x + 1, 1, z + 1, 0, 0, 1, 0, 0,
+				x - 1, 1, z + 1, 0, 0, 1, 1, 0,
+				x - 1, 1, z - 1, 0, 0, 1, 1, 1,
+				x + 1, 1, z + 1, 0, 0, 1, 0, 0,
+				x - 1, 1, z - 1, 0, 0, 1, 1, 1,
+				x + 1, 1, z - 1, 0, 0, 1, 0, 1
 			};
 
-			append_ezarray(&data, &rect, sizeof(float) * 8 * 6);
-			vertex_count += 6;
+			append_ezarray(&data, &rect, sizeof(float) * 8 * 12);
+			vertex_count += 12;
 		}
 	}
 
