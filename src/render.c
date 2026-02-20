@@ -376,57 +376,58 @@ Mesh *make_text_sprite_mesh(const char *text, const char *ppm_path, const int gl
 }
 
 // returns number of vertices added
-int mesh_wall(EZArray *data, const tile* map, int w, int h, int x, int z) {
+int mesh_wall(EZArray *data, const tile* map, int w, int h, int x, int y, int z, tile to_block) {
 
 	float data_wall[] = {
 		// +z
-		x + 0.5,	1,	z + 0.5,	0, 0, -1,	1,	1,
-		x - 0.5,	1,	z + 0.5,	0, 0, -1,	0,	1,
-		x - 0.5,	0,	z + 0.5,	0, 0, -1,	0,	0,
-		x + 0.5,	1,	z + 0.5,	0, 0, -1,	1,	1,
-		x - 0.5,	0,	z + 0.5,	0, 0, -1,	0,	0,
-		x + 0.5,	0,	z + 0.5,	0, 0, -1,	1,	0,
+		x + 0.5,	y + 1,	z + 0.5,	0, 0, -1,	1,	1,
+		x - 0.5,	y,		z + 0.5,	0, 0, -1,	0,	0,
+		x - 0.5,	y + 1,	z + 0.5,	0, 0, -1,	0,	1,
+		x + 0.5,	y + 1,	z + 0.5,	0, 0, -1,	1,	1,
+		x + 0.5,	y,		z + 0.5,	0, 0, -1,	1,	0,
+		x - 0.5,	y,		z + 0.5,	0, 0, -1,	0,	0,
 		// -z
-		x + 0.5,	1,	z - 0.5,	0, 0, 1,	0,	1,
-		x - 0.5,	0,	z - 0.5,	0, 0, 1,	1,	0,
-		x - 0.5,	1,	z - 0.5,	0, 0, 1,	1,	1,
-		x + 0.5,	1,	z - 0.5,	0, 0, 1,	0,	1,
-		x + 0.5,	0,	z - 0.5,	0, 0, 1,	0,	0,
-		x - 0.5,	0,	z - 0.5,	0, 0, 1,	1,	0,
+		x + 0.5,	y + 1,	z - 0.5,	0, 0, 1,	0,	1,
+		x - 0.5,	y + 1,	z - 0.5,	0, 0, 1,	1,	1,
+		x - 0.5,	y,		z - 0.5,	0, 0, 1,	1,	0,
+		x + 0.5,	y + 1,	z - 0.5,	0, 0, 1,	0,	1,
+		x - 0.5,	y,		z - 0.5,	0, 0, 1,	1,	0,
+		x + 0.5,	y,		z - 0.5,	0, 0, 1,	0,	0,
 		// +x
-		x + 0.5,	1,	z + 0.5,	-1, 0, 0,	0,	1,
-		x + 0.5,	0,	z - 0.5,	-1, 0, 0,	1,	0,
-		x + 0.5,	1,	z - 0.5,	-1, 0, 0,	1,	1,
-		x + 0.5,	1,	z + 0.5,	-1, 0, 0,	0,	1,
-		x + 0.5,	0,	z + 0.5,	-1, 0, 0,	0,	0,
-		x + 0.5,	0,	z - 0.5,	-1, 0, 0,	1,	0,
+		x + 0.5,	y + 1,	z + 0.5,	-1, 0, 0,	0,	1,
+		x + 0.5,	y + 1,	z - 0.5,	-1, 0, 0,	1,	1,
+		x + 0.5,	y,		z - 0.5,	-1, 0, 0,	1,	0,
+		x + 0.5,	y + 1,	z + 0.5,	-1, 0, 0,	0,	1,
+		x + 0.5,	y,		z - 0.5,	-1, 0, 0,	1,	0,
+		x + 0.5,	y,		z + 0.5,	-1, 0, 0,	0,	0,
 		// -x
-		x - 0.5,	1,	z + 0.5,	1, 0, 0,	1,	1,
-		x - 0.5,	1,	z - 0.5,	1, 0, 0,	0,	1,
-		x - 0.5,	0,	z - 0.5,	1, 0, 0,	0,	0,
-		x - 0.5,	1,	z + 0.5,	1, 0, 0,	1,	1,
-		x - 0.5,	0,	z - 0.5,	1, 0, 0,	0,	0,
-		x - 0.5,	0,	z + 0.5,	1, 0, 0,	1,	0,
+		x - 0.5,	y + 1,	z + 0.5,	1, 0, 0,	1,	1,
+		x - 0.5,	y,		z - 0.5,	1, 0, 0,	0,	0,
+		x - 0.5,	y + 1,	z - 0.5,	1, 0, 0,	0,	1,
+		x - 0.5,	y + 1,	z + 0.5,	1, 0, 0,	1,	1,
+		x - 0.5,	y,		z + 0.5,	1, 0, 0,	1,	0,
+		x - 0.5,	y,		z - 0.5,	1, 0, 0,	0,	0,
 	};
 
 	int vertex_count = 0;
 
-	if (z != h - 1 && map[x + (z - 1) * w] != TILE_WALL) {
+	// check if the tile to_block is in any of the four directions; if so, put a wall there
+	if (z == h - 1 || map[x + (z + 1) * w] == to_block) {
 
 		append_ezarray(data, data_wall, sizeof(float) * 8 * 6);
 		vertex_count += 6;
 	}
-	if (z != 0 && map[x + (z + 1) * w] != TILE_WALL) {
+	if (z == 0 || map[x + (z - 1) * w] == to_block) {
 
 		append_ezarray(data, data_wall + 8 * 6, sizeof(float) * 8 * 6);
 		vertex_count += 6;
 	}
-	if (x != w - 1 && map[(x + 1) + z * w] != TILE_WALL) {
+	if (x == w - 1 || map[(x + 1) + z * w] == to_block) {
 
 		append_ezarray(data, data_wall + 8 * 6 * 2, sizeof(float) * 8 * 6);
 		vertex_count += 6;
 	}
-	if (x != 0 && map[(x - 1) + z * w] != TILE_WALL) {
+	if (x == 0 || map[(x - 1) + z * w] == to_block) {
 
 		append_ezarray(data, data_wall + 8 * 6 * 3, sizeof(float) * 8 * 6);
 		vertex_count += 6;
@@ -446,9 +447,12 @@ Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
 
 			switch (map[x + z * w]) {
 		
-				case TILE_EMPTY:;
+				case TILE_EMPTY:
+					break;
+				
+				case TILE_FLOOR:;
 
-					float data_empty[] = {
+					float data_floor[] = {
 						// floor
 						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0, 0,
 						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 1, 1,
@@ -465,14 +469,10 @@ Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
 						x + 0.5, 1, z - 0.5, 0, 0, 0.5, 0, 1
 					};
 
-					append_ezarray(&data, &data_empty, sizeof(float) * 8 * 12);
+					append_ezarray(&data, &data_floor, sizeof(float) * 8 * 12);
 					vertex_count += 12;
-					break;
-				
-				case TILE_WALL:;
 
-					vertex_count += mesh_wall(&data, map, w, h, x, z);
-
+					vertex_count += mesh_wall(&data, map, w, h, x, 0, z, TILE_EMPTY);
 					break;
 
 				case TILE_LAVA:;
@@ -496,6 +496,10 @@ Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
 
 					append_ezarray(&data, &data_lava, sizeof(float) * 8 * 12);
 					vertex_count += 12;
+
+					vertex_count += mesh_wall(&data, map, w, h, x,  0, z, TILE_EMPTY);
+					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_EMPTY);
+					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_FLOOR);
 					break;
 			}
 		}

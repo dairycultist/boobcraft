@@ -7,7 +7,7 @@ typedef char bool;
 
 typedef unsigned char tile;
 #define TILE_EMPTY 0
-#define TILE_WALL 1
+#define TILE_FLOOR 1
 #define TILE_LAVA 2
 
 typedef struct {
