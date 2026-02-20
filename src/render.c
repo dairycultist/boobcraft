@@ -375,9 +375,30 @@ Mesh *make_text_sprite_mesh(const char *text, const char *ppm_path, const int gl
 	return mesh_builder((const float *) vertices.data, vertices.byte_count, vertex_count, ppm_path, MESH_UI);
 }
 
-Mesh *make_map_mesh(tile* map, int w, int h) {
+Mesh *make_map_mesh(const char *ppm_path, tile* map, int w, int h) {
 
-	return NULL; // TODO
+	EZArray data = {0};
+	int vertex_count = 0;
+
+	for (int z = 0; z < h * 2; z += 2) {
+
+		for (int x = 0; x < w * 2; x += 2) {
+		
+			float rect[] = {
+				x + 1, -1, z + 1, 0, 0, 1, 0, 0,
+				x - 1, -1, z - 1, 0, 0, 1, 1, 1,
+				x - 1, -1, z + 1, 0, 0, 1, 1, 0,
+				x + 1, -1, z + 1, 0, 0, 1, 0, 0,
+				x + 1, -1, z - 1, 0, 0, 1, 0, 1,
+				x - 1, -1, z - 1, 0, 0, 1, 1, 1
+			};
+
+			append_ezarray(&data, &rect, sizeof(float) * 8 * 6);
+			vertex_count += 6;
+		}
+	}
+
+	return mesh_builder((const float *) data.data, sizeof(float) * 8 * vertex_count, vertex_count, ppm_path, MESH_SHADED);
 }
 
 void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) {
