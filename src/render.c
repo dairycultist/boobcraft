@@ -457,52 +457,52 @@ Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
 
 					float data_floor[] = {
 						// floor
-						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0, 0,
-						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 1, 1,
-						x - 0.5, 0, z + 0.5, 0, 0, 0.5, 1, 0,
-						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0, 0,
-						x + 0.5, 0, z - 0.5, 0, 0, 0.5, 0, 1,
-						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 1, 1,
+						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0, 		0,
+						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 0.25, 	0.25,
+						x - 0.5, 0, z + 0.5, 0, 0, 0.5, 0.25, 	0,
+						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0, 		0,
+						x + 0.5, 0, z - 0.5, 0, 0, 0.5, 0, 		0.25,
+						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 0.25, 	0.25,
 						// ceiling
-						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 0,
-						x - 0.5, 1, z + 0.5, 0, 0, 0.5, 1, 0,
-						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 1, 1,
-						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 0,
-						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 1, 1,
-						x + 0.5, 1, z - 0.5, 0, 0, 0.5, 0, 1
+						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 		0,
+						x - 0.5, 1, z + 0.5, 0, 0, 0.5, 0.25, 	0,
+						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 0.25, 	0.25,
+						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 		0,
+						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 0.25, 	0.25,
+						x + 0.5, 1, z - 0.5, 0, 0, 0.5, 0, 		0.25
 					};
 
 					append_ezarray(&data, &data_floor, sizeof(float) * 8 * 12);
 					vertex_count += 12;
 
-					vertex_count += mesh_wall(&data, map, w, h, x, 0, z, TILE_EMPTY, 0, 1, 0, 1);
+					vertex_count += mesh_wall(&data, map, w, h, x, 0, z, TILE_EMPTY, 0, 0.25, 0, 0.25);
 					break;
 
 				case TILE_LAVA:;
 
 					float data_lava[] = {
 						// floor
-						x + 0.5, -0.2, z + 0.5, 0, 0, 0.5, 0, 0,
-						x - 0.5, -0.2, z - 0.5, 0, 0, 0.5, 1, 1,
-						x - 0.5, -0.2, z + 0.5, 0, 0, 0.5, 1, 0,
-						x + 0.5, -0.2, z + 0.5, 0, 0, 0.5, 0, 0,
-						x + 0.5, -0.2, z - 0.5, 0, 0, 0.5, 0, 1,
-						x - 0.5, -0.2, z - 0.5, 0, 0, 0.5, 1, 1,
+						x + 0.5, -0.2, z + 0.5, 0, 0, 0.5, 0, 		0.25,
+						x - 0.5, -0.2, z - 0.5, 0, 0, 0.5, 0.25, 	0.5,
+						x - 0.5, -0.2, z + 0.5, 0, 0, 0.5, 0.25, 	0.25,
+						x + 0.5, -0.2, z + 0.5, 0, 0, 0.5, 0, 		0.25,
+						x + 0.5, -0.2, z - 0.5, 0, 0, 0.5, 0, 		0.5,
+						x - 0.5, -0.2, z - 0.5, 0, 0, 0.5, 0.25, 	0.5,
 						// ceiling
-						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 0,
-						x - 0.5, 1, z + 0.5, 0, 0, 0.5, 1, 0,
-						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 1, 1,
-						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 0,
-						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 1, 1,
-						x + 0.5, 1, z - 0.5, 0, 0, 0.5, 0, 1
+						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 		0,
+						x - 0.5, 1, z + 0.5, 0, 0, 0.5, 0.25, 	0,
+						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 0.25, 	0.25,
+						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 		0,
+						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 0.25, 	0.25,
+						x + 0.5, 1, z - 0.5, 0, 0, 0.5, 0, 		0.25
 					};
 
 					append_ezarray(&data, &data_lava, sizeof(float) * 8 * 12);
 					vertex_count += 12;
 
-					vertex_count += mesh_wall(&data, map, w, h, x,  0, z, TILE_EMPTY, 0, 1, 0, 1);
-					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_EMPTY, 0, 1, 0, 1);
-					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_FLOOR, 0, 1, 0, 1);
+					vertex_count += mesh_wall(&data, map, w, h, x,  0, z, TILE_EMPTY, 0, 0.25, 0, 0.25);
+					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_EMPTY, 0, 0.25, 0, 0.25);
+					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_FLOOR, 0, 0.25, 0, 0.25);
 					break;
 			}
 		}
@@ -737,7 +737,7 @@ void initialize_shaders() {
 		"in vec2 frag_UV;"
 		"out vec4 outColor;"
 		"void main() {"
-			"float c = dot(normal_camera, vec3(0.7, 0.7, 0)) * 0.5 + 0.5;" // TODO use gl_Position.z to make further fragments darker
+			"float c = dot(normal_camera, vec3(0.7, 0.65, 0.3)) * 0.3 + 0.7;" // TODO use gl_Position.z to make further fragments darker
 			"outColor = texture(tex, frag_UV) * vec4(c, c, c, 1.0);"
 		"}"
 	);

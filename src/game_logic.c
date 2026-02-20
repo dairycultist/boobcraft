@@ -32,7 +32,7 @@ int move_time = 0;
 void on_start() {
 
 	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm");
-	mesh2 = make_map_mesh("res/block.ppm", &map[0][0], MAP_W, MAP_H);
+	mesh2 = make_map_mesh("res/tiles.ppm", &map[0][0], MAP_W, MAP_H);
 	sky = make_sky_mesh("res/sky.ppm");
 	sprite = make_sprite_mesh("res/gun.ppm"); //make_text_sprite_mesh("HELLO WORLD\nNEW LINE", "res/font.ppm", 6, 7);
 
