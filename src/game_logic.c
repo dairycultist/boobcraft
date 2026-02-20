@@ -5,7 +5,10 @@
 #define MAP_W 4
 #define MAP_H 4
 
+#define TILE_AT(x, z) (map[(int) floor((z) + 0.5)][(int) floor((x) + 0.5)])
+
 #define PLAYER_RADIUS 0.2
+#define PLAYER_MOVE_SPEED 0.1
 
 static const tile map[MAP_W][MAP_H] = {
 	{ TILE_FLOOR,  TILE_LAVA,  TILE_LAVA, TILE_FLOOR },
@@ -52,26 +55,41 @@ void on_terminate() {
 	free_mesh(sprite);
 }
 
+void move_player_x(float dist) {
+
+	camera.x += dist;
+
+	// map collision
+	while (TILE_AT(camera.x + copysign(PLAYER_RADIUS, dist), camera.z + PLAYER_RADIUS) == TILE_EMPTY || TILE_AT(camera.x + copysign(PLAYER_RADIUS, dist), camera.z - PLAYER_RADIUS) == TILE_EMPTY)
+		camera.x -= copysign(0.01, dist);
+
+	// boundary collision
+	if (camera.x < PLAYER_RADIUS - 0.5)
+		camera.x = PLAYER_RADIUS - 0.5;
+
+	if (camera.x > MAP_W - 0.5 - PLAYER_RADIUS)
+		camera.x = MAP_W - 0.5 - PLAYER_RADIUS;
+}
+
+void move_player_z(float dist) {
+
+	camera.z += dist;
+
+	// map collision
+	while (TILE_AT(camera.x + PLAYER_RADIUS, camera.z + copysign(PLAYER_RADIUS, dist)) == TILE_EMPTY || TILE_AT(camera.x - PLAYER_RADIUS, camera.z + copysign(PLAYER_RADIUS, dist)) == TILE_EMPTY)
+		camera.z -= copysign(0.01, dist);
+
+	// boundary collision
+	if (camera.z < PLAYER_RADIUS - 0.5)
+		camera.z = PLAYER_RADIUS - 0.5;
+
+	if (camera.z > MAP_H - 0.5 - PLAYER_RADIUS)
+		camera.z = MAP_H - 0.5 - PLAYER_RADIUS;
+}
+
 void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool paused) {
 
 	if (!paused) {
-
-		// boundary collision
-		if (camera.x < PLAYER_RADIUS - 0.5)
-			camera.x = PLAYER_RADIUS - 0.5;
-	
-		if (camera.x > MAP_W - 0.5 - PLAYER_RADIUS)
-			camera.x = MAP_W - 0.5 - PLAYER_RADIUS;
-
-		if (camera.z < PLAYER_RADIUS - 0.5)
-			camera.z = PLAYER_RADIUS - 0.5;
-	
-		if (camera.z > MAP_H - 0.5 - PLAYER_RADIUS)
-			camera.z = MAP_H - 0.5 - PLAYER_RADIUS;
-
-		// sink down when on a lava tile
-		if (camera.x > -0.5 && camera.x < MAP_W - 0.5 && camera.z > -0.5 && camera.z < MAP_H - 0.5)
-			camera.y = map[(int) floor(camera.z + 0.5)][(int) floor(camera.x + 0.5)] == TILE_LAVA ? 0.3 : 0.5;
 
 		// movement
 		if (left)
@@ -81,14 +99,18 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 
 		if (up) {
 
-			camera.x += 0.1 * sin(camera.yaw);
-			camera.z -= 0.1 * cos(camera.yaw);
+			move_player_x( PLAYER_MOVE_SPEED * sin(camera.yaw));
+			move_player_z(-PLAYER_MOVE_SPEED * cos(camera.yaw));
 		}
 		if (down) {
 			
-			camera.x -= 0.1 * sin(camera.yaw);
-			camera.z += 0.1 * cos(camera.yaw);
+			move_player_x(-PLAYER_MOVE_SPEED * sin(camera.yaw));
+			move_player_z( PLAYER_MOVE_SPEED * cos(camera.yaw));
 		}
+
+		// sink down when on a lava tile
+		if (camera.x > -0.5 && camera.x < MAP_W - 0.5 && camera.z > -0.5 && camera.z < MAP_H - 0.5)
+			camera.y = TILE_AT(camera.x, camera.z) == TILE_LAVA ? 0.3 : 0.5;
 
 		// move bob animation
 		if (left || right || up || down) {
