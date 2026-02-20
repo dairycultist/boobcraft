@@ -5,6 +5,11 @@ typedef char bool;
 #define TRUE 1
 #define FALSE 0
 
+typedef unsigned char tile;
+#define TILE_EMPTY 0
+#define TILE_WALL 1
+// lava, door, etc
+
 typedef struct {
 
 	float x;

@@ -1,7 +1,8 @@
 // this file handles both 2D and 3D mesh data creation, rendering, manipulation, and destruction
 
-static GLuint shader_program_shaded;
-static GLuint shader_program_unshaded;
+// shader programs
+static GLuint sp_shaded;
+static GLuint sp_unshaded;
 
 // perspective projection matrix (converts from view space to clip space)
 // hardcoded with FOV=100 aspect=1.666 near=0.01 far=100
@@ -93,30 +94,30 @@ static Mesh *mesh_builder(const float data[], const int byte_count, const int ve
 	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);					// make it the active buffer
-	glBufferData(GL_ARRAY_BUFFER, byte_count, data, GL_STATIC_DRAW);	// copy vertex data into the active buffer
+	glBufferData(GL_ARRAY_BUFFER, byte_count, data, GL_STATIC_DRAW);// copy vertex data into the active buffer
 
 	// link active vertex data and shader attributes (for MESH_SHADED)
 	if (type == MESH_SHADED) {
 
-		GLint pos_attrib = glGetAttribLocation(shader_program_shaded, "position");
+		GLint pos_attrib = glGetAttribLocation(sp_shaded, "position");
 		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
 		glEnableVertexAttribArray(pos_attrib); // requires a VAO to be bound
 
-		GLint normal_attrib = glGetAttribLocation(shader_program_shaded, "normal");
+		GLint normal_attrib = glGetAttribLocation(sp_shaded, "normal");
 		glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 3));
 		glEnableVertexAttribArray(normal_attrib);
 
-		GLint uv_attrib = glGetAttribLocation(shader_program_shaded, "UV");
+		GLint uv_attrib = glGetAttribLocation(sp_shaded, "UV");
 		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
 		glEnableVertexAttribArray(uv_attrib);
 
 	} else if (type == MESH_SKY || type == MESH_UI) {
 
-		GLint pos_attrib = glGetAttribLocation(shader_program_unshaded, "position");
+		GLint pos_attrib = glGetAttribLocation(sp_unshaded, "position");
 		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
 		glEnableVertexAttribArray(pos_attrib);
 
-		GLint uv_attrib = glGetAttribLocation(shader_program_unshaded, "UV");
+		GLint uv_attrib = glGetAttribLocation(sp_unshaded, "UV");
 		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid *) (sizeof(float) * 3));
 		glEnableVertexAttribArray(uv_attrib);
 
@@ -374,6 +375,11 @@ Mesh *make_text_sprite_mesh(const char *text, const char *ppm_path, const int gl
 	return mesh_builder((const float *) vertices.data, vertices.byte_count, vertex_count, ppm_path, MESH_UI);
 }
 
+Mesh *make_map_mesh(tile* map, int w, int h) {
+
+	return NULL; // TODO
+}
+
 void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) {
 
 	// a (rightmost) is applied first, then b
@@ -518,9 +524,9 @@ void draw_mesh(const Transform *camera, const Transform *mesh_transform, const M
 		mat4_mult(yaw_matrix, pitch_matrix, normal_matrix);
 
 		// load the shader program and the uniforms we just calculated
-		glUseProgram(shader_program_shaded);
-		glUniformMatrix4fv(glGetUniformLocation(shader_program_shaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(shader_program_shaded, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
+		glUseProgram(sp_shaded);
+		glUniformMatrix4fv(glGetUniformLocation(sp_shaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(sp_shaded, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
 
 	} else if (mesh->type == MESH_SKY) {
 
@@ -535,8 +541,8 @@ void draw_mesh(const Transform *camera, const Transform *mesh_transform, const M
 		mat4_mult(proj_matrix, position_matrix, position_matrix);
 
 		// load the shader program and the uniforms we just calculated
-		glUseProgram(shader_program_unshaded);
-		glUniformMatrix4fv(glGetUniformLocation(shader_program_unshaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
+		glUseProgram(sp_unshaded);
+		glUniformMatrix4fv(glGetUniformLocation(sp_unshaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
 
 	} else if (mesh->type == MESH_UI) {
 
@@ -550,8 +556,8 @@ void draw_mesh(const Transform *camera, const Transform *mesh_transform, const M
 		position_matrix[3][1] = mesh_transform->y / 120 - 1;
 
 		// load the shader program and the uniforms we just calculated
-		glUseProgram(shader_program_unshaded);
-		glUniformMatrix4fv(glGetUniformLocation(shader_program_unshaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
+		glUseProgram(sp_unshaded);
+		glUniformMatrix4fv(glGetUniformLocation(sp_unshaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
 	}
 
 	// for sprites ONLY - disable depth buffer testing/writing and backface culling
@@ -580,7 +586,7 @@ void free_mesh(Mesh *mesh) {
 void initialize_shaders() {
 
 	// shader programs
-	shader_program_shaded = load_shader_program(
+	sp_shaded = load_shader_program(
 		"#version 150 core\n"
 		"uniform mat4 position_matrix;"
 		"uniform mat4 normal_matrix;"
@@ -605,7 +611,7 @@ void initialize_shaders() {
 		"}"
 	);
 
-	shader_program_unshaded = load_shader_program(
+	sp_unshaded = load_shader_program(
 		"#version 150 core\n"
 		"uniform mat4 position_matrix;"
 		"in vec3 position;"
