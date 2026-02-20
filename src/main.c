@@ -15,38 +15,58 @@ typedef struct {
 
 } Transform;
 
-/*
- * engine-side implemented
- * game-side will reference these headers upon linkage
- */
-void set_skybox_color(float r, float g, float b);
+typedef enum {
 
-void *import_mesh(const char *obj_path, const char *ppm_path); // eventually will be replaced by make_generic_mesh or something, taking raw data instead of a filepath
-void *make_sky_mesh(const char *ppm_path);
-void *make_sprite_mesh(const char *ppm_path);
-void *make_text_sprite_mesh(const char *text, const char *ppm_path, const int glyph_width, const int glyph_height);
+  MESH_SHADED,
+  MESH_SKY,
+  MESH_UI // 2D
 
-void draw_mesh(const Transform *camera, const Transform *mesh_transform, const void *void_mesh);
+} MeshType;
 
-void free_mesh(void *void_mesh);
+// generic struct for all types of mesh (2D, 3D, sky, etc)
+typedef struct {
 
-/*
- * game-side implemented
- */
-void on_start();
-void on_terminate();
-void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool menu);
+	MeshType type;
 
-#include "util.c"
-#include "game_logic.c"
+	GLuint vertex_array; // "VAO"
+	uint vertex_count;
+	GLuint texture;
+
+} Mesh;
+
+// static uint rng_state = 1; // uint32_t? time(NULL)?
+
+// // stole this from nash so I don't have to use rand(). it's deterministic!
+// uint random_uint(uint bound) {
+	
+//     rng_state ^= rng_state << 13;
+//     rng_state ^= rng_state >> 17;
+//     rng_state ^= rng_state << 5;
+//     return rng_state % bound;
+// }
+
+typedef struct {
+
+	char data[65536 * 64];
+	int byte_count;
+
+} EZArray;
+
+void append_ezarray(EZArray *array, void *data, int data_length) {
+
+	memcpy(&array->data[array->byte_count], data, data_length);
+	array->byte_count += data_length;
+}
+
 #include "render.c"
+#include "game_logic.c"
 
 int main() {
 
-	printf("Starting game");
+	printf("Starting game\n");
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-		log_error("Could not initialize SDL");
+		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
 		return 1;
 	}
 
@@ -60,7 +80,7 @@ int main() {
 	SDL_Window *window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 400, 240, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	if (!window) {
-        log_error("Could not create window");
+		fprintf(stderr, "Could not create window: %s\n", SDL_GetError());
 		return 1;
     }
 
@@ -69,13 +89,11 @@ int main() {
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	// lock mouse
-	SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_SetRelativeMouseMode(SDL_TRUE); // lock mouse
 
-	// initialize shaders
 	initialize_shaders();
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	
-	// let programmer initialize stuff
 	on_start();
 
 	// process events until window is closed
@@ -88,7 +106,6 @@ int main() {
 	bool right    = FALSE;
 	bool action_1 = FALSE;
 	bool action_2 = FALSE;
-	bool menu     = FALSE;
 
 	while (running) {
 
@@ -118,8 +135,6 @@ int main() {
 						action_1 = TRUE;
 					} else if (event.key.keysym.scancode == SDL_SCANCODE_X) {
 						action_2 = TRUE;
-					} else if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT) {
-						menu = TRUE;
 					}
 				}
 
@@ -142,8 +157,7 @@ int main() {
 			}
 		}
 
-		process(up, down, left, right, action_1, action_2, menu);
-		menu = FALSE; // automatically goes back after one frame
+		process(up, down, left, right, action_1, action_2, !SDL_GetRelativeMouseMode());
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1000 / 30);

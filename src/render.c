@@ -13,29 +13,6 @@ static GLfloat proj_matrix[4][4] = {
 	{0, 0, -0.02, 0},
 };
 
-typedef enum {
-
-  MESH_SHADED,
-  MESH_SKY,
-  MESH_UI // 2D
-
-} MeshType;
-
-// generic struct for all types of mesh (2D, 3D, sky, etc)
-typedef struct {
-
-	MeshType type;
-
-	GLuint vertex_array; // "VAO"
-	uint vertex_count;
-	GLuint texture;
-
-} Mesh;
-
-void set_skybox_color(float r, float g, float b) {
-	glClearColor(r, g, b, 1.0f);
-}
-
 static GLuint load_shader(const char *shadercode, GLenum shader_type) {
 
 	GLuint shader = glCreateShader(shader_type);
@@ -105,7 +82,7 @@ static void import_ppm(GLenum target, const char *ppm_path) {
 	glTexImage2D(target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 }
 
-static void *mesh_builder(const float data[], const int byte_count, const int vertex_count, const char *ppm_path, MeshType type) {
+static Mesh *mesh_builder(const float data[], const int byte_count, const int vertex_count, const char *ppm_path, MeshType type) {
 
 	// make vertex array
 	GLuint vertex_array;
@@ -177,7 +154,7 @@ static void *mesh_builder(const float data[], const int byte_count, const int ve
 }
 
 // returns NULL on error
-void *import_mesh(const char *obj_path, const char *ppm_path) {
+Mesh *import_mesh(const char *obj_path, const char *ppm_path) {
 
 	// read obj file
 	FILE *file = fopen(obj_path, "r");
@@ -267,7 +244,7 @@ void *import_mesh(const char *obj_path, const char *ppm_path) {
 	return mesh_builder((const float *) composite_data.data, composite_data.byte_count, vertex_count, ppm_path, MESH_SHADED);
 }
 
-void *make_sky_mesh(const char *ppm_path) {
+Mesh *make_sky_mesh(const char *ppm_path) {
 
 	// hardcoded inverted cube with sidelength 100 units (aka a cheap skybox)
 	const float data[] = {
@@ -318,7 +295,7 @@ void *make_sky_mesh(const char *ppm_path) {
 	return mesh_builder((const float *) data, sizeof(float) * 5 * 36, 36, ppm_path, MESH_SKY);
 }
 
-void *make_sprite_mesh(const char *ppm_path) {
+Mesh *make_sprite_mesh(const char *ppm_path) {
 
 	// sprite mesh is pixel-perfect - every pixel in the texture lines up with one on the screen
 	int width, height;
@@ -341,7 +318,7 @@ void *make_sprite_mesh(const char *ppm_path) {
 	return mesh_builder((const float *) data, sizeof(float) * 5 * 6, 6, ppm_path, MESH_UI);
 }
 
-void *make_text_sprite_mesh(const char *text, const char *ppm_path, const int glyph_width, const int glyph_height) {
+Mesh *make_text_sprite_mesh(const char *text, const char *ppm_path, const int glyph_width, const int glyph_height) {
 	
 	EZArray vertices = {0};
 	int vertex_count = 0;
@@ -480,9 +457,7 @@ void generate_rotation_matrices(GLfloat pitch_matrix[4][4], float pitch, GLfloat
 	yaw_matrix[3][3] = 1;
 }
 
-void draw_mesh(const Transform *camera, const Transform *mesh_transform, const void *void_mesh) {
-
-	const Mesh *mesh = (Mesh *) void_mesh;
+void draw_mesh(const Transform *camera, const Transform *mesh_transform, const Mesh *mesh) {
 
 	// shared buffers
 	GLfloat pitch_matrix[4][4];
@@ -597,9 +572,7 @@ void draw_mesh(const Transform *camera, const Transform *mesh_transform, const v
 }
 
 // TODO proper OpenGL-compliant freeing of meshes
-void free_mesh(void *void_mesh) {
-
-	Mesh *mesh = (Mesh *) void_mesh;
+void free_mesh(Mesh *mesh) {
 
 	free(mesh);
 }
@@ -627,7 +600,7 @@ void initialize_shaders() {
 		"in vec2 frag_UV;"
 		"out vec4 outColor;"
 		"void main() {"
-			"float c = dot(normal_camera, vec3(0.7, 0.7, 0)) * 0.5 + 0.5;"
+			"float c = dot(normal_camera, vec3(0.7, 0.7, 0)) * 0.5 + 0.5;" // TODO use gl_Position.z to make further fragments darker
 			"outColor = texture(tex, frag_UV) * vec4(c, c, c, 1.0);"
 		"}"
 	);

@@ -1,22 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 Transform camera;
 
-void *mesh1;
+Mesh *mesh1;
 Transform mesh1_transform;
 
-void *mesh2;
+Mesh *mesh2;
 Transform mesh2_transform;
 
-void *sky;
+Mesh *sky;
 
-void *sprite;
+Mesh *sprite;
 Transform sprite_transform;
 
 void on_start() {
-
-	set_skybox_color(0.2f, 0.2f, 0.23f);
 
 	camera.z = 5;
 
@@ -41,10 +40,10 @@ void on_terminate() {
 	free_mesh(sprite);
 }
 
-void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool menu) {
+void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool paused) {
 
-	if (menu) {
-		printf("Menu!\n");
+	if (paused) {
+		return;
 	}
 
 	if (left) {
@@ -54,9 +53,11 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 	}
 
 	if (up) {
-		camera.pitch -= 0.05;
+		camera.x += 0.1 * sin(camera.yaw);
+		camera.z -= 0.1 * cos(camera.yaw);
 	} else if (down) {
-		camera.pitch += 0.05;
+		camera.x -= 0.1 * sin(camera.yaw);
+		camera.z += 0.1 * cos(camera.yaw);
 	}
 
 	if (action_1) {
