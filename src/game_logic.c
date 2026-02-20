@@ -39,8 +39,6 @@ void on_start() {
 	sky = make_sky_mesh("res/sky.ppm");
 	sprite = make_sprite_mesh("res/gun.ppm"); //make_text_sprite_mesh("HELLO WORLD\nNEW LINE", "res/font.ppm", 6, 7);
 
-	mesh1_transform.yaw = 3.14 * -0.2;
-
 	sprite_transform.x = 136;
 	sprite_transform.y = -20;
 
@@ -60,7 +58,9 @@ void move_player_x(float dist) {
 	camera.x += dist;
 
 	// map collision
-	while (TILE_AT(camera.x + copysign(PLAYER_RADIUS, dist), camera.z + PLAYER_RADIUS) == TILE_EMPTY || TILE_AT(camera.x + copysign(PLAYER_RADIUS, dist), camera.z - PLAYER_RADIUS) == TILE_EMPTY)
+	while (
+		TILE_AT(camera.x + copysign(PLAYER_RADIUS, dist), camera.z + PLAYER_RADIUS) == TILE_EMPTY ||
+		TILE_AT(camera.x + copysign(PLAYER_RADIUS, dist), camera.z - PLAYER_RADIUS) == TILE_EMPTY)
 		camera.x -= copysign(0.01, dist);
 
 	// boundary collision
@@ -76,7 +76,9 @@ void move_player_z(float dist) {
 	camera.z += dist;
 
 	// map collision
-	while (TILE_AT(camera.x + PLAYER_RADIUS, camera.z + copysign(PLAYER_RADIUS, dist)) == TILE_EMPTY || TILE_AT(camera.x - PLAYER_RADIUS, camera.z + copysign(PLAYER_RADIUS, dist)) == TILE_EMPTY)
+	while (
+		TILE_AT(camera.x + PLAYER_RADIUS, camera.z + copysign(PLAYER_RADIUS, dist)) == TILE_EMPTY ||
+		TILE_AT(camera.x - PLAYER_RADIUS, camera.z + copysign(PLAYER_RADIUS, dist)) == TILE_EMPTY)
 		camera.z -= copysign(0.01, dist);
 
 	// boundary collision

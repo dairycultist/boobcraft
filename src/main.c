@@ -10,6 +10,9 @@ typedef unsigned char tile;
 #define TILE_FLOOR 1
 #define TILE_LAVA 2
 
+#define SCREEN_W 400
+#define SCREEN_H 240
+
 typedef struct {
 
 	float x;
@@ -82,7 +85,7 @@ int main() {
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 	// create the window
-	SDL_Window *window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 400, 240, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	SDL_Window *window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_W, SCREEN_H, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	if (!window) {
 		fprintf(stderr, "Could not create window: %s\n", SDL_GetError());

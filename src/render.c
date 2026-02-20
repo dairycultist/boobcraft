@@ -305,8 +305,8 @@ Mesh *make_sprite_mesh(const char *ppm_path) {
 	int width, height;
 	get_ppm_resolution(ppm_path, &width, &height);
 
-	float w = width * 2 / 400.;
-	float h = height * 2 / 240.;
+	float w = width * 2. / SCREEN_W;
+	float h = height * 2. / SCREEN_H;
 
 	// sprite mesh is initialized with bottom left corner in center, and moved to screen bottom left corner by transformations
 	const float data[] = {
@@ -330,8 +330,8 @@ Mesh *make_text_sprite_mesh(const char *text, const char *ppm_path, const int gl
 	int width, height;
 	get_ppm_resolution(ppm_path, &width, &height);
 
-	float w = glyph_width * 2 / 400.;
-	float h = glyph_height * 2 / 240.;
+	float w = glyph_width * 2. / SCREEN_W;
+	float h = glyph_height * 2. / SCREEN_H;
 
 	float x = 0, y = 0;
 
@@ -683,8 +683,8 @@ void draw_mesh(const Transform *camera, const Transform *mesh_transform, const M
 		position_matrix[2][2] = 1;
 		position_matrix[3][3] = 1;
 
-		position_matrix[3][0] = mesh_transform->x / 200 - 1; // translation (converted from screen [0,400]x[0,240] to UV [-1,1]x[-1,1])
-		position_matrix[3][1] = mesh_transform->y / 120 - 1;
+		position_matrix[3][0] = mesh_transform->x / (SCREEN_W / 2) - 1; // translation (converted from screen [0,SCREEN_W]x[0,SCREEN_H] to UV [-1,1]x[-1,1])
+		position_matrix[3][1] = mesh_transform->y / (SCREEN_H / 2) - 1;
 
 		// load the shader program and the uniforms we just calculated
 		glUseProgram(sp_unshaded);
