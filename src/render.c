@@ -375,34 +375,66 @@ Mesh *make_text_sprite_mesh(const char *text, const char *ppm_path, const int gl
 	return mesh_builder((const float *) vertices.data, vertices.byte_count, vertex_count, ppm_path, MESH_UI);
 }
 
-Mesh *make_map_mesh(const char *ppm_path, tile* map, int w, int h) {
+Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
 
 	EZArray data = {0};
 	int vertex_count = 0;
 
-	for (int z = 0; z < h * 2; z += 2) {
+	for (int z = 0; z < h; z++) {
 
-		for (int x = 0; x < w * 2; x += 2) {
+		for (int x = 0; x < w; x++) {
+
+			switch (map[x + z * w]) {
 		
-			float rect[] = {
-				// floor
-				x + 1, -1, z + 1, 0, 0, 1, 0, 0,
-				x - 1, -1, z - 1, 0, 0, 1, 1, 1,
-				x - 1, -1, z + 1, 0, 0, 1, 1, 0,
-				x + 1, -1, z + 1, 0, 0, 1, 0, 0,
-				x + 1, -1, z - 1, 0, 0, 1, 0, 1,
-				x - 1, -1, z - 1, 0, 0, 1, 1, 1,
-				// ceiling
-				x + 1, 1, z + 1, 0, 0, 1, 0, 0,
-				x - 1, 1, z + 1, 0, 0, 1, 1, 0,
-				x - 1, 1, z - 1, 0, 0, 1, 1, 1,
-				x + 1, 1, z + 1, 0, 0, 1, 0, 0,
-				x - 1, 1, z - 1, 0, 0, 1, 1, 1,
-				x + 1, 1, z - 1, 0, 0, 1, 0, 1
-			};
+				case TILE_EMPTY:;
 
-			append_ezarray(&data, &rect, sizeof(float) * 8 * 12);
-			vertex_count += 12;
+					float data_empty[] = {
+						// floor
+						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0, 0,
+						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 1, 1,
+						x - 0.5, 0, z + 0.5, 0, 0, 0.5, 1, 0,
+						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0, 0,
+						x + 0.5, 0, z - 0.5, 0, 0, 0.5, 0, 1,
+						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 1, 1,
+						// ceiling
+						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 0,
+						x - 0.5, 1, z + 0.5, 0, 0, 0.5, 1, 0,
+						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 1, 1,
+						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 0,
+						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 1, 1,
+						x + 0.5, 1, z - 0.5, 0, 0, 0.5, 0, 1
+					};
+
+					append_ezarray(&data, &data_empty, sizeof(float) * 8 * 12);
+					vertex_count += 12;
+					break;
+				
+				case TILE_WALL:
+					break;
+
+				case TILE_LAVA:;
+
+					float data_lava[] = {
+						// floor
+						x + 0.5, -0.2, z + 0.5, 0, 0, 0.5, 0, 0,
+						x - 0.5, -0.2, z - 0.5, 0, 0, 0.5, 1, 1,
+						x - 0.5, -0.2, z + 0.5, 0, 0, 0.5, 1, 0,
+						x + 0.5, -0.2, z + 0.5, 0, 0, 0.5, 0, 0,
+						x + 0.5, -0.2, z - 0.5, 0, 0, 0.5, 0, 1,
+						x - 0.5, -0.2, z - 0.5, 0, 0, 0.5, 1, 1,
+						// ceiling
+						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 0,
+						x - 0.5, 1, z + 0.5, 0, 0, 0.5, 1, 0,
+						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 1, 1,
+						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0, 0,
+						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 1, 1,
+						x + 0.5, 1, z - 0.5, 0, 0, 0.5, 0, 1
+					};
+
+					append_ezarray(&data, &data_lava, sizeof(float) * 8 * 12);
+					vertex_count += 12;
+					break;
+			}
 		}
 	}
 

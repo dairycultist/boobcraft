@@ -2,6 +2,16 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define MAP_W 4
+#define MAP_H 4
+
+static const tile map[MAP_W][MAP_H] = {
+	{ TILE_EMPTY,  TILE_LAVA,  TILE_LAVA, TILE_EMPTY },
+	{ TILE_EMPTY,  TILE_LAVA,  TILE_LAVA, TILE_EMPTY },
+	{ TILE_EMPTY, TILE_EMPTY, TILE_EMPTY, TILE_EMPTY },
+	{  TILE_WALL,  TILE_WALL,  TILE_WALL,  TILE_WALL }
+};
+
 Transform camera;
 
 Mesh *mesh1;
@@ -21,15 +31,8 @@ void on_start() {
 
 	camera.z = 5;
 
-	tile map[] = {
-		TILE_EMPTY, TILE_EMPTY, TILE_EMPTY, TILE_EMPTY,
-		TILE_EMPTY, TILE_EMPTY, TILE_EMPTY, TILE_EMPTY,
-		TILE_EMPTY, TILE_EMPTY, TILE_EMPTY, TILE_EMPTY,
-		TILE_EMPTY, TILE_EMPTY, TILE_EMPTY, TILE_EMPTY, // TILE_WALL
-	};
-
 	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm");
-	mesh2 = make_map_mesh("res/block.ppm", map, 4, 4);
+	mesh2 = make_map_mesh("res/block.ppm", &map[0][0], MAP_W, MAP_H);
 	sky = make_sky_mesh("res/sky.ppm");
 	sprite = make_sprite_mesh("res/gun.ppm"); //make_text_sprite_mesh("HELLO WORLD\nNEW LINE", "res/font.ppm", 6, 7);
 
@@ -37,6 +40,8 @@ void on_start() {
 
 	sprite_transform.x = 136;
 	sprite_transform.y = -20;
+
+	camera.y = 0.5;
 }
 
 void on_terminate() {
@@ -51,23 +56,30 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 
 	if (!paused) {
 
-		if (left) {
+		// sink down when on a lava tile
+		if (camera.x > -0.5 && camera.x < MAP_W - 0.5 && -camera.z > -0.5 && -camera.z < MAP_H - 0.5)
+			camera.y = map[(int) floor(camera.x - 0.5)][(int) ceil(-camera.z + 0.5)] == TILE_LAVA ? 0.3 : 0.5;
+
+		// movement
+		if (left)
 			camera.yaw -= 0.15;
-		}
-		if (right) {
+		if (right)
 			camera.yaw += 0.15;
-		}
 
 		if (up) {
-			camera.x += 0.2 * sin(camera.yaw);
-			camera.z -= 0.2 * cos(camera.yaw);
+
+			camera.x += 0.1 * sin(camera.yaw);
+			camera.z -= 0.1 * cos(camera.yaw);
 		}
 		if (down) {
-			camera.x -= 0.2 * sin(camera.yaw);
-			camera.z += 0.2 * cos(camera.yaw);
+			
+			camera.x -= 0.1 * sin(camera.yaw);
+			camera.z += 0.1 * cos(camera.yaw);
 		}
 
+		// move bob animation
 		if (left || right || up || down) {
+
 			move_time++;
 			sprite_transform.x = 136 + sin(move_time * 0.2) * 3;
 			sprite_transform.y = -20 + sin(move_time * 0.4) * 3;
