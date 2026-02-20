@@ -409,7 +409,60 @@ Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
 					vertex_count += 12;
 					break;
 				
-				case TILE_WALL:
+				case TILE_WALL:;
+
+					float data_wall[] = {
+						// +z
+						x + 0.5,	1,	z + 0.5,	0, 0, -1,	0.5,	0.75,
+						x - 0.5,	1,	z + 0.5,	0, 0, -1,	0.25,	0.75,
+						x - 0.5,	0,	z + 0.5,	0, 0, -1,	0.25,	0.5,
+						x + 0.5,	1,	z + 0.5,	0, 0, -1,	0.5,	0.75,
+						x - 0.5,	0,	z + 0.5,	0, 0, -1,	0.25,	0.5,
+						x + 0.5,	0,	z + 0.5,	0, 0, -1,	0.5,	0.5,
+						// -z
+						x + 0.5,	1,	z - 0.5,	0, 0, 1,	0.75,	0.75,
+						x - 0.5,	0,	z - 0.5,	0, 0, 1,	1,		0.5,
+						x - 0.5,	1,	z - 0.5,	0, 0, 1,	1,		0.75,
+						x + 0.5,	1,	z - 0.5,	0, 0, 1,	0.75,	0.75,
+						x + 0.5,	0,	z - 0.5,	0, 0, 1,	0.75,	0.5,
+						x - 0.5,	0,	z - 0.5,	0, 0, 1,	1,		0.5,
+						// +x
+						x + 0.5,	1,	z + 0.5,	-1, 0, 0,	0.5,	0.75,
+						x + 0.5,	0,	z - 0.5,	-1, 0, 0,	0.75,	0.5,
+						x + 0.5,	1,	z - 0.5,	-1, 0, 0,	0.75,	0.75,
+						x + 0.5,	1,	z + 0.5,	-1, 0, 0,	0.5,	0.75,
+						x + 0.5,	0,	z + 0.5,	-1, 0, 0,	0.5,	0.5,
+						x + 0.5,	0,	z - 0.5,	-1, 0, 0,	0.75,	0.5,
+						// -x
+						x - 0.5,	1,	z + 0.5,	1, 0, 0,	0.25,	0.75,
+						x - 0.5,	1,	z - 0.5,	1, 0, 0,	0,		0.75,
+						x - 0.5,	0,	z - 0.5,	1, 0, 0,	0,		0.5,
+						x - 0.5,	1,	z + 0.5,	1, 0, 0,	0.25,	0.75,
+						x - 0.5,	0,	z - 0.5,	1, 0, 0,	0,		0.5,
+						x - 0.5,	0,	z + 0.5,	1, 0, 0,	0.25,	0.5,
+					};
+
+					if (z != h - 1 && map[x + (z - 1) * w] != TILE_WALL) {
+
+						append_ezarray(&data, data_wall, sizeof(float) * 8 * 6);
+						vertex_count += 6;
+					}
+					if (z != 0 && map[x + (z + 1) * w] != TILE_WALL) {
+
+						append_ezarray(&data, data_wall + 8 * 6, sizeof(float) * 8 * 6);
+						vertex_count += 6;
+					}
+					if (x != w - 1 && map[(x + 1) + z * w] != TILE_WALL) {
+
+						append_ezarray(&data, data_wall + 8 * 6 * 2, sizeof(float) * 8 * 6);
+						vertex_count += 6;
+					}
+					if (x != 0 && map[(x - 1) + z * w] != TILE_WALL) {
+
+						append_ezarray(&data, data_wall + 8 * 6 * 3, sizeof(float) * 8 * 6);
+						vertex_count += 6;
+					}
+
 					break;
 
 				case TILE_LAVA:;

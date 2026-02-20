@@ -7,7 +7,7 @@
 
 static const tile map[MAP_W][MAP_H] = {
 	{ TILE_EMPTY,  TILE_LAVA,  TILE_LAVA, TILE_EMPTY },
-	{ TILE_EMPTY,  TILE_LAVA,  TILE_LAVA, TILE_EMPTY },
+	{ TILE_EMPTY,  TILE_WALL,  TILE_LAVA, TILE_EMPTY },
 	{ TILE_EMPTY, TILE_EMPTY, TILE_EMPTY, TILE_EMPTY },
 	{  TILE_WALL,  TILE_WALL,  TILE_WALL,  TILE_WALL }
 };
@@ -58,7 +58,7 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 
 		// sink down when on a lava tile
 		if (camera.x > -0.5 && camera.x < MAP_W - 0.5 && -camera.z > -0.5 && -camera.z < MAP_H - 0.5)
-			camera.y = map[(int) floor(camera.x - 0.5)][(int) ceil(-camera.z + 0.5)] == TILE_LAVA ? 0.3 : 0.5;
+			camera.y = map[(int) floor(-camera.z + 0.5)][(int) floor(camera.x + 0.5)] == TILE_LAVA ? 0.3 : 0.5;
 
 		// movement
 		if (left)
