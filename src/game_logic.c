@@ -5,11 +5,13 @@
 #define MAP_W 4
 #define MAP_H 4
 
+#define PLAYER_RADIUS 0.2
+
 static const tile map[MAP_W][MAP_H] = {
 	{ TILE_FLOOR,  TILE_LAVA,  TILE_LAVA, TILE_FLOOR },
 	{ TILE_FLOOR, TILE_EMPTY,  TILE_LAVA, TILE_FLOOR },
 	{ TILE_FLOOR, TILE_FLOOR, TILE_FLOOR, TILE_FLOOR },
-	{ TILE_EMPTY, TILE_EMPTY, TILE_EMPTY, TILE_EMPTY }
+	{ TILE_EMPTY, TILE_FLOOR, TILE_FLOOR, TILE_EMPTY }
 };
 
 Transform camera;
@@ -28,8 +30,6 @@ Transform sprite_transform;
 int move_time = 0;
 
 void on_start() {
-
-	camera.z = 5;
 
 	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm");
 	mesh2 = make_map_mesh("res/block.ppm", &map[0][0], MAP_W, MAP_H);
@@ -56,9 +56,22 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 
 	if (!paused) {
 
+		// boundary collision
+		if (camera.x < PLAYER_RADIUS - 0.5)
+			camera.x = PLAYER_RADIUS - 0.5;
+	
+		if (camera.x > MAP_W - 0.5 - PLAYER_RADIUS)
+			camera.x = MAP_W - 0.5 - PLAYER_RADIUS;
+
+		if (camera.z < PLAYER_RADIUS - 0.5)
+			camera.z = PLAYER_RADIUS - 0.5;
+	
+		if (camera.z > MAP_H - 0.5 - PLAYER_RADIUS)
+			camera.z = MAP_H - 0.5 - PLAYER_RADIUS;
+
 		// sink down when on a lava tile
-		if (camera.x > -0.5 && camera.x < MAP_W - 0.5 && -camera.z > -0.5 && -camera.z < MAP_H - 0.5)
-			camera.y = map[(int) floor(-camera.z + 0.5)][(int) floor(camera.x + 0.5)] == TILE_LAVA ? 0.3 : 0.5;
+		if (camera.x > -0.5 && camera.x < MAP_W - 0.5 && camera.z > -0.5 && camera.z < MAP_H - 0.5)
+			camera.y = map[(int) floor(camera.z + 0.5)][(int) floor(camera.x + 0.5)] == TILE_LAVA ? 0.3 : 0.5;
 
 		// movement
 		if (left)
