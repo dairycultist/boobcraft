@@ -1,10 +1,18 @@
-# this is game-implementation agnostic
-include/framework.o: src/* include/framework.h
-	@gcc -c -o include/framework.o src/main.c
+UNAME := $(shell uname)
 
-# this should be modified based on your game's file structure
-example_game/game: example_game/main.c example_game/res/* include/framework.o
-	@gcc -o example_game/game example_game/main.c include/framework.o -lGLEW -framework OpenGL $(shell sdl2-config --libs) $(shell sdl2-config --cflags)
+ifeq ($(UNAME), Darwin) # macOS
+	GCCFLAGS = -lGLEW -framework OpenGL
+else ifeq ($(UNAME), Linux)
+	GCCFLAGS = -lGLEW -lGL -lm
+else
+	$(error Unsupported OS: $(UNAME))
+endif
 
-run: example_game/game
-	@./example_game/game
+game: res/* src/*
+	@gcc -o game src/main.c $(GCCFLAGS) $(shell pkg-config --cflags --libs sdl2 SDL2_image)
+
+run: game
+	@./game
+
+clean:
+	rm game

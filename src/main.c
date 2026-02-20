@@ -1,13 +1,49 @@
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 
-#include "../include/framework.h"
+typedef char bool;
+#define TRUE 1
+#define FALSE 0
+
+typedef struct {
+
+	float x;
+	float y;
+	float z;
+	float pitch;
+	float yaw;
+
+} Transform;
+
+/*
+ * engine-side implemented
+ * game-side will reference these headers upon linkage
+ */
+void set_skybox_color(float r, float g, float b);
+
+void *import_mesh(const char *obj_path, const char *ppm_path); // eventually will be replaced by make_generic_mesh or something, taking raw data instead of a filepath
+void *make_sky_mesh(const char *ppm_path);
+void *make_sprite_mesh(const char *ppm_path);
+void *make_text_sprite_mesh(const char *text, const char *ppm_path, const int glyph_width, const int glyph_height);
+
+void draw_mesh(const Transform *camera, const Transform *mesh_transform, const void *void_mesh);
+
+void free_mesh(void *void_mesh);
+
+/*
+ * game-side implemented
+ */
+void on_start();
+void on_terminate();
+void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool menu);
+
 #include "util.c"
+#include "game_logic.c"
 #include "render.c"
 
 int main() {
 
-	printf("Starting %s\n", get_title());
+	printf("Starting game");
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		log_error("Could not initialize SDL");
@@ -21,7 +57,7 @@ int main() {
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 	// create the window
-	SDL_Window *window = SDL_CreateWindow(get_title(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 400, 240, SDL_WINDOW_OPENGL);
+	SDL_Window *window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 400, 240, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	if (!window) {
         log_error("Could not create window");

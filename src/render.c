@@ -1,16 +1,14 @@
-#include "util.c"
-
 // this file handles both 2D and 3D mesh data creation, rendering, manipulation, and destruction
 
 static GLuint shader_program_shaded;
 static GLuint shader_program_unshaded;
 
 // perspective projection matrix (converts from view space to clip space)
-// hardcoded with FOV=40 aspect=1.666 near=0.01 far=100
+// hardcoded with FOV=100 aspect=1.666 near=0.01 far=100
 // https://www.songho.ca/opengl/gl_projectionmatrix.html#fov
 static GLfloat proj_matrix[4][4] = {
-	{1.6485, 0, 0, 0},
-	{0, 2.7475, 0, 0},
+	{0.503661243, 0, 0, 0},
+	{0, 0.839099631, 0, 0},
 	{0, 0, -1.0, -1.0},
 	{0, 0, -0.02, 0},
 };
@@ -19,7 +17,7 @@ typedef enum {
 
   MESH_SHADED,
   MESH_SKY,
-  MESH_SPRITE // 2D
+  MESH_UI // 2D
 
 } MeshType;
 
@@ -28,18 +26,11 @@ typedef struct {
 
 	MeshType type;
 
-	Transform transform;
-
 	GLuint vertex_array; // "VAO"
 	uint vertex_count;
 	GLuint texture;
 
 } Mesh;
-
-Transform *get_mesh_transform(void *mesh) {
-
-	return &((Mesh *) mesh)->transform;
-}
 
 void set_skybox_color(float r, float g, float b) {
 	glClearColor(r, g, b, 1.0f);
@@ -142,7 +133,7 @@ static void *mesh_builder(const float data[], const int byte_count, const int ve
 		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
 		glEnableVertexAttribArray(uv_attrib);
 
-	} else if (type == MESH_SKY || type == MESH_SPRITE) {
+	} else if (type == MESH_SKY || type == MESH_UI) {
 
 		GLint pos_attrib = glGetAttribLocation(shader_program_unshaded, "position");
 		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
@@ -177,11 +168,6 @@ static void *mesh_builder(const float data[], const int byte_count, const int ve
 
 	// create final mesh object to return
 	Mesh *mesh = malloc(sizeof(Mesh));
-	mesh->transform.x 		= 0.0f;
-	mesh->transform.y 		= 0.0f;
-	mesh->transform.z 		= 0.0f;
-	mesh->transform.pitch 	= 0.0f;
-	mesh->transform.yaw 	= 0.0f;
 	mesh->vertex_array = vertex_array;
 	mesh->vertex_count = vertex_count;
 	mesh->type = type;
@@ -352,7 +338,7 @@ void *make_sprite_mesh(const char *ppm_path) {
 		w, 0, 1,	1, 0,
 	};
 	
-	return mesh_builder((const float *) data, sizeof(float) * 5 * 6, 6, ppm_path, MESH_SPRITE);
+	return mesh_builder((const float *) data, sizeof(float) * 5 * 6, 6, ppm_path, MESH_UI);
 }
 
 void *make_text_sprite_mesh(const char *text, const char *ppm_path, const int glyph_width, const int glyph_height) {
@@ -408,7 +394,7 @@ void *make_text_sprite_mesh(const char *text, const char *ppm_path, const int gl
 		}
 	}
 
-	return mesh_builder((const float *) vertices.data, vertices.byte_count, vertex_count, ppm_path, MESH_SPRITE);
+	return mesh_builder((const float *) vertices.data, vertices.byte_count, vertex_count, ppm_path, MESH_UI);
 }
 
 void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) {
@@ -494,7 +480,7 @@ void generate_rotation_matrices(GLfloat pitch_matrix[4][4], float pitch, GLfloat
 	yaw_matrix[3][3] = 1;
 }
 
-void draw_mesh(const Transform *camera, const void *void_mesh) {
+void draw_mesh(const Transform *camera, const Transform *mesh_transform, const void *void_mesh) {
 
 	const Mesh *mesh = (Mesh *) void_mesh;
 
@@ -513,17 +499,17 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 
 		// model matrix (converts from model space to world space)
 		generate_rotation_matrices(
-			pitch_matrix, mesh->transform.pitch,
-			yaw_matrix, mesh->transform.yaw
+			pitch_matrix, mesh_transform->pitch,
+			yaw_matrix, mesh_transform->yaw
 		);
 
 		GLfloat model_matrix[4][4];
 
 		mat4_mult(yaw_matrix, pitch_matrix, model_matrix); // rotation
 
-		model_matrix[3][0] = mesh->transform.x; // translation
-		model_matrix[3][1] = mesh->transform.y;
-		model_matrix[3][2] = mesh->transform.z;
+		model_matrix[3][0] = mesh_transform->x; // translation
+		model_matrix[3][1] = mesh_transform->y;
+		model_matrix[3][2] = mesh_transform->z;
 
 		// view matrix (converts from world space to view space, aka accounts for camera transformations)
 		// must apply translations before rotations this time, unlike model matrix!
@@ -550,8 +536,8 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 		GLfloat normal_matrix[4][4];
 
 		generate_rotation_matrices(
-			pitch_matrix, -mesh->transform.pitch,
-			yaw_matrix, -mesh->transform.yaw
+			pitch_matrix, -mesh_transform->pitch,
+			yaw_matrix, -mesh_transform->yaw
 		);
 
 		mat4_mult(yaw_matrix, pitch_matrix, normal_matrix);
@@ -577,7 +563,7 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 		glUseProgram(shader_program_unshaded);
 		glUniformMatrix4fv(glGetUniformLocation(shader_program_unshaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
 
-	} else if (mesh->type == MESH_SPRITE) {
+	} else if (mesh->type == MESH_UI) {
 
 		memset(position_matrix, 0, sizeof(GLfloat) * 16);
 		position_matrix[0][0] = 1;
@@ -585,8 +571,8 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 		position_matrix[2][2] = 1;
 		position_matrix[3][3] = 1;
 
-		position_matrix[3][0] = mesh->transform.x / 200 - 1; // translation (converted from screen [0,400]x[0,240] to UV [-1,1]x[-1,1])
-		position_matrix[3][1] = mesh->transform.y / 120 - 1;
+		position_matrix[3][0] = mesh_transform->x / 200 - 1; // translation (converted from screen [0,400]x[0,240] to UV [-1,1]x[-1,1])
+		position_matrix[3][1] = mesh_transform->y / 120 - 1;
 
 		// load the shader program and the uniforms we just calculated
 		glUseProgram(shader_program_unshaded);
@@ -594,7 +580,7 @@ void draw_mesh(const Transform *camera, const void *void_mesh) {
 	}
 
 	// for sprites ONLY - disable depth buffer testing/writing and backface culling
-	if (mesh->type == MESH_SPRITE) {
+	if (mesh->type == MESH_UI) {
 
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
@@ -634,8 +620,7 @@ void initialize_shaders() {
 			"gl_Position = position_matrix * vec4(position.xy, -position.z, 1.0);" // get final position
 			"normal_camera = (normal_matrix * vec4(normal, 1.0)).xyz;" // get final normal
 			"frag_UV = UV;" // pass along UV
-		"}"
-		,
+		"}",
 		"#version 150 core\n"
 		"uniform sampler2D tex;"
 		"in vec3 normal_camera;"
@@ -656,8 +641,7 @@ void initialize_shaders() {
 		"void main() {"
 			"gl_Position = position_matrix * vec4(position.xy, -position.z, 1.0);" // get final position
 			"frag_UV = UV;" // pass along UV
-		"}"
-		,
+		"}",
 		"#version 150 core\n"
 		"uniform sampler2D tex;"
 		"in vec2 frag_UV;"
