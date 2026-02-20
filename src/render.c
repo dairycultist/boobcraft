@@ -198,6 +198,9 @@ Mesh *import_mesh(const char *obj_path, const char *ppm_path) {
 			
 			sscanf(line, "vn %f %f %f", &n[0], &n[1], &n[2]);
 
+			// idk why I have to do this but it fixes lighting so
+			n[0] = -n[0];
+
 			append_ezarray(&normal_data, n, sizeof(float) * 3);
 		}
 
