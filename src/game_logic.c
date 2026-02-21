@@ -64,29 +64,26 @@ void move_player_x(float dist) {
 
 	camera.x += dist;
 
-	// map collision
-	while (
-		TILE_AT(camera.x + copysign(PLAYER_RADIUS, dist), camera.z + PLAYER_RADIUS) == TILE_EMPTY ||
-		TILE_AT(camera.x + copysign(PLAYER_RADIUS, dist), camera.z - PLAYER_RADIUS) == TILE_EMPTY)
-		camera.x -= copysign(0.01, dist);
-
 	// boundary collision
 	if (camera.x < PLAYER_RADIUS - 0.5)
 		camera.x = PLAYER_RADIUS - 0.5;
 
 	if (camera.x > MAP_W - 0.5 - PLAYER_RADIUS)
 		camera.x = MAP_W - 0.5 - PLAYER_RADIUS;
+
+	// map collision (PLAYER_RADIUS is made smaller to prevent weird float behaviour when converting to map-space (int))
+	if (
+		TILE_AT(camera.x + copysign(PLAYER_RADIUS * 0.95, dist), camera.z + PLAYER_RADIUS * 0.95) == TILE_EMPTY ||
+		TILE_AT(camera.x + copysign(PLAYER_RADIUS * 0.95, dist), camera.z - PLAYER_RADIUS * 0.95) == TILE_EMPTY) {
+		
+		// place player right up against wall
+		camera.x = dist > 0 ? (floor(camera.x) + 0.5 - PLAYER_RADIUS) : (ceil(camera.x) - 0.5 + PLAYER_RADIUS);
+	}
 }
 
 void move_player_z(float dist) {
 
 	camera.z += dist;
-
-	// map collision
-	while (
-		TILE_AT(camera.x + PLAYER_RADIUS, camera.z + copysign(PLAYER_RADIUS, dist)) == TILE_EMPTY ||
-		TILE_AT(camera.x - PLAYER_RADIUS, camera.z + copysign(PLAYER_RADIUS, dist)) == TILE_EMPTY)
-		camera.z -= copysign(0.01, dist);
 
 	// boundary collision
 	if (camera.z < PLAYER_RADIUS - 0.5)
@@ -94,6 +91,15 @@ void move_player_z(float dist) {
 
 	if (camera.z > MAP_H - 0.5 - PLAYER_RADIUS)
 		camera.z = MAP_H - 0.5 - PLAYER_RADIUS;
+
+	// map collision
+	if (
+		TILE_AT(camera.x + PLAYER_RADIUS * 0.95, camera.z + copysign(PLAYER_RADIUS * 0.95, dist)) == TILE_EMPTY ||
+		TILE_AT(camera.x - PLAYER_RADIUS * 0.95, camera.z + copysign(PLAYER_RADIUS * 0.95, dist)) == TILE_EMPTY) {
+		
+		// place player right up against wall
+		camera.z = dist > 0 ? (floor(camera.z) + 0.5 - PLAYER_RADIUS) : (ceil(camera.z) - 0.5 + PLAYER_RADIUS);
+	}
 }
 
 void process(bool up, bool down, bool left, bool right, bool action_1, bool action_2, bool paused) {
