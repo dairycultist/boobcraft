@@ -55,12 +55,26 @@ typedef struct {
 
 typedef struct {
 
-	char data[65536 * 64];
+	char *data;
+	int alloc_size;
 	int byte_count;
 
 } EZArray;
 
 void append_ezarray(EZArray *array, void *data, int data_length) {
+
+	// initialize EZArray if necessary
+	if (!array->data) {
+		
+		array->data = malloc(65536);
+		array->alloc_size = 65536;
+	}
+
+	// grow size of EZArray allocation if necessary
+	while (array->alloc_size < array->byte_count + data_length) {
+
+		array->data = realloc(array->data, array->alloc_size *= 2);
+	}
 
 	memcpy(&array->data[array->byte_count], data, data_length);
 	array->byte_count += data_length;
