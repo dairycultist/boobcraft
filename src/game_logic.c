@@ -17,30 +17,36 @@ static const tile map[MAP_W][MAP_H] = {
 	{ TILE_EMPTY, TILE_FLOOR, TILE_FLOOR, TILE_EMPTY }
 };
 
+Transform transform_zero;
 Transform camera;
 
-Mesh *mesh1;
-Transform mesh1_transform;
-
-Mesh *mesh2;
-Transform mesh2_transform;
-
+Mesh *mesh_map;
 Mesh *sky;
 
-Mesh *sprite;
-Transform sprite_transform;
+Mesh *mesh_miku;
+Transform transform_miku;
+
+Mesh *sprite_gun;
+Transform transform_gun;
+
+Mesh *sprite_paused;
+Transform transform_paused;
 
 int move_time = 0;
 
 void on_start() {
 
-	mesh1 = import_mesh("res/miku.obj", "res/miku.ppm");
-	mesh2 = make_map_mesh("res/tiles.ppm", &map[0][0], MAP_W, MAP_H);
+	mesh_miku = import_mesh("res/miku.obj", "res/miku.ppm");
+	mesh_map = make_map_mesh("res/tiles.ppm", &map[0][0], MAP_W, MAP_H);
 	sky = make_sky_mesh("res/sky.ppm");
-	sprite = make_sprite_mesh("res/gun.ppm"); //make_text_sprite_mesh("HELLO WORLD\nNEW LINE", "res/font.ppm", 6, 7);
+	sprite_gun = make_sprite_mesh("res/gun.ppm");
+	sprite_paused = make_text_sprite_mesh("GAME PAUSED", "res/font.ppm", 6, 7);
 
-	sprite_transform.x = 136;
-	sprite_transform.y = -20;
+	transform_paused.x = (SCREEN_W - (6 * strlen("GAME PAUSED"))) / 2;
+	transform_paused.y = SCREEN_H / 2;
+
+	transform_gun.x = SCREEN_W / 2 - 64;
+	transform_gun.y = -20;
 
 	camera.y = 0.5;
 }
@@ -48,9 +54,10 @@ void on_start() {
 void on_terminate() {
 
 	free_mesh(sky);
-	free_mesh(mesh1);
-	free_mesh(mesh2);
-	free_mesh(sprite);
+	free_mesh(mesh_miku);
+	free_mesh(mesh_map);
+	free_mesh(sprite_gun);
+	free_mesh(sprite_paused);
 }
 
 void move_player_x(float dist) {
@@ -118,19 +125,22 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 		if (left || right || up || down) {
 
 			move_time++;
-			sprite_transform.x = 136 + sin(move_time * 0.2) * 3;
-			sprite_transform.y = -20 + sin(move_time * 0.4) * 3;
+			transform_gun.x = SCREEN_W / 2 - 64 + sin(move_time * 0.2) * 3;
+			transform_gun.y = -20 + sin(move_time * 0.4) * 3;
 		}
 
 		if (action_1) {
-			mesh1_transform.yaw += 0.1;
+			transform_miku.yaw += 0.1;
 		} else if (action_2) {
-			mesh1_transform.yaw -= 0.1;
+			transform_miku.yaw -= 0.1;
 		}
 	}
 
 	draw_mesh(&camera, NULL, sky);
-	draw_mesh(&camera, &mesh1_transform, mesh1);
-	draw_mesh(&camera, &mesh2_transform, mesh2);
-	draw_mesh(&camera, &sprite_transform, sprite);
+	draw_mesh(&camera, &transform_miku, mesh_miku);
+	draw_mesh(&camera, &transform_zero, mesh_map);
+	draw_mesh(&camera, &transform_gun, sprite_gun);
+
+	if (paused)
+		draw_mesh(&camera, &transform_paused, sprite_paused);
 }
