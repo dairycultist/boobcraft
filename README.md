@@ -1,4 +1,4 @@
-Smol retro 3D Doom clone written in C + OpenGL.
+Smol retro FOSS 3D Doom clone written in C + OpenGL.
 
 ## Installation
 
@@ -12,7 +12,13 @@ make run
 
 ## Inspiration/References
 
-I should make doom but worse and in C and it is so much simpler but it's easy to make levels with enemies and rooms and keys and hazards and the collision is simple and the visuals are aesthetic
+I know I like to play FPS games, and I like games with clear objectives, and I like light worldbuilding. I also like lightweight games that can run on a potato.
+
+I want to make a game that has a smol community and that I actually enjoy playing day to day
+
+easy to make levels with enemies and rooms and keys and hazards and the collision is simple and the visuals are aesthetic
+
+https://mods.sm64coopdx.com/mods/cs-karisa.1108/
 
 https://youtu.be/qht68vFaa1M
 
