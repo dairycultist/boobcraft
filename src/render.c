@@ -520,8 +520,8 @@ Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
 					append_ezarray(&data, &data_outside, sizeof(float) * 8 * 6);
 					vertex_count += 6;
 
-					vertex_count += mesh_wall(&data, map, w, h, x, 0, z, TILE_EMPTY, 0.25, 0.5, 0.25, 0.5);
-					vertex_count += mesh_wall(&data, map, w, h, x, 1.0, z, TILE_EMPTY, 0.25, 0.5, 0.25, 0.5);
+					vertex_count += mesh_wall(&data, map, w, h, x, 0, z, TILE_EMPTY, 0.25, 0.5, 0.5, 0.75);
+					vertex_count += mesh_wall(&data, map, w, h, x, 1.0, z, TILE_EMPTY, 0.25, 0.5, 0.75, 1.0);
 					vertex_count += mesh_wall(&data, map, w, h, x, 1.0, z, TILE_FLOOR, 0, 0.25, 0, 0.25);
 					break;
 			}
