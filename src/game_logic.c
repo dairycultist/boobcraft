@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+// TODO add better error reporting for functions like import_mesh
+
 #define TILE_AT(x, z) (map[(int) floor((z) + 0.5)][(int) floor((x) + 0.5)])
 
 #define PLAYER_RADIUS 0.2
@@ -27,8 +29,8 @@ Transform camera;
 Mesh *mesh_map;
 Mesh *sky;
 
-Mesh *mesh_miku;
-Transform transform_miku;
+Mesh *mesh_health;
+Transform transform_health;
 
 Mesh *sprite_gun;
 Transform transform_gun;
@@ -40,11 +42,14 @@ int move_time = 0;
 
 void on_start() {
 
-	mesh_miku = import_mesh("res/miku.obj", "res/miku.ppm");
+	mesh_health = import_mesh("res/health.obj", "res/health.ppm");
 	mesh_map = make_map_mesh("res/tiles.ppm", &map[0][0], MAP_W, MAP_H);
 	sky = make_sky_mesh("res/sky.ppm");
 	sprite_gun = make_sprite_mesh("res/gun.ppm");
 	sprite_paused = make_text_sprite_mesh("GAME PAUSED", "res/font.ppm", 6, 7);
+
+	transform_health.y = 0.2;
+	transform_health.pitch = 0.2;
 
 	transform_paused.x = (SCREEN_W - (6 * strlen("GAME PAUSED"))) / 2;
 	transform_paused.y = SCREEN_H / 2;
@@ -58,7 +63,7 @@ void on_start() {
 void on_terminate() {
 
 	free_mesh(sky);
-	free_mesh(mesh_miku);
+	free_mesh(mesh_health);
 	free_mesh(mesh_map);
 	free_mesh(sprite_gun);
 	free_mesh(sprite_paused);
@@ -139,15 +144,12 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 			transform_gun.y = -20 + sin(move_time * 0.4) * 3;
 		}
 
-		if (action_1) {
-			transform_miku.yaw += 0.1;
-		} else if (action_2) {
-			transform_miku.yaw -= 0.1;
-		}
+		// health item spin
+		transform_health.yaw += 0.1;
 	}
 
 	draw_mesh(&camera, NULL, sky);
-	draw_mesh(&camera, &transform_miku, mesh_miku);
+	draw_mesh(&camera, &transform_health, mesh_health);
 	draw_mesh(&camera, &transform_zero, mesh_map);
 	draw_mesh(&camera, &transform_gun, sprite_gun);
 
