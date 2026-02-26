@@ -504,6 +504,26 @@ Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
 					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_EMPTY, 0, 0.25, 0, 0.25);
 					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_FLOOR, 0, 0.25, 0, 0.25);
 					break;
+				
+				case TILE_OUTSIDE:;
+
+					float data_outside[] = {
+						// floor
+						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0.25, 	0.25,
+						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 0.5, 	0.5,
+						x - 0.5, 0, z + 0.5, 0, 0, 0.5, 0.5, 	0.25,
+						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0.25, 	0.25,
+						x + 0.5, 0, z - 0.5, 0, 0, 0.5, 0.25, 	0.5,
+						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 0.5, 	0.5,
+					};
+
+					append_ezarray(&data, &data_outside, sizeof(float) * 8 * 6);
+					vertex_count += 6;
+
+					vertex_count += mesh_wall(&data, map, w, h, x, 0, z, TILE_EMPTY, 0, 0.25, 0, 0.25);
+					vertex_count += mesh_wall(&data, map, w, h, x, 1.0, z, TILE_EMPTY, 0, 0.25, 0, 0.25);
+					vertex_count += mesh_wall(&data, map, w, h, x, 1.0, z, TILE_FLOOR, 0, 0.25, 0, 0.25);
+					break;
 			}
 		}
 	}

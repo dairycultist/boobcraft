@@ -9,6 +9,7 @@ typedef unsigned char tile;
 #define TILE_EMPTY 0
 #define TILE_FLOOR 1
 #define TILE_LAVA 2
+#define TILE_OUTSIDE 3
 
 #define SCREEN_W 400
 #define SCREEN_H 240
