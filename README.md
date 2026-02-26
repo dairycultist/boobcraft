@@ -14,6 +14,8 @@ make run
 
 I know I like to play FPS games, and I like games with clear objectives, and I like light worldbuilding. I also like lightweight games that can run on a potato.
 
+ancient alien temple on another planet that is not as deserted as you thought
+
 I want to make a game that has a smol community and that I actually enjoy playing day to day
 
 easy to make levels with enemies and rooms and keys and hazards and the collision is simple and the visuals are aesthetic
