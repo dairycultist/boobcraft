@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "item.c"
+
 // TODO add better error reporting for functions like import_mesh
 
 #define TILE_AT(x, z) (map[(int) floor((z) + 0.5)][(int) floor((x) + 0.5)])
@@ -29,8 +31,7 @@ Transform camera;
 Mesh *mesh_map;
 Mesh *sky;
 
-Mesh *mesh_health;
-Transform transform_health;
+Item health_item;
 
 Mesh *sprite_gun;
 Transform transform_gun;
@@ -42,14 +43,12 @@ int move_time = 0;
 
 void on_start() {
 
-	mesh_health = import_mesh("res/health.obj", "res/health.ppm");
 	mesh_map = make_map_mesh("res/tiles.ppm", &map[0][0], MAP_W, MAP_H);
 	sky = make_sky_mesh("res/sky.ppm");
 	sprite_gun = make_sprite_mesh("res/gun.ppm");
 	sprite_paused = make_text_sprite_mesh("GAME PAUSED", "res/font.ppm", 6, 7);
 
-	transform_health.y = 0.2;
-	transform_health.pitch = 0.2;
+	init_item(&health_item, 0, 5);
 
 	transform_paused.x = (SCREEN_W - (6 * strlen("GAME PAUSED"))) / 2;
 	transform_paused.y = SCREEN_H / 2;
@@ -63,7 +62,7 @@ void on_start() {
 void on_terminate() {
 
 	free_mesh(sky);
-	free_mesh(mesh_health);
+	free_mesh(health_item.mesh);
 	free_mesh(mesh_map);
 	free_mesh(sprite_gun);
 	free_mesh(sprite_paused);
@@ -145,11 +144,11 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 		}
 
 		// health item spin
-		transform_health.yaw += 0.1;
+		process_item(&health_item);
 	}
 
 	draw_mesh(&camera, NULL, sky);
-	draw_mesh(&camera, &transform_health, mesh_health);
+	draw_mesh(&camera, &health_item.transform, health_item.mesh);
 	draw_mesh(&camera, &transform_zero, mesh_map);
 	draw_mesh(&camera, &transform_gun, sprite_gun);
 
