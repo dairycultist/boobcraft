@@ -446,20 +446,20 @@ int mesh_wall_corner(EZArray *data, const tile* map, int w, int h, int x, int z,
 	float data_wall[] = {
 		// +z +x
 		x + 0.5,	2,	z + 0.5,	-0.7, 0, -0.7,	u_mid,			v_max,
-		x + 0.5,	0,	z + 0.2,	-0.7, 0, -0.7,	u_mid - 0.05,	v_min,
-		x + 0.2,	0,	z + 0.5,	-0.7, 0, -0.7,	u_mid + 0.05,	v_min,
+		x + 0.5,	0,	z + 0.2,	-1, 0, 0,		u_mid - 0.05,	v_min,
+		x + 0.2,	0,	z + 0.5,	0, 0, -1,		u_mid + 0.05,	v_min,
 		// +x -z
 		x + 0.5,	2,	z - 0.5,	-0.7, 0, 0.7,	u_mid,			v_max,
-		x + 0.2,	0,	z - 0.5,	-0.7, 0, 0.7,	u_mid - 0.05,	v_min,
-		x + 0.5,	0,	z - 0.2,	-0.7, 0, 0.7,	u_mid + 0.05,	v_min,
+		x + 0.2,	0,	z - 0.5,	0, 0, 1,		u_mid - 0.05,	v_min,
+		x + 0.5,	0,	z - 0.2,	-1, 0, 0,		u_mid + 0.05,	v_min,
 		// -z -x
 		x - 0.5,	2,	z - 0.5,	0.7, 0, 0.7,	u_mid,			v_max,
-		x - 0.5,	0,	z - 0.2,	0.7, 0, 0.7,	u_mid - 0.05,	v_min,
-		x - 0.2,	0,	z - 0.5,	0.7, 0, 0.7,	u_mid + 0.05,	v_min,
+		x - 0.5,	0,	z - 0.2,	1, 0, 0,		u_mid - 0.05,	v_min,
+		x - 0.2,	0,	z - 0.5,	0, 0, 1,		u_mid + 0.05,	v_min,
 		// -x +z
 		x - 0.5,	2,	z + 0.5,	0.7, 0, -0.7,	u_mid,			v_max,
-		x - 0.2,	0,	z + 0.5,	0.7, 0, -0.7,	u_mid - 0.05,	v_min,
-		x - 0.5,	0,	z + 0.2,	0.7, 0, -0.7,	u_mid + 0.05,	v_min,
+		x - 0.2,	0,	z + 0.5,	0, 0, -1,		u_mid - 0.05,	v_min,
+		x - 0.5,	0,	z + 0.2,	1, 0, 0,		u_mid + 0.05,	v_min,
 	};
 
 	int vertex_count = 0;
