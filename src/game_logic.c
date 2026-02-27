@@ -31,8 +31,6 @@ Transform camera;
 Mesh *mesh_map;
 Mesh *sky;
 
-Item health_item;
-
 Mesh *sprite_gun;
 Transform transform_gun;
 
@@ -48,7 +46,7 @@ void on_start() {
 	sprite_gun = make_sprite_mesh("res/gun.ppm");
 	sprite_paused = make_text_sprite_mesh("GAME PAUSED", "res/font.ppm", 6, 7);
 
-	init_item(&health_item, 0, 5);
+	add_item(0, 5);
 
 	transform_paused.x = (SCREEN_W - (6 * strlen("GAME PAUSED"))) / 2;
 	transform_paused.y = SCREEN_H / 2;
@@ -61,8 +59,9 @@ void on_start() {
 
 void on_terminate() {
 
+	free_items();
+
 	free_mesh(sky);
-	free_mesh(health_item.mesh);
 	free_mesh(mesh_map);
 	free_mesh(sprite_gun);
 	free_mesh(sprite_paused);
@@ -143,14 +142,15 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 			transform_gun.y = -20 + sin(move_time * 0.4) * 3;
 		}
 
-		// health item spin
-		process_item(&health_item);
+		// item spin + collision
+		process_items();
 	}
 
 	draw_mesh(&camera, NULL, sky);
-	draw_mesh(&camera, &health_item.transform, health_item.mesh);
 	draw_mesh(&camera, &transform_zero, mesh_map);
 	draw_mesh(&camera, &transform_gun, sprite_gun);
+
+	draw_items(&camera);
 
 	if (paused)
 		draw_mesh(&camera, &transform_paused, sprite_paused);
