@@ -441,14 +441,25 @@ int mesh_wall(EZArray *data, const tile* map, int w, int h, int x, int y, int z,
 
 int mesh_wall_corner(EZArray *data, const tile* map, int w, int h, int x, int z, tile to_block, float u_min, float u_max, float v_min, float v_max) {
 
+	const float u_mid = (u_min + u_max) / 2;
+
 	float data_wall[] = {
 		// +z +x
-		x + 0.5,	1,	z + 0.5,	0, 0, -1,	u_max,	v_max,
-		x + 0.5,	0,	z - 0.5,	0, 0, -1,	u_min,	v_max,
-		x - 0.5,	0,	z + 0.5,	0, 0, -1,	u_min,	v_min,
+		x + 0.5,	2,	z + 0.5,	-0.7, 0, -0.7,	u_mid,			v_max,
+		x + 0.5,	0,	z + 0.2,	-0.7, 0, -0.7,	u_mid - 0.05,	v_min,
+		x + 0.2,	0,	z + 0.5,	-0.7, 0, -0.7,	u_mid + 0.05,	v_min,
 		// +x -z
+		x + 0.5,	2,	z - 0.5,	-0.7, 0, 0.7,	u_mid,			v_max,
+		x + 0.2,	0,	z - 0.5,	-0.7, 0, 0.7,	u_mid - 0.05,	v_min,
+		x + 0.5,	0,	z - 0.2,	-0.7, 0, 0.7,	u_mid + 0.05,	v_min,
 		// -z -x
+		x - 0.5,	2,	z - 0.5,	0.7, 0, 0.7,	u_mid,			v_max,
+		x - 0.5,	0,	z - 0.2,	0.7, 0, 0.7,	u_mid - 0.05,	v_min,
+		x - 0.2,	0,	z - 0.5,	0.7, 0, 0.7,	u_mid + 0.05,	v_min,
 		// -x +z
+		x - 0.5,	2,	z + 0.5,	0.7, 0, -0.7,	u_mid,			v_max,
+		x - 0.2,	0,	z + 0.5,	0.7, 0, -0.7,	u_mid - 0.05,	v_min,
+		x - 0.5,	0,	z + 0.2,	0.7, 0, -0.7,	u_mid + 0.05,	v_min,
 	};
 
 	int vertex_count = 0;
@@ -463,21 +474,21 @@ int mesh_wall_corner(EZArray *data, const tile* map, int w, int h, int x, int z,
 		append_ezarray(data, data_wall, sizeof(float) * 8 * 3);
 		vertex_count += 3;
 	}
-	// if (x_plus && z_mins) {
+	if (x_plus && z_mins) {
 
-	// 	append_ezarray(data, data_wall + 8 * 6, sizeof(float) * 8 * 6);
-	// 	vertex_count += 6;
-	// }
-	// if (z_mins && x_mins) {
+		append_ezarray(data, data_wall + 8 * 3, sizeof(float) * 8 * 3);
+		vertex_count += 3;
+	}
+	if (z_mins && x_mins) {
 
-	// 	append_ezarray(data, data_wall + 8 * 6 * 2, sizeof(float) * 8 * 6);
-	// 	vertex_count += 6;
-	// }
-	// if (x_mins && z_plus) {
+		append_ezarray(data, data_wall + 8 * 3 * 2, sizeof(float) * 8 * 3);
+		vertex_count += 3;
+	}
+	if (x_mins && z_plus) {
 
-	// 	append_ezarray(data, data_wall + 8 * 6 * 3, sizeof(float) * 8 * 6);
-	// 	vertex_count += 6;
-	// }
+		append_ezarray(data, data_wall + 8 * 3 * 3, sizeof(float) * 8 * 3);
+		vertex_count += 3;
+	}
 
 	return vertex_count;
 }
@@ -563,7 +574,7 @@ Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
 					append_ezarray(&data, &data_outside, sizeof(float) * 8 * 6);
 					vertex_count += 6;
 
-					vertex_count += mesh_wall_corner(&data, map, w, h, x, z, TILE_EMPTY, 0.25, 0.5, 0.5, 0.75);
+					vertex_count += mesh_wall_corner(&data, map, w, h, x, z, TILE_EMPTY, 0.25, 0.5, 0.5, 1.0);
 					vertex_count += mesh_wall(&data, map, w, h, x, 0, z, TILE_EMPTY, 0.25, 0.5, 0.5, 0.75);
 					vertex_count += mesh_wall(&data, map, w, h, x, 1.0, z, TILE_EMPTY, 0.25, 0.5, 0.75, 1.0);
 					vertex_count += mesh_wall(&data, map, w, h, x, 1.0, z, TILE_FLOOR, 0, 0.25, 0, 0.25);
