@@ -46,7 +46,8 @@ void on_start() {
 	sprite_gun = make_sprite_mesh("res/gun.ppm");
 	sprite_paused = make_text_sprite_mesh("GAME PAUSED", "res/font.ppm", 6, 7);
 
-	add_item(0, 5);
+	add_item(0, 5, ITEM_HEALTH);
+	add_item(3, 0, ITEM_HEALTH);
 
 	transform_paused.x = (SCREEN_W - (6 * strlen("GAME PAUSED"))) / 2;
 	transform_paused.y = SCREEN_H / 2;
@@ -143,7 +144,7 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 		}
 
 		// item spin + collision
-		process_items();
+		process_items(&camera);
 	}
 
 	// draw world meshes

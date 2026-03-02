@@ -1,40 +1,94 @@
+#define ITEM_PICKUP_DISTANCE 0.5
+#define MAX_ITEMS 5
+
+typedef enum {
+
+	ITEM_UNUSED,
+	ITEM_HEALTH
+
+} ItemType;
 
 typedef struct {
 
+	ItemType type;
 	Mesh *mesh;
 	Transform transform;
-	// TODO add type enum
 
 } Item;
 
-Item items;
+Item items[MAX_ITEMS];
 
 // adds an item to the registry
-void add_item(int x, int z) { // TODO add type enum
+void add_item(int x, int z, ItemType type) {
 
-	items.mesh = import_mesh("res/health.obj", "res/health.ppm");
+	// find an empty slot
+	Item *item = NULL;
 
-	items.transform.x = (float) x;
-	items.transform.z = (float) z;
+	for (int i = 0; i < MAX_ITEMS; i++) {
 
-	items.transform.y = 0.2;
-	items.transform.pitch = 0.2;
+		if (items[i].type == ITEM_UNUSED) {
+
+			item = items + i;
+			break;
+		}
+	}
+
+	if (!item) {
+
+		printf("Failed to add an item.\n");
+		return;
+	}
+
+	// TODO switch statement for ItemType
+	item->mesh = import_mesh("res/health.obj", "res/health.ppm");
+
+	item->type = type;
+
+	item->transform.x = (float) x;
+	item->transform.z = (float) z;
+
+	item->transform.y = 0.2;
+	item->transform.pitch = 0.2;
+	item->transform.yaw = 0.0;
 }
 
 // process all items in the registry
-void process_items() {
+void process_items(Transform *camera) {
 
-	items.transform.yaw += 0.1;
+	for (int i = 0; i < MAX_ITEMS; i++) {
 
-	// TODO player collision detection, in which case apply items effect
+		if (items[i].type != ITEM_UNUSED) {
+
+			items[i].transform.yaw += 0.1;
+
+			// player collision detection (King's distance)
+			if (items[i].mesh && fmax(fabs(items[i].transform.x - camera->x), fabs(items[i].transform.z - camera->z)) < ITEM_PICKUP_DISTANCE) {
+
+				// apply item's effect
+
+				// free item
+				free_mesh(items[i].mesh);
+				items[i].type = ITEM_UNUSED;
+				items[i].mesh = NULL;
+			}
+		}
+	}
 }
 
 void draw_items(Transform *camera) {
 
-	draw_mesh(camera, &items.transform, items.mesh);
+	for (int i = 0; i < MAX_ITEMS; i++) {
+
+		if (items[i].type != ITEM_UNUSED)
+			draw_mesh(camera, &items[i].transform, items[i].mesh);
+	}
 }
 
 void free_items() {
 
-	free_mesh(items.mesh);
+	for (int i = 0; i < MAX_ITEMS; i++) {
+
+		if (items[i].type != ITEM_UNUSED)
+			free_mesh(items[i].mesh);
+	}
 }

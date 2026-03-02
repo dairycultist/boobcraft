@@ -783,8 +783,11 @@ void draw_mesh(const Transform *camera, const Transform *mesh_transform, const M
 	glDrawArrays(GL_TRIANGLES, 0, mesh->vertex_count);
 }
 
-// TODO proper OpenGL-compliant freeing of meshes
 void free_mesh(Mesh *mesh) {
+
+	// OpenGL-compliant free
+	glDeleteVertexArrays(1, &mesh->vertex_array);
+	glDeleteTextures(1, &mesh->texture);
 
 	free(mesh);
 }
