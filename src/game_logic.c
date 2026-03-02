@@ -146,11 +146,13 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 		process_items();
 	}
 
+	// draw world meshes
 	draw_mesh(&camera, NULL, sky);
 	draw_mesh(&camera, &transform_zero, mesh_map);
-	draw_mesh(&camera, &transform_gun, sprite_gun);
-
 	draw_items(&camera);
+
+	// draw UI elements
+	draw_mesh(&camera, &transform_gun, sprite_gun);
 
 	if (paused)
 		draw_mesh(&camera, &transform_paused, sprite_paused);

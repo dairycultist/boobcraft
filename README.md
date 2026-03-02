@@ -22,6 +22,8 @@ I want to make a game that has a smol community and that I actually enjoy playin
 
 easy to make levels with enemies and rooms and keys and hazards and the collision is simple and the visuals are aesthetic
 
+the lore is that you're part of a lunar colony in a far away solar system that got murked by alien body snatchers, letting me make all the enemies hot babes
+
 https://mods.sm64coopdx.com/mods/cs-karisa.1108/
 
 https://youtu.be/qht68vFaa1M
