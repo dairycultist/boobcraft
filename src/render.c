@@ -529,7 +529,7 @@ Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
 					append_ezarray(&data, &data_floor, sizeof(float) * 8 * 12);
 					vertex_count += 12;
 
-					vertex_count += mesh_wall(&data, map, w, h, x, 0, z, TILE_EMPTY, 0, 0.25, 0, 0.25);
+					vertex_count += mesh_wall(&data, map, w, h, x, 0, z, TILE_EMPTY, 0.75, 1, 0, 0.25);
 					break;
 
 				case TILE_LAVA:;
@@ -554,9 +554,9 @@ Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
 					append_ezarray(&data, &data_lava, sizeof(float) * 8 * 12);
 					vertex_count += 12;
 
-					vertex_count += mesh_wall(&data, map, w, h, x,  0, z, TILE_EMPTY, 0, 0.25, 0, 0.25);
-					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_EMPTY, 0, 0.25, 0, 0.25);
-					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_FLOOR, 0, 0.25, 0, 0.25);
+					vertex_count += mesh_wall(&data, map, w, h, x,  0, z, TILE_EMPTY, 0.75, 1, 0, 0.25);
+					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_EMPTY, 0.75, 1, 0, 0.25);
+					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_FLOOR, 0.75, 1, 0, 0.25);
 					break;
 				
 				case TILE_OUTSIDE:;

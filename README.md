@@ -30,6 +30,8 @@ https://youtu.be/qht68vFaa1M
 
 https://x.com/KenneyNL/status/2023770424404840520
 
+https://x.com/roger_creus_art/status/2028456790287958482
+
 [Miku model used for testing](https://sketchfab.com/3d-models/hatsune-miku-low-poly-6668784e9dfa46ba92bc28f85d8154e5)
 
 [Skybox texture](https://freestylized.com/skybox/sky_27/)
