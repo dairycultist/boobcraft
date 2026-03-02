@@ -32,4 +32,4 @@ https://x.com/KenneyNL/status/2023770424404840520
 
 [Miku model used for testing](https://sketchfab.com/3d-models/hatsune-miku-low-poly-6668784e9dfa46ba92bc28f85d8154e5)
 
-[Skybox texture](https://opengameart.org/content/sky-box-sunny-day)
+[Skybox texture](https://freestylized.com/skybox/sky_27/)
