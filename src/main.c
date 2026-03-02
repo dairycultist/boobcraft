@@ -138,6 +138,21 @@ int main() {
 
 				running = FALSE;
 
+			} else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
+
+				if (SCREEN_W / (float) SCREEN_H > event.window.data1 / (float) event.window.data2) {
+
+					int h = SCREEN_H * event.window.data1 / SCREEN_W;
+
+					glViewport(0, (event.window.data2 - h) / 2, event.window.data1, h);
+
+				} else {
+
+					int w = SCREEN_W * event.window.data2 / SCREEN_H;
+
+					glViewport((event.window.data1 - w) / 2, 0, w, event.window.data2);
+				}
+			
 			} else if (event.type == SDL_KEYDOWN && event.key.repeat == 0 && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
 
 				SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
