@@ -119,9 +119,48 @@ int main() {
 	
 	on_start();
 
+	// create frame buffer for original-resolution mode (as opposed to native-resolution mode)
+	// involves first creating two texures, one for color and one for depth, and then attaching to that frame buffer
+	GLuint fbo_color;
+	glGenTextures(1, &fbo_color);
+	glBindTexture(GL_TEXTURE_2D, fbo_color);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	GLuint fbo_depth;
+	glGenTextures(1, &fbo_depth);
+	glBindTexture(GL_TEXTURE_2D, fbo_depth);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCREEN_W, SCREEN_H, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	GLuint fbo;
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo_color, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fbo_depth, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// ...and a mesh for that frame buffer
+	const float data[] = {
+		0, 0, 1, 0, 0,
+		0, 2, 1, 0, 1,
+		2, 2, 1, 1, 1,
+		0, 0, 1, 0, 0,
+		2, 2, 1, 1, 1,
+		2, 0, 1, 1, 0,
+	};
+	
+	Mesh *fbo_mesh = mesh_builder((const float *) data, sizeof(float) * 5 * 6, 6, "res/sky.ppm", MESH_UI); // TODO refactor mesh builder to take in a texture GLuint, not a PPM path
+	fbo_mesh->texture = fbo_color;
+
 	// process events until window is closed
 	SDL_Event event;
 	bool running = TRUE;
+	bool use_original_res = TRUE;
 
 	bool up       = FALSE;
 	bool down     = FALSE;
@@ -129,6 +168,8 @@ int main() {
 	bool right    = FALSE;
 	bool action_1 = FALSE;
 	bool action_2 = FALSE;
+
+	int window_w = SCREEN_W, window_h = SCREEN_H, window_x = 0, window_y = 0;
 
 	while (running) {
 
@@ -142,16 +183,22 @@ int main() {
 
 				if (SCREEN_W / (float) SCREEN_H > event.window.data1 / (float) event.window.data2) {
 
-					int h = SCREEN_H * event.window.data1 / SCREEN_W;
+					window_w = event.window.data1;
+					window_h = SCREEN_H * event.window.data1 / SCREEN_W;
 
-					glViewport(0, (event.window.data2 - h) / 2, event.window.data1, h);
+					window_x = 0;
+					window_y = (event.window.data2 - window_h) / 2;
 
 				} else {
 
-					int w = SCREEN_W * event.window.data2 / SCREEN_H;
+					window_w = SCREEN_W * event.window.data2 / SCREEN_H;
+					window_h = event.window.data2;
 
-					glViewport((event.window.data1 - w) / 2, 0, w, event.window.data2);
+					window_x = (event.window.data1 - window_w) / 2;
+					window_y = 0;
 				}
+
+				glViewport(window_x, window_y, window_w, window_h);
 			
 			} else if (event.type == SDL_KEYDOWN && event.key.repeat == 0 && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
 
@@ -173,6 +220,8 @@ int main() {
 						action_1 = TRUE;
 					} else if (event.key.keysym.scancode == SDL_SCANCODE_X) {
 						action_2 = TRUE;
+					} else if (event.key.keysym.scancode == SDL_SCANCODE_O) {
+						use_original_res = !use_original_res;
 					}
 				}
 
@@ -195,7 +244,27 @@ int main() {
 			}
 		}
 
+		if (use_original_res) {
+
+			// switch to rendering to framebuffer
+			glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+			glViewport(0, 0, SCREEN_W, SCREEN_H);
+
+			// clear that mf
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		}
+
 		process(up, down, left, right, action_1, action_2, !SDL_GetRelativeMouseMode());
+
+		if (use_original_res) {
+
+			// switch to rendering to screen
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(window_x, window_y, window_w, window_h);
+
+			// render framebuffer to screen
+			draw_mesh(NULL, &transform_zero, fbo_mesh);
+		}
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1000 / 30);
