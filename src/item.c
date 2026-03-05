@@ -14,7 +14,8 @@ typedef struct {
 	Mesh *mesh;
 	Transform transform;
 
-} Item;
+} Item; // TODO turn into Entities, which have a type (which determines the singleton model, AABB collider size, and maybe collidability)
+// enemies, props, items, and the level end trigger will be entities
 
 Item items[MAX_ITEMS];
 
