@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "item.c"
+#include "entity.c"
 
 // TODO add better error reporting for functions like import_mesh
 
@@ -46,8 +46,8 @@ void on_start() {
 	sprite_gun = make_sprite_mesh("res/gun.ppm");
 	sprite_paused = make_text_sprite_mesh("GAME PAUSED", "res/font.ppm", 6, 7);
 
-	add_item(0, 5, ITEM_HEALTH);
-	add_item(3, 0, ITEM_HEALTH);
+	add_entity(0, 5, ITEM_HEALTH);
+	add_entity(3, 0, ITEM_HEALTH);
 
 	transform_paused.x = (SCREEN_W - (6 * strlen("GAME PAUSED"))) / 2;
 	transform_paused.y = SCREEN_H / 2;
@@ -60,7 +60,7 @@ void on_start() {
 
 void on_terminate() {
 
-	free_items();
+	free_entities();
 
 	free_mesh(sky);
 	free_mesh(mesh_map);
@@ -143,14 +143,13 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 			transform_gun.y = -20 + sin(move_time * 0.4) * 3;
 		}
 
-		// item spin + collision
-		process_items(&camera);
+		process_entities(&camera);
 	}
 
 	// draw world meshes
 	draw_mesh(&camera, NULL, sky);
 	draw_mesh(&camera, &transform_zero, mesh_map);
-	draw_items(&camera);
+	draw_entities(&camera);
 
 	// draw UI elements
 	draw_mesh(&camera, &transform_gun, sprite_gun);
