@@ -1,5 +1,7 @@
 // this file handles both 2D and 3D mesh data creation, rendering, manipulation, and destruction
 
+#define UV_EPSILON (1.0 / 512 / 2)
+
 // shader programs
 static GLuint sp_shaded;
 static GLuint sp_unshaded;
@@ -137,9 +139,14 @@ static Mesh *mesh_builder(const float data[], const int byte_count, const int ve
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	// filter linear
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// texture filtering
+	if (type == MESH_UI || type == MESH_SHADED) { // TODO make MESH_SHADED linear
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	} else {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
 
 	// write texture data
 	import_ppm(GL_TEXTURE_2D, ppm_path);
@@ -253,47 +260,47 @@ Mesh *make_sky_mesh(const char *ppm_path) {
 	// hardcoded inverted cube with sidelength 100 units (aka a cheap skybox)
 	const float data[] = {
 		// +z
-		50, 50, 50, 0.5, 0.75,
-		-50, 50, 50, 0.25, 0.75,
-		-50, -50, 50, 0.25, 0.5,
-		50, 50, 50, 0.5, 0.75,
-		-50, -50, 50, 0.25, 0.5,
-		50, -50, 50, 0.5, 0.5,
+		50, 50, 50, 	0.5  - UV_EPSILON, 0.75 - UV_EPSILON,
+		-50, 50, 50, 	0.25 + UV_EPSILON, 0.75 - UV_EPSILON,
+		-50, -50, 50, 	0.25 + UV_EPSILON, 0.5  + UV_EPSILON,
+		50, 50, 50, 	0.5  - UV_EPSILON, 0.75 - UV_EPSILON,
+		-50, -50, 50, 	0.25 + UV_EPSILON, 0.5  + UV_EPSILON,
+		50, -50, 50, 	0.5  - UV_EPSILON, 0.5  + UV_EPSILON,
 		// -z
-		50, 50, -50, 0.75, 0.75,
-		-50, -50, -50, 1, 0.5,
-		-50, 50, -50, 1, 0.75,
-		50, 50, -50, 0.75, 0.75,
-		50, -50, -50, 0.75, 0.5,
-		-50, -50, -50, 1, 0.5,
+		50, 50, -50, 	0.75 + UV_EPSILON, 0.75 - UV_EPSILON,
+		-50, -50, -50, 	1    - UV_EPSILON, 0.5  + UV_EPSILON,
+		-50, 50, -50, 	1    - UV_EPSILON, 0.75 - UV_EPSILON,
+		50, 50, -50, 	0.75 + UV_EPSILON, 0.75 - UV_EPSILON,
+		50, -50, -50, 	0.75 + UV_EPSILON, 0.5  + UV_EPSILON,
+		-50, -50, -50, 	1    - UV_EPSILON, 0.5  + UV_EPSILON,
 		// +x
-		50, 50, 50, 0.5, 0.75,
-		50, -50, -50, 0.75, 0.5,
-		50, 50, -50, 0.75, 0.75,
-		50, 50, 50, 0.5, 0.75,
-		50, -50, 50, 0.5, 0.5,
-		50, -50, -50, 0.75, 0.5,
+		50, 50, 50, 	0.5  + UV_EPSILON, 0.75 - UV_EPSILON,
+		50, -50, -50, 	0.75 - UV_EPSILON, 0.5  + UV_EPSILON,
+		50, 50, -50, 	0.75 - UV_EPSILON, 0.75 - UV_EPSILON,
+		50, 50, 50, 	0.5  + UV_EPSILON, 0.75 - UV_EPSILON,
+		50, -50, 50, 	0.5  + UV_EPSILON, 0.5  + UV_EPSILON,
+		50, -50, -50, 	0.75 - UV_EPSILON, 0.5  + UV_EPSILON,
 		// -x
-		-50, 50, 50, 0.25, 0.75,
-		-50, 50, -50, 0, 0.75,
-		-50, -50, -50, 0, 0.5,
-		-50, 50, 50, 0.25, 0.75,
-		-50, -50, -50, 0, 0.5,
-		-50, -50, 50, 0.25, 0.5,
+		-50, 50, 50, 	0.25 - UV_EPSILON, 0.75 - UV_EPSILON,
+		-50, 50, -50, 	0    + UV_EPSILON, 0.75 - UV_EPSILON,
+		-50, -50, -50, 	0    + UV_EPSILON, 0.5  + UV_EPSILON,
+		-50, 50, 50, 	0.25 - UV_EPSILON, 0.75 - UV_EPSILON,
+		-50, -50, -50, 	0    + UV_EPSILON, 0.5  + UV_EPSILON,
+		-50, -50, 50, 	0.25 - UV_EPSILON, 0.5  + UV_EPSILON,
 		// +y
-		50, 50, 50, 0.5, 0.75,
-		-50, 50, -50, 0.25, 1,
-		-50, 50, 50, 0.25, 0.75,
-		50, 50, 50, 0.5, 0.75,
-		50, 50, -50, 0.5, 1,
-		-50, 50, -50, 0.25, 1,
+		50, 50, 50, 	0.5  - UV_EPSILON, 0.75 + UV_EPSILON,
+		-50, 50, -50, 	0.25 + UV_EPSILON, 1    - UV_EPSILON,
+		-50, 50, 50, 	0.25 + UV_EPSILON, 0.75 + UV_EPSILON,
+		50, 50, 50, 	0.5  - UV_EPSILON, 0.75 + UV_EPSILON,
+		50, 50, -50, 	0.5  - UV_EPSILON, 1    - UV_EPSILON,
+		-50, 50, -50, 	0.25 + UV_EPSILON, 1    - UV_EPSILON,
 		// -y
-		50, -50, 50, 0.5, 0.5,
-		-50, -50, 50, 0.25, 0.5,
-		-50, -50, -50, 0.25, 0.25,
-		50, -50, 50, 0.5, 0.5,
-		-50, -50, -50, 0.25, 0.25,
-		50, -50, -50, 0.5, 0.25
+		50, -50, 50, 	0.5  - UV_EPSILON, 0.5  - UV_EPSILON,
+		-50, -50, 50, 	0.25 + UV_EPSILON, 0.5  - UV_EPSILON,
+		-50, -50, -50, 	0.25 + UV_EPSILON, 0.25 + UV_EPSILON,
+		50, -50, 50, 	0.5  - UV_EPSILON, 0.5  - UV_EPSILON,
+		-50, -50, -50, 	0.25 + UV_EPSILON, 0.25 + UV_EPSILON,
+		50, -50, -50, 	0.5  - UV_EPSILON, 0.25 + UV_EPSILON
 	};
 
 	return mesh_builder((const float *) data, sizeof(float) * 5 * 36, 36, ppm_path, MESH_SKY);
