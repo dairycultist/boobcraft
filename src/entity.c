@@ -4,7 +4,10 @@
 typedef enum {
 
 	UNUSED,
-	ITEM_HEALTH
+	ITEM_HEALTH,
+	ENEMY_TEST // TODO use miku model for testing
+
+	// enemies, props, items, and the level end trigger will be entities
 
 } EntityType;
 
@@ -13,7 +16,7 @@ typedef struct {
 	EntityType type; // determines the singleton model, AABB collider size, and maybe collidability
 	Transform transform;
 
-} Entity; // enemies, props, items, and the level end trigger will be entities
+} Entity;
 
 Entity entities[MAX_ENTITIES];
 
