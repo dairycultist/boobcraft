@@ -46,6 +46,7 @@ void on_start() {
 	sprite_gun = make_sprite_mesh("res/gun.ppm");
 	sprite_paused = make_text_sprite_mesh("GAME PAUSED", "res/font.ppm", 6, 7);
 
+	init_entity_types();
 	add_entity(0, 5, ITEM_HEALTH);
 	add_entity(3, 0, ITEM_HEALTH);
 

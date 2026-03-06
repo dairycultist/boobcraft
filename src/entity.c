@@ -11,12 +11,18 @@ typedef enum {
 typedef struct {
 
 	EntityType type; // determines the singleton model, AABB collider size, and maybe collidability
-	Mesh *mesh;
 	Transform transform;
 
 } Entity; // enemies, props, items, and the level end trigger will be entities
 
 Entity entities[MAX_ENTITIES];
+
+static Mesh *item_health_mesh;
+
+void init_entity_types() {
+
+	item_health_mesh = import_mesh("res/health.obj", "res/health.ppm");
+}
 
 // adds an entity to the registry
 void add_entity(int x, int z, EntityType type) {
@@ -40,8 +46,6 @@ void add_entity(int x, int z, EntityType type) {
 	}
 
 	// TODO switch statement for EntityType
-	entity->mesh = import_mesh("res/health.obj", "res/health.ppm");
-
 	entity->type = type;
 
 	entity->transform.x = (float) x;
@@ -57,22 +61,25 @@ void process_entities(Transform *camera) {
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 
-		if (entities[i].type != UNUSED) {
+		switch (entities[i].type) {
 
-			// TODO switch statement for EntityType
-			// item spin + collision
-			entities[i].transform.yaw += 0.1;
+			case UNUSED: break;
 
-			// player collision detection (King's distance)
-			if (entities[i].mesh && fmax(fabs(entities[i].transform.x - camera->x), fabs(entities[i].transform.z - camera->z)) < ITEM_PICKUP_DISTANCE) {
+			case ITEM_HEALTH:
 
-				// apply item's effect
+				// item spin
+				entities[i].transform.yaw += 0.1;
 
-				// free item
-				free_mesh(entities[i].mesh);
-				entities[i].type = UNUSED;
-				entities[i].mesh = NULL;
-			}
+				// player collision detection (King's distance)
+				if (fmax(fabs(entities[i].transform.x - camera->x), fabs(entities[i].transform.z - camera->z)) < ITEM_PICKUP_DISTANCE) {
+
+					// apply item's effect
+
+					// free item
+					entities[i].type = UNUSED;
+				}
+
+				break;
 		}
 	}
 }
@@ -81,16 +88,18 @@ void draw_entities(Transform *camera) {
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
 
-		if (entities[i].type != UNUSED)
-			draw_mesh(camera, &entities[i].transform, entities[i].mesh);
+		switch (entities[i].type) {
+
+			case UNUSED: break;
+
+			case ITEM_HEALTH:
+				draw_mesh(camera, &entities[i].transform, item_health_mesh);
+				break;
+		}
 	}
 }
 
 void free_entities() {
 
-	for (int i = 0; i < MAX_ENTITIES; i++) {
-
-		if (entities[i].type != UNUSED)
-			free_mesh(entities[i].mesh);
-	}
+	free(item_health_mesh);
 }
