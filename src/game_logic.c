@@ -61,11 +61,12 @@ int fire_cooldown;
 Mesh *mesh_map;
 Mesh *sky;
 
-Mesh *sprite_gun;
-Transform transform_gun;
+Transform transform_hand;
+Mesh *sprite_hand_idle;
+Mesh *sprite_hand_fire;
 
-Mesh *sprite_paused;
 Transform transform_paused;
+Mesh *sprite_paused;
 
 int move_time = 0;
 
@@ -73,7 +74,8 @@ void on_start() {
 
 	mesh_map = make_map_mesh("res/tiles.ppm", &map[0][0], MAP_W, MAP_H);
 	sky = make_sky_mesh("res/sky.ppm");
-	sprite_gun = make_sprite_mesh("res/gun.ppm");
+	sprite_hand_idle = make_sprite_mesh("res/hand_idle.ppm");
+	sprite_hand_fire = make_sprite_mesh("res/hand_fire.ppm");
 	sprite_paused = make_text_sprite_mesh("GAME PAUSED", "res/font.ppm", 6, 7);
 
 	init_entity_types();
@@ -83,8 +85,8 @@ void on_start() {
 	transform_paused.x = (SCREEN_W - (6 * strlen("GAME PAUSED"))) / 2;
 	transform_paused.y = SCREEN_H / 2;
 
-	transform_gun.x = SCREEN_W / 2 - 64;
-	transform_gun.y = -20;
+	transform_hand.x = SCREEN_W / 2 - 64;
+	transform_hand.y = -20;
 
 	camera.y = 0.5;
 }
@@ -95,7 +97,7 @@ void on_terminate() {
 
 	free_mesh(sky);
 	free_mesh(mesh_map);
-	free_mesh(sprite_gun);
+	free_mesh(sprite_hand_idle);
 	free_mesh(sprite_paused);
 }
 
@@ -170,8 +172,8 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 		if (left || right || up || down) {
 
 			move_time++;
-			transform_gun.x = SCREEN_W / 2 - 64 + sin(move_time * 0.2) * 3;
-			transform_gun.y = -20 + sin(move_time * 0.4) * 3;
+			transform_hand.x = SCREEN_W / 2 - 64 + sin(move_time * 0.2) * 3;
+			transform_hand.y = -20 + sin(move_time * 0.4) * 3;
 		}
 
 		// shooting
@@ -201,7 +203,7 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 	draw_entities(&camera);
 
 	// draw UI elements
-	draw_mesh(&camera, &transform_gun, sprite_gun);
+	draw_mesh(&camera, &transform_hand, action_1 ? sprite_hand_fire : sprite_hand_idle);
 
 	if (paused)
 		draw_mesh(&camera, &transform_paused, sprite_paused);
