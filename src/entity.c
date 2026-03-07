@@ -1,5 +1,5 @@
 #define ITEM_PICKUP_DISTANCE 0.5
-#define MAX_ENTITIES 5
+#define MAX_ENTITIES 10
 
 typedef enum {
 
@@ -22,10 +22,12 @@ typedef struct {
 Entity entities[MAX_ENTITIES];
 
 static Mesh *item_health_mesh;
+static Mesh *proj_fireball_mesh;
 
 void init_entity_types() {
 
 	item_health_mesh = import_mesh("res/health.obj", "res/health.ppm");
+	proj_fireball_mesh = import_mesh("res/fireball.obj", "res/fireball.ppm");
 }
 
 // adds an entity to the registry and returns it in case you need to modify it
@@ -103,10 +105,12 @@ void process_entities(Transform *camera) {
 				// move forward
 				entities[i].transform.x += sin(entities[i].transform.yaw) * 0.15;
 				entities[i].transform.z -= cos(entities[i].transform.yaw) * 0.15;
-				entities[i].transform.pitch += 0.2;
+
+				entities[i].transform.y -= sin(entities[i].transform.pitch) * 0.06;
+				entities[i].transform.pitch += 0.07;
 
 				// free upon collide
-				if (aabb_collides_with_map(&entities[i].transform, 0.2))
+				if (aabb_collides_with_map(&entities[i].transform, 0.1) || entities[i].transform.y < 0.0)
 					entities[i].type = UNUSED;
 
 				break;
@@ -122,9 +126,12 @@ void draw_entities(Transform *camera) {
 
 			case UNUSED: break;
 
-			case PROJ_FIREBALL: // TODO change mesh
 			case ITEM_HEALTH:
 				draw_mesh(camera, &entities[i].transform, item_health_mesh);
+				break;
+
+			case PROJ_FIREBALL:
+				draw_mesh(camera, &entities[i].transform, proj_fireball_mesh);
 				break;
 		}
 	}

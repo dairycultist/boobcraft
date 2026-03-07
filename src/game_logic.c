@@ -179,7 +179,7 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 
 			fire_cooldown = 5;
 			
-			Entity *fireball = add_entity(camera.x, camera.z, PROJ_FIREBALL);
+			Entity *fireball = add_entity(camera.x + sin(camera.yaw) * PLAYER_MOVE_SPEED, camera.z - cos(camera.yaw) * PLAYER_MOVE_SPEED, PROJ_FIREBALL);
 
 			if (fireball)
 				fireball->transform.yaw = camera.yaw;
