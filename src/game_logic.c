@@ -168,12 +168,18 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 		if (camera.x > -0.5 && camera.x < MAP_W - 0.5 && camera.z > -0.5 && camera.z < MAP_H - 0.5)
 			camera.y = TILE_AT(camera.x, camera.z) == TILE_LAVA ? 0.3 : 0.5;
 
-		// move bob animation
+		// hand animation
 		if (left || right || up || down) {
 
 			move_time++;
-			transform_hand.x = SCREEN_W / 2 - 64 + sin(move_time * 0.2) * 3;
-			transform_hand.y = -20 + sin(move_time * 0.4) * 3;
+		}
+
+		transform_hand.x = SCREEN_W / 2 - 64 + sin(move_time * 0.2) * 3;
+		transform_hand.y = -20 + sin(move_time * 0.4) * 3;
+
+		if (action_1) {
+			transform_hand.x += (random_uint(5)) / 2;
+			transform_hand.y += (random_uint(5)) / 2;
 		}
 
 		// shooting

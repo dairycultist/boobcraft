@@ -44,16 +44,16 @@ typedef struct {
 
 } Mesh;
 
-// static uint rng_state = 1; // uint32_t? time(NULL)?
+static uint rng_state = 1; // uint32_t? time(NULL)?
 
-// // stole this from nash so I don't have to use rand(). it's deterministic!
-// uint random_uint(uint bound) {
+// stole this from nash so I don't have to use rand(). it's deterministic!
+uint random_uint(uint bound) {
 	
-//     rng_state ^= rng_state << 13;
-//     rng_state ^= rng_state >> 17;
-//     rng_state ^= rng_state << 5;
-//     return rng_state % bound;
-// }
+    rng_state ^= rng_state << 13;
+    rng_state ^= rng_state >> 17;
+    rng_state ^= rng_state << 5;
+    return rng_state % bound;
+}
 
 typedef struct {
 
