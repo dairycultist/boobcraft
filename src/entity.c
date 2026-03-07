@@ -26,8 +26,8 @@ static Mesh *proj_fireball_mesh;
 
 void init_entity_types() {
 
-	item_health_mesh = import_mesh("res/health.obj", "res/health.ppm");
-	proj_fireball_mesh = import_mesh("res/fireball.obj", "res/fireball.ppm");
+	item_health_mesh = import_mesh("res/health.obj", "res/health.ppm", 0);
+	proj_fireball_mesh = import_mesh("res/fireball.obj", "res/fireball.ppm", 0);
 }
 
 // adds an entity to the registry and returns it in case you need to modify it

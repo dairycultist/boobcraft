@@ -27,7 +27,8 @@ typedef struct {
 typedef enum {
 
   MESH_SHADED,
-  MESH_SKY,
+  MESH_UNSHADED,
+  MESH_SKY, // does not take a transform matrix
   MESH_UI // 2D
 
 } MeshType;
@@ -115,6 +116,7 @@ int main() {
 	SDL_SetRelativeMouseMode(SDL_TRUE); // lock mouse
 
 	initialize_shaders();
+	glFrontFace(GL_CCW);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	
 	on_start();

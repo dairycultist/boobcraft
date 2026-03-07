@@ -98,7 +98,7 @@ static Mesh *mesh_builder(const float data[], const int byte_count, const int ve
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);					// make it the active buffer
 	glBufferData(GL_ARRAY_BUFFER, byte_count, data, GL_STATIC_DRAW);// copy vertex data into the active buffer
 
-	// link active vertex data and shader attributes (for MESH_SHADED)
+	// link active vertex data and shader attributes
 	if (type == MESH_SHADED) {
 
 		GLint pos_attrib = glGetAttribLocation(sp_shaded, "position");
@@ -113,7 +113,7 @@ static Mesh *mesh_builder(const float data[], const int byte_count, const int ve
 		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid *) (sizeof(float) * 6));
 		glEnableVertexAttribArray(uv_attrib);
 
-	} else if (type == MESH_SKY || type == MESH_UI) {
+	} else { // MESH_UNSHADED, MESH_SKY, MESH_UI
 
 		GLint pos_attrib = glGetAttribLocation(sp_unshaded, "position");
 		glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
@@ -122,7 +122,6 @@ static Mesh *mesh_builder(const float data[], const int byte_count, const int ve
 		GLint uv_attrib = glGetAttribLocation(sp_unshaded, "UV");
 		glVertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid *) (sizeof(float) * 3));
 		glEnableVertexAttribArray(uv_attrib);
-
 	}
 
 	// debind vertex array
@@ -136,16 +135,16 @@ static Mesh *mesh_builder(const float data[], const int byte_count, const int ve
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	// wrap repeat
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
 	// texture filtering
-	if (type == MESH_UI || type == MESH_SHADED) { // TODO make MESH_SHADED linear
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	} else {
+	if (type == MESH_SKY) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	} else {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
 
 	// write texture data
@@ -162,7 +161,7 @@ static Mesh *mesh_builder(const float data[], const int byte_count, const int ve
 }
 
 // returns NULL on error
-Mesh *import_mesh(const char *obj_path, const char *ppm_path) {
+Mesh *import_mesh(const char *obj_path, const char *ppm_path, int is_shaded) {
 
 	// read obj file
 	FILE *file = fopen(obj_path, "r");
@@ -234,17 +233,17 @@ Mesh *import_mesh(const char *obj_path, const char *ppm_path) {
 				&p[2], &t[2], &n[2]);
 
 			// convert vertex indices to vertex positions (indices start at 1 for some reason)
-			append_ezarray(&composite_data, position_data.data + ((p[0] - 1) * sizeof(float) * 3), sizeof(float) * 3);
-			append_ezarray(&composite_data, normal_data.data +   ((n[0] - 1) * sizeof(float) * 3), sizeof(float) * 3);
-			append_ezarray(&composite_data, texture_data.data +  ((t[0] - 1) * sizeof(float) * 2), sizeof(float) * 2);
+			               append_ezarray(&composite_data, position_data.data + ((p[0] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			if (is_shaded) append_ezarray(&composite_data, normal_data.data +   ((n[0] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			               append_ezarray(&composite_data, texture_data.data +  ((t[0] - 1) * sizeof(float) * 2), sizeof(float) * 2);
 
-			append_ezarray(&composite_data, position_data.data + ((p[1] - 1) * sizeof(float) * 3), sizeof(float) * 3);
-			append_ezarray(&composite_data, normal_data.data +   ((n[1] - 1) * sizeof(float) * 3), sizeof(float) * 3);
-			append_ezarray(&composite_data, texture_data.data +  ((t[1] - 1) * sizeof(float) * 2), sizeof(float) * 2);
+			               append_ezarray(&composite_data, position_data.data + ((p[1] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			if (is_shaded) append_ezarray(&composite_data, normal_data.data +   ((n[1] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			               append_ezarray(&composite_data, texture_data.data +  ((t[1] - 1) * sizeof(float) * 2), sizeof(float) * 2);
 
-			append_ezarray(&composite_data, position_data.data + ((p[2] - 1) * sizeof(float) * 3), sizeof(float) * 3);
-			append_ezarray(&composite_data, normal_data.data +   ((n[2] - 1) * sizeof(float) * 3), sizeof(float) * 3);
-			append_ezarray(&composite_data, texture_data.data +  ((t[2] - 1) * sizeof(float) * 2), sizeof(float) * 2);
+			               append_ezarray(&composite_data, position_data.data + ((p[2] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			if (is_shaded) append_ezarray(&composite_data, normal_data.data +   ((n[2] - 1) * sizeof(float) * 3), sizeof(float) * 3);
+			               append_ezarray(&composite_data, texture_data.data +  ((t[2] - 1) * sizeof(float) * 2), sizeof(float) * 2);
 			
 			vertex_count += 3;
 		}
@@ -252,7 +251,7 @@ Mesh *import_mesh(const char *obj_path, const char *ppm_path) {
 
 	fclose(file);
 
-	return mesh_builder((const float *) composite_data.data, composite_data.byte_count, vertex_count, ppm_path, MESH_SHADED);
+	return mesh_builder((const float *) composite_data.data, composite_data.byte_count, vertex_count, ppm_path, is_shaded ? MESH_SHADED : MESH_UNSHADED);
 }
 
 Mesh *make_sky_mesh(const char *ppm_path) {
@@ -689,7 +688,7 @@ void draw_mesh(const Transform *camera, const Transform *mesh_transform, const M
 	glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
 	// do different stuff depending on mesh type (informing what shaders, matrices, etc to use)
-	if (mesh->type == MESH_SHADED) {
+	if (mesh->type == MESH_SHADED || mesh->type == MESH_UNSHADED) {
 
 		// model matrix (converts from model space to world space)
 		generate_rotation_matrices(
@@ -726,20 +725,29 @@ void draw_mesh(const Transform *camera, const Transform *mesh_transform, const M
 		mat4_mult(proj_matrix, view_matrix, position_matrix);
 		mat4_mult(position_matrix, model_matrix, position_matrix);
 
-		// normal matrix (applied to normals to account for model rotation)
-		GLfloat normal_matrix[4][4];
+		if (mesh->type == MESH_SHADED) {
 
-		generate_rotation_matrices(
-			pitch_matrix, -mesh_transform->pitch,
-			yaw_matrix, -mesh_transform->yaw
-		);
+			// normal matrix (applied to normals to account for model rotation)
+			GLfloat normal_matrix[4][4];
 
-		mat4_mult(yaw_matrix, pitch_matrix, normal_matrix);
+			generate_rotation_matrices(
+				pitch_matrix, -mesh_transform->pitch,
+				yaw_matrix, -mesh_transform->yaw
+			);
 
-		// load the shader program and the uniforms we just calculated
-		glUseProgram(sp_shaded);
-		glUniformMatrix4fv(glGetUniformLocation(sp_shaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(sp_shaded, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
+			mat4_mult(yaw_matrix, pitch_matrix, normal_matrix);
+
+			// load the shader program and the uniforms we just calculated
+			glUseProgram(sp_shaded);
+			glUniformMatrix4fv(glGetUniformLocation(sp_shaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(sp_shaded, "normal_matrix"), 1, GL_FALSE, &normal_matrix[0][0]);
+
+		} else {
+
+			// load the shader program and the uniforms we just calculated
+			glUseProgram(sp_unshaded);
+			glUniformMatrix4fv(glGetUniformLocation(sp_unshaded, "position_matrix"), 1, GL_FALSE, &position_matrix[0][0]);
+		}
 
 	} else if (mesh->type == MESH_SKY) {
 
@@ -783,7 +791,6 @@ void draw_mesh(const Transform *camera, const Transform *mesh_transform, const M
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
-		glFrontFace(GL_CCW);
 	}
 
 	// draw
@@ -834,7 +841,7 @@ void initialize_shaders() {
 		"in vec2 UV;"
 		"out vec2 frag_UV;"
 		"void main() {"
-			"gl_Position = position_matrix * vec4(position.xy, -position.z, 1.0);" // get final position
+			"gl_Position = position_matrix * vec4(position.xyz, 1.0);" // get final position
 			"frag_UV = UV;" // pass along UV
 		"}",
 		"#version 150 core\n"
