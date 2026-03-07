@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "entity.c"
-
 // TODO add better error reporting for functions like import_mesh
 
 #define TILE_AT(x, z) (map[(int) floor((z) + 0.5)][(int) floor((x) + 0.5)])
@@ -25,8 +23,40 @@ static const tile map[MAP_H][MAP_W] = {
 	{ TILE_OUTSIDE,	TILE_OUTSIDE,	TILE_OUTSIDE,	TILE_OUTSIDE },
 };
 
+int aabb_collides_with_map(Transform *transform, float radius) {
+
+	// boundary collision
+	if (transform->x < radius - 0.5)
+		return 1;
+
+	if (transform->x > MAP_W - 0.5 - radius)
+		return 1;
+
+	if (transform->z < radius - 0.5)
+		return 1;
+
+	if (transform->z > MAP_H - 0.5 - radius)
+		return 1;
+
+	// map collision (radius is made smaller to prevent weird float behaviour when converting to map-space (int))
+	if (
+		TILE_AT(transform->x + radius * 0.95, transform->z + radius * 0.95) == TILE_EMPTY ||
+		TILE_AT(transform->x - radius * 0.95, transform->z + radius * 0.95) == TILE_EMPTY ||
+		TILE_AT(transform->x + radius * 0.95, transform->z - radius * 0.95) == TILE_EMPTY ||
+		TILE_AT(transform->x - radius * 0.95, transform->z - radius * 0.95) == TILE_EMPTY) {
+		
+		return 1;
+	}
+
+	return 0;
+}
+
+#include "entity.c"
+
 Transform transform_zero;
 Transform camera;
+
+int fire_cooldown;
 
 Mesh *mesh_map;
 Mesh *sky;
@@ -142,6 +172,21 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 			move_time++;
 			transform_gun.x = SCREEN_W / 2 - 64 + sin(move_time * 0.2) * 3;
 			transform_gun.y = -20 + sin(move_time * 0.4) * 3;
+		}
+
+		// shooting
+		if (action_1 && fire_cooldown <= 0) {
+
+			fire_cooldown = 5;
+			
+			Entity *fireball = add_entity(camera.x, camera.z, PROJ_FIREBALL);
+
+			if (fireball)
+				fireball->transform.yaw = camera.yaw;
+
+		} else {
+
+			fire_cooldown--;
 		}
 
 		process_entities(&camera);

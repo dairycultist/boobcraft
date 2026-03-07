@@ -5,7 +5,7 @@ typedef enum {
 
 	UNUSED,
 	ITEM_HEALTH,
-	ENEMY_TEST // TODO use miku model for testing
+	PROJ_FIREBALL
 
 	// enemies, props, items, and the level end trigger will be entities
 
@@ -15,6 +15,7 @@ typedef struct {
 
 	EntityType type; // determines the singleton model, AABB collider size, and maybe collidability
 	Transform transform;
+	// maybe add lifetime int for animation
 
 } Entity;
 
@@ -27,8 +28,8 @@ void init_entity_types() {
 	item_health_mesh = import_mesh("res/health.obj", "res/health.ppm");
 }
 
-// adds an entity to the registry
-void add_entity(int x, int z, EntityType type) {
+// adds an entity to the registry and returns it in case you need to modify it
+Entity *add_entity(float x, float z, EntityType type) {
 
 	// find an empty slot
 	Entity *entity = NULL;
@@ -45,18 +46,31 @@ void add_entity(int x, int z, EntityType type) {
 	if (!entity) {
 
 		printf("Failed to add an entity.\n");
-		return;
+		return NULL;
 	}
 
-	// TODO switch statement for EntityType
 	entity->type = type;
+	entity->transform.x = x;
+	entity->transform.z = z;
 
-	entity->transform.x = (float) x;
-	entity->transform.z = (float) z;
+	switch (type) {
 
-	entity->transform.y = 0.2;
-	entity->transform.pitch = 0.2;
-	entity->transform.yaw = 0.0;
+		case UNUSED: break;
+
+		case ITEM_HEALTH:
+			entity->transform.y = 0.2;
+			entity->transform.pitch = 0.2;
+			entity->transform.yaw = 0.0;
+			break;
+		
+		case PROJ_FIREBALL:
+			entity->transform.y = 0.5;
+			entity->transform.pitch = 0.0;
+			entity->transform.yaw = 0.0;
+			break;
+	}
+
+	return entity;
 }
 
 // process all entities in the registry
@@ -83,6 +97,19 @@ void process_entities(Transform *camera) {
 				}
 
 				break;
+			
+			case PROJ_FIREBALL:
+				
+				// move forward
+				entities[i].transform.x += sin(entities[i].transform.yaw) * 0.15;
+				entities[i].transform.z -= cos(entities[i].transform.yaw) * 0.15;
+				entities[i].transform.pitch += 0.2;
+
+				// free upon collide
+				if (aabb_collides_with_map(&entities[i].transform, 0.2))
+					entities[i].type = UNUSED;
+
+				break;
 		}
 	}
 }
@@ -95,6 +122,7 @@ void draw_entities(Transform *camera) {
 
 			case UNUSED: break;
 
+			case PROJ_FIREBALL: // TODO change mesh
 			case ITEM_HEALTH:
 				draw_mesh(camera, &entities[i].transform, item_health_mesh);
 				break;
