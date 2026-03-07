@@ -181,8 +181,11 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 			
 			Entity *fireball = add_entity(camera.x + sin(camera.yaw) * PLAYER_MOVE_SPEED, camera.z - cos(camera.yaw) * PLAYER_MOVE_SPEED, PROJ_FIREBALL);
 
-			if (fireball)
+			if (fireball) {
+
+				fireball->transform.y = camera.y - 0.1;
 				fireball->transform.yaw = camera.yaw;
+			}
 
 		} else {
 

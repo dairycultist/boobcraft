@@ -106,8 +106,10 @@ void process_entities(Transform *camera) {
 				entities[i].transform.x += sin(entities[i].transform.yaw) * 0.15;
 				entities[i].transform.z -= cos(entities[i].transform.yaw) * 0.15;
 
-				entities[i].transform.y -= sin(entities[i].transform.pitch) * 0.06;
-				entities[i].transform.pitch += 0.07;
+				entities[i].transform.y -= sin(entities[i].transform.pitch) * 0.04;
+
+				if (entities[i].transform.pitch < 0.8)
+					entities[i].transform.pitch += 0.06;
 
 				// free upon collide
 				if (aabb_collides_with_map(&entities[i].transform, 0.1) || entities[i].transform.y < 0.0)
