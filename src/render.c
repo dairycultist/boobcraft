@@ -260,46 +260,46 @@ Mesh *make_sky_mesh(const char *ppm_path) {
 	const float data[] = {
 		// +z
 		50, 50, 50, 	0.5  - UV_EPSILON, 0.75 - UV_EPSILON,
+		-50, -50, 50, 	0.25 + UV_EPSILON, 0.5  + UV_EPSILON,
 		-50, 50, 50, 	0.25 + UV_EPSILON, 0.75 - UV_EPSILON,
-		-50, -50, 50, 	0.25 + UV_EPSILON, 0.5  + UV_EPSILON,
 		50, 50, 50, 	0.5  - UV_EPSILON, 0.75 - UV_EPSILON,
-		-50, -50, 50, 	0.25 + UV_EPSILON, 0.5  + UV_EPSILON,
 		50, -50, 50, 	0.5  - UV_EPSILON, 0.5  + UV_EPSILON,
+		-50, -50, 50, 	0.25 + UV_EPSILON, 0.5  + UV_EPSILON,
 		// -z
 		50, 50, -50, 	0.75 + UV_EPSILON, 0.75 - UV_EPSILON,
-		-50, -50, -50, 	1    - UV_EPSILON, 0.5  + UV_EPSILON,
 		-50, 50, -50, 	1    - UV_EPSILON, 0.75 - UV_EPSILON,
-		50, 50, -50, 	0.75 + UV_EPSILON, 0.75 - UV_EPSILON,
-		50, -50, -50, 	0.75 + UV_EPSILON, 0.5  + UV_EPSILON,
 		-50, -50, -50, 	1    - UV_EPSILON, 0.5  + UV_EPSILON,
+		50, 50, -50, 	0.75 + UV_EPSILON, 0.75 - UV_EPSILON,
+		-50, -50, -50, 	1    - UV_EPSILON, 0.5  + UV_EPSILON,
+		50, -50, -50, 	0.75 + UV_EPSILON, 0.5  + UV_EPSILON,
 		// +x
 		50, 50, 50, 	0.5  + UV_EPSILON, 0.75 - UV_EPSILON,
-		50, -50, -50, 	0.75 - UV_EPSILON, 0.5  + UV_EPSILON,
 		50, 50, -50, 	0.75 - UV_EPSILON, 0.75 - UV_EPSILON,
-		50, 50, 50, 	0.5  + UV_EPSILON, 0.75 - UV_EPSILON,
-		50, -50, 50, 	0.5  + UV_EPSILON, 0.5  + UV_EPSILON,
 		50, -50, -50, 	0.75 - UV_EPSILON, 0.5  + UV_EPSILON,
+		50, 50, 50, 	0.5  + UV_EPSILON, 0.75 - UV_EPSILON,
+		50, -50, -50, 	0.75 - UV_EPSILON, 0.5  + UV_EPSILON,
+		50, -50, 50, 	0.5  + UV_EPSILON, 0.5  + UV_EPSILON,
 		// -x
 		-50, 50, 50, 	0.25 - UV_EPSILON, 0.75 - UV_EPSILON,
+		-50, -50, -50, 	0    + UV_EPSILON, 0.5  + UV_EPSILON,
 		-50, 50, -50, 	0    + UV_EPSILON, 0.75 - UV_EPSILON,
-		-50, -50, -50, 	0    + UV_EPSILON, 0.5  + UV_EPSILON,
 		-50, 50, 50, 	0.25 - UV_EPSILON, 0.75 - UV_EPSILON,
-		-50, -50, -50, 	0    + UV_EPSILON, 0.5  + UV_EPSILON,
 		-50, -50, 50, 	0.25 - UV_EPSILON, 0.5  + UV_EPSILON,
+		-50, -50, -50, 	0    + UV_EPSILON, 0.5  + UV_EPSILON,
 		// +y
 		50, 50, 50, 	0.5  - UV_EPSILON, 0.75 + UV_EPSILON,
-		-50, 50, -50, 	0.25 + UV_EPSILON, 1    - UV_EPSILON,
 		-50, 50, 50, 	0.25 + UV_EPSILON, 0.75 + UV_EPSILON,
-		50, 50, 50, 	0.5  - UV_EPSILON, 0.75 + UV_EPSILON,
-		50, 50, -50, 	0.5  - UV_EPSILON, 1    - UV_EPSILON,
 		-50, 50, -50, 	0.25 + UV_EPSILON, 1    - UV_EPSILON,
+		50, 50, 50, 	0.5  - UV_EPSILON, 0.75 + UV_EPSILON,
+		-50, 50, -50, 	0.25 + UV_EPSILON, 1    - UV_EPSILON,
+		50, 50, -50, 	0.5  - UV_EPSILON, 1    - UV_EPSILON,
 		// -y
 		50, -50, 50, 	0.5  - UV_EPSILON, 0.5  - UV_EPSILON,
+		-50, -50, -50, 	0.25 + UV_EPSILON, 0.25 + UV_EPSILON,
 		-50, -50, 50, 	0.25 + UV_EPSILON, 0.5  - UV_EPSILON,
-		-50, -50, -50, 	0.25 + UV_EPSILON, 0.25 + UV_EPSILON,
 		50, -50, 50, 	0.5  - UV_EPSILON, 0.5  - UV_EPSILON,
-		-50, -50, -50, 	0.25 + UV_EPSILON, 0.25 + UV_EPSILON,
-		50, -50, -50, 	0.5  - UV_EPSILON, 0.25 + UV_EPSILON
+		50, -50, -50, 	0.5  - UV_EPSILON, 0.25 + UV_EPSILON,
+		-50, -50, -50, 	0.25 + UV_EPSILON, 0.25 + UV_EPSILON
 	};
 
 	return mesh_builder((const float *) data, sizeof(float) * 5 * 36, 36, ppm_path, MESH_SKY);
