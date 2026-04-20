@@ -16,6 +16,7 @@ TODO mouse input for camera control
 
 ```
 brew install sdl2
+brew install sdl2_image
 brew install glew
 git clone https://github.com/dairycultist/boobcraft/
 cd boobcraft
@@ -25,6 +26,8 @@ make run
 ## idk
 
 the code will be bad and the ideas will be ruined and idc I want to make a game that has a smol community and that I actually enjoy playing occasionally bruh
+
+https://store.steampowered.com/app/869480/Jabroni_Brawl_Episode_3/
 
 https://mods.sm64coopdx.com/mods/cs-karisa.1108/
 

@@ -1,5 +1,7 @@
 // this file handles both 2D and 3D mesh data creation, rendering, manipulation, and destruction
 
+#include <SDL2/SDL_image.h>
+
 #define UV_EPSILON (1.0 / 512 / 2)
 
 // shader programs
@@ -38,54 +40,34 @@ static GLuint load_shader_program(const char *vertex_shadercode, const char *fra
 	return shader_program;
 }
 
-static void get_ppm_resolution(const char *ppm_path, int *width, int *height) {
+SDL_Surface *load_surface(const char *path) {
 
-	FILE *file = fopen(ppm_path, "r");
+	SDL_Surface *surface = IMG_Load(path);
 
-	char line[1024];
+	// flip texture vertically to match OpenGL spec
+	unsigned char *pixels = (unsigned char *) surface->pixels;
+	int pixelBytes = surface->format->BytesPerPixel;
 
-	// read header
-	fgets(line, 1024, file);
-	fgets(line, 1024, file);
-	sscanf(line, "%d %d", width, height);
+	for (int y = 0; y < surface->h / 2; y++) {
 
-	fclose(file);
-}
+		for (int x = 0; x < surface->w; x++) {
 
-static void import_ppm(GLenum target, const char *ppm_path) {
+			int top = x + y * surface->h;
+			int bottom = x + (surface->w * surface->h - (y + 1) * surface->h);
 
-	// by default, OpenGL reads texture data with a 4-byte row alignment: https://stackoverflow.com/questions/72177553/why-is-gl-unpack-alignment-default-4
-	// it's more efficient, but means this function cannot properly read images whose dimensions aren't a multiple of 4 correctly (fix is simple tho)
+			for (int i=0; i<pixelBytes; i++) {
 
-	int width, height;
-
-	FILE *file = fopen(ppm_path, "r");
-
-	// read header
-	{
-		char line[1024];
-
-		fgets(line, 1024, file); // not gonna verify header because I'm lazy and just wanna get this working right now
-		fgets(line, 1024, file);
-		sscanf(line, "%d %d", &width, &height);
-		fgets(line, 1024, file);
+				unsigned char hold = pixels[top * pixelBytes + i];
+				pixels[top * pixelBytes + i] = pixels[bottom * pixelBytes + i];
+				pixels[bottom * pixelBytes + i] = hold;
+			}
+		}
 	}
 
-	unsigned char *pixels = malloc(width * height * 3);
-
-	// ppms store pixels starting from the top left, but opengl wants them starting from the bottom left, so you need to flip the "layers"
-	int i;
-
-	for (i = height - 1; i >= 0; i--)
-		fread(pixels + i * width * 3, 3, width, file);
-
-	fclose(file);
-
-	// write texture data to target buffer
-	glTexImage2D(target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+	return surface;
 }
 
-static Mesh *mesh_builder(const float data[], const int byte_count, const int vertex_count, const char *ppm_path, MeshType type) {
+static Mesh *mesh_builder(const float data[], const int byte_count, const int vertex_count, const SDL_Surface *surface, MeshType type) {
 
 	// make vertex array
 	GLuint vertex_array;
@@ -147,8 +129,8 @@ static Mesh *mesh_builder(const float data[], const int byte_count, const int ve
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
 
-	// write texture data
-	import_ppm(GL_TEXTURE_2D, ppm_path);
+	// write texture data to GL_TEXTURE_2D buffer
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, surface->w, surface->h, 0, GL_RGB, GL_UNSIGNED_BYTE, surface->pixels);
 
 	// create final mesh object to return
 	Mesh *mesh = malloc(sizeof(Mesh));
@@ -161,7 +143,7 @@ static Mesh *mesh_builder(const float data[], const int byte_count, const int ve
 }
 
 // returns NULL on error
-Mesh *import_mesh(const char *obj_path, const char *ppm_path, int is_shaded) {
+Mesh *import_mesh(const char *obj_path, const SDL_Surface *surface, int is_shaded) {
 
 	// read obj file
 	FILE *file = fopen(obj_path, "r");
@@ -251,10 +233,10 @@ Mesh *import_mesh(const char *obj_path, const char *ppm_path, int is_shaded) {
 
 	fclose(file);
 
-	return mesh_builder((const float *) composite_data.data, composite_data.byte_count, vertex_count, ppm_path, is_shaded ? MESH_SHADED : MESH_UNSHADED);
+	return mesh_builder((const float *) composite_data.data, composite_data.byte_count, vertex_count, surface, is_shaded ? MESH_SHADED : MESH_UNSHADED);
 }
 
-Mesh *make_sky_mesh(const char *ppm_path) {
+Mesh *make_sky_mesh(const SDL_Surface *surface) {
 
 	// hardcoded inverted cube with sidelength 100 units (aka a cheap skybox)
 	const float data[] = {
@@ -302,16 +284,13 @@ Mesh *make_sky_mesh(const char *ppm_path) {
 		-50, -50, -50, 	0.25 + UV_EPSILON, 0.25 + UV_EPSILON
 	};
 
-	return mesh_builder((const float *) data, sizeof(float) * 5 * 36, 36, ppm_path, MESH_SKY);
+	return mesh_builder((const float *) data, sizeof(float) * 5 * 36, 36, surface, MESH_SKY);
 }
 
-Mesh *make_sprite_mesh(const char *ppm_path, float u_amt) {
-
-	int width, height;
-	get_ppm_resolution(ppm_path, &width, &height);
+Mesh *make_sprite_mesh(const SDL_Surface *surface, float u_amt) {
 
 	float w = u_amt;
-	float h = u_amt * height / width * ASPECT;
+	float h = u_amt * surface->h / surface->w * ASPECT;
 
 	// sprite mesh is initialized with bottom left corner in center, and moved to screen bottom left corner by transformations
 	const float data[] = {
@@ -324,7 +303,7 @@ Mesh *make_sprite_mesh(const char *ppm_path, float u_amt) {
 		w, 0, 1,	1, 0,
 	};
 	
-	return mesh_builder((const float *) data, sizeof(float) * 5 * 6, 6, ppm_path, MESH_UI);
+	return mesh_builder((const float *) data, sizeof(float) * 5 * 6, 6, surface, MESH_UI);
 }
 
 void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) {

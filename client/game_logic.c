@@ -17,14 +17,16 @@ Mesh *miku;
 
 void on_start() {
 
-	sky = make_sky_mesh("client/sky.ppm");
+	SDL_Surface *miku_surface = load_surface("client/miku.ppm");
+
+	sky = make_sky_mesh(load_surface("client/sky.ppm"));
 
 	transform_test_sprite.x = 0.0;
 	transform_test_sprite.y = 0.0;
-	test_sprite = make_sprite_mesh("client/miku.ppm", 0.3);
+	test_sprite = make_sprite_mesh(miku_surface, 0.3);
 
 	transform_miku.z = -0.5;
-	miku = import_mesh("client/miku.obj", "client/miku.ppm", TRUE);
+	miku = import_mesh("client/miku.obj", miku_surface, TRUE);
 
 	camera.y = 0.5;
 }
