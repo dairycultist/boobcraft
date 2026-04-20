@@ -1,18 +1,13 @@
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 
+// TODO add better error reporting for functions like import_mesh
+
 typedef char bool;
 #define TRUE 1
 #define FALSE 0
 
-typedef unsigned char tile;
-#define TILE_EMPTY 0
-#define TILE_FLOOR 1
-#define TILE_LAVA 2
-#define TILE_OUTSIDE 3
-
-#define SCREEN_W 400
-#define SCREEN_H 240
+#define ASPECT 1.666
 
 typedef struct {
 
@@ -44,16 +39,16 @@ typedef struct {
 
 } Mesh;
 
-static uint rng_state = 1; // uint32_t? time(NULL)?
+// static uint rng_state = 1; // uint32_t? time(NULL)?
 
-// stole this from nash so I don't have to use rand(). it's deterministic!
-uint random_uint(uint bound) {
+// // stole this from nash so I don't have to use rand(). it's deterministic!
+// uint random_uint(uint bound) {
 	
-    rng_state ^= rng_state << 13;
-    rng_state ^= rng_state >> 17;
-    rng_state ^= rng_state << 5;
-    return rng_state % bound;
-}
+//     rng_state ^= rng_state << 13;
+//     rng_state ^= rng_state >> 17;
+//     rng_state ^= rng_state << 5;
+//     return rng_state % bound;
+// }
 
 typedef struct {
 
@@ -101,7 +96,7 @@ int main() {
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 	// create the window
-	SDL_Window *window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_W, SCREEN_H, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	SDL_Window *window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 400, 240, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	if (!window) {
 		fprintf(stderr, "Could not create window: %s\n", SDL_GetError());
@@ -121,44 +116,6 @@ int main() {
 	
 	on_start();
 
-	// create frame buffer for original-resolution mode (as opposed to native-resolution mode)
-	// involves first creating two texures, one for color and one for depth, and then attaching to that frame buffer
-	GLuint fbo_color;
-	glGenTextures(1, &fbo_color);
-	glBindTexture(GL_TEXTURE_2D, fbo_color);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_W, SCREEN_H, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	GLuint fbo_depth;
-	glGenTextures(1, &fbo_depth);
-	glBindTexture(GL_TEXTURE_2D, fbo_depth);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCREEN_W, SCREEN_H, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	GLuint fbo;
-	glGenFramebuffers(1, &fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo_color, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fbo_depth, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// ...and a mesh for that frame buffer
-	const float data[] = {
-		0, 0, 1, 0, 0,
-		0, 2, 1, 0, 1,
-		2, 2, 1, 1, 1,
-		0, 0, 1, 0, 0,
-		2, 2, 1, 1, 1,
-		2, 0, 1, 1, 0,
-	};
-	
-	Mesh *fbo_mesh = mesh_builder((const float *) data, sizeof(float) * 5 * 6, 6, "res/sky.ppm", MESH_UI); // TODO refactor mesh builder to take in a texture GLuint, not a PPM path
-	fbo_mesh->texture = fbo_color;
-
 	// process events until window is closed
 	SDL_Event event;
 	bool running = TRUE;
@@ -171,7 +128,7 @@ int main() {
 	bool action_1 = FALSE;
 	bool action_2 = FALSE;
 
-	int window_w = SCREEN_W, window_h = SCREEN_H, window_x = 0, window_y = 0;
+	int window_w = 400, window_h = 240, window_x = 0, window_y = 0;
 
 	while (running) {
 
@@ -183,17 +140,17 @@ int main() {
 
 			} else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
 
-				if (SCREEN_W / (float) SCREEN_H > event.window.data1 / (float) event.window.data2) {
+				if (ASPECT > event.window.data1 / (float) event.window.data2) {
 
 					window_w = event.window.data1;
-					window_h = SCREEN_H * event.window.data1 / SCREEN_W;
+					window_h = event.window.data1 / ASPECT;
 
 					window_x = 0;
 					window_y = (event.window.data2 - window_h) / 2;
 
 				} else {
 
-					window_w = SCREEN_W * event.window.data2 / SCREEN_H;
+					window_w = event.window.data2 * ASPECT;
 					window_h = event.window.data2;
 
 					window_x = (event.window.data1 - window_w) / 2;
@@ -246,27 +203,7 @@ int main() {
 			}
 		}
 
-		if (use_original_res) {
-
-			// switch to rendering to framebuffer
-			glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-			glViewport(0, 0, SCREEN_W, SCREEN_H);
-
-			// clear that mf
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		}
-
 		process(up, down, left, right, action_1, action_2, !SDL_GetRelativeMouseMode());
-
-		if (use_original_res) {
-
-			// switch to rendering to screen
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glViewport(window_x, window_y, window_w, window_h);
-
-			// render framebuffer to screen
-			draw_mesh(NULL, &transform_zero, fbo_mesh);
-		}
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1000 / 30);

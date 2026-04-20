@@ -305,14 +305,13 @@ Mesh *make_sky_mesh(const char *ppm_path) {
 	return mesh_builder((const float *) data, sizeof(float) * 5 * 36, 36, ppm_path, MESH_SKY);
 }
 
-Mesh *make_sprite_mesh(const char *ppm_path) {
+Mesh *make_sprite_mesh(const char *ppm_path, float u_amt) {
 
-	// sprite mesh is pixel-perfect - every pixel in the texture lines up with one on the screen
 	int width, height;
 	get_ppm_resolution(ppm_path, &width, &height);
 
-	float w = width * 2. / SCREEN_W;
-	float h = height * 2. / SCREEN_H;
+	float w = u_amt;
+	float h = u_amt * height / width;
 
 	// sprite mesh is initialized with bottom left corner in center, and moved to screen bottom left corner by transformations
 	const float data[] = {
@@ -326,270 +325,6 @@ Mesh *make_sprite_mesh(const char *ppm_path) {
 	};
 	
 	return mesh_builder((const float *) data, sizeof(float) * 5 * 6, 6, ppm_path, MESH_UI);
-}
-
-Mesh *make_text_sprite_mesh(const char *text, const char *ppm_path, const int glyph_width, const int glyph_height) {
-	
-	EZArray vertices = {0};
-	int vertex_count = 0;
-
-	int width, height;
-	get_ppm_resolution(ppm_path, &width, &height);
-
-	float w = glyph_width * 2. / SCREEN_W;
-	float h = glyph_height * 2. / SCREEN_H;
-
-	float x = 0, y = 0;
-
-	float uv_w = glyph_width / (float) width;
-	float uv_h = glyph_height / (float) height;
-
-	float uv_x, uv_y;
-
-	int i;
-
-	for (i = 0; text[i]; i++) {
-
-		if (text[i] == ' ') {
-
-			x += w;
-
-		} else if (text[i] == '\n') {
-
-			x = 0;
-			y -= h;
-
-		} else {
-
-			uv_x = ((int) text[i] - 65) * uv_w;
-			uv_y = 0;
-
-			const float data[] = {
-				x, 		y, 		1,		uv_x, 			uv_y,
-				x, 		y + h, 	1,		uv_x, 			uv_y + uv_h,
-				x + w, 	y + h, 	1,		uv_x + uv_w, 	uv_y + uv_h,
-
-				x, 		y, 		1,		uv_x, 			uv_y,
-				x + w, 	y + h, 	1,		uv_x + uv_w, 	uv_y + uv_h,
-				x + w, 	y, 		1,		uv_x + uv_w, 	uv_y,
-			};
-
-			append_ezarray(&vertices, (void *) data, sizeof(float) * 5 * 6);
-			vertex_count += 6;
-
-			x += w;
-		}
-	}
-
-	return mesh_builder((const float *) vertices.data, vertices.byte_count, vertex_count, ppm_path, MESH_UI);
-}
-
-// returns number of vertices added
-int mesh_wall(EZArray *data, const tile* map, int w, int h, int x, int y, int z, tile to_block, float u_min, float u_max, float v_min, float v_max) {
-
-	float data_wall[] = {
-		// +z
-		x + 0.5,	y + 1,	z + 0.5,	0, 0, -1,	u_max,	v_max,
-		x - 0.5,	y,		z + 0.5,	0, 0, -1,	u_min,	v_min,
-		x - 0.5,	y + 1,	z + 0.5,	0, 0, -1,	u_min,	v_max,
-		x + 0.5,	y + 1,	z + 0.5,	0, 0, -1,	u_max,	v_max,
-		x + 0.5,	y,		z + 0.5,	0, 0, -1,	u_max,	v_min,
-		x - 0.5,	y,		z + 0.5,	0, 0, -1,	u_min,	v_min,
-		// -z
-		x + 0.5,	y + 1,	z - 0.5,	0, 0, 1,	u_min,	v_max,
-		x - 0.5,	y + 1,	z - 0.5,	0, 0, 1,	u_max,	v_max,
-		x - 0.5,	y,		z - 0.5,	0, 0, 1,	u_max,	v_min,
-		x + 0.5,	y + 1,	z - 0.5,	0, 0, 1,	u_min,	v_max,
-		x - 0.5,	y,		z - 0.5,	0, 0, 1,	u_max,	v_min,
-		x + 0.5,	y,		z - 0.5,	0, 0, 1,	u_min,	v_min,
-		// +x
-		x + 0.5,	y + 1,	z + 0.5,	-1, 0, 0,	u_min,	v_max,
-		x + 0.5,	y + 1,	z - 0.5,	-1, 0, 0,	u_max,	v_max,
-		x + 0.5,	y,		z - 0.5,	-1, 0, 0,	u_max,	v_min,
-		x + 0.5,	y + 1,	z + 0.5,	-1, 0, 0,	u_min,	v_max,
-		x + 0.5,	y,		z - 0.5,	-1, 0, 0,	u_max,	v_min,
-		x + 0.5,	y,		z + 0.5,	-1, 0, 0,	u_min,	v_min,
-		// -x
-		x - 0.5,	y + 1,	z + 0.5,	1, 0, 0,	u_max,	v_max,
-		x - 0.5,	y,		z - 0.5,	1, 0, 0,	u_min,	v_min,
-		x - 0.5,	y + 1,	z - 0.5,	1, 0, 0,	u_min,	v_max,
-		x - 0.5,	y + 1,	z + 0.5,	1, 0, 0,	u_max,	v_max,
-		x - 0.5,	y,		z + 0.5,	1, 0, 0,	u_max,	v_min,
-		x - 0.5,	y,		z - 0.5,	1, 0, 0,	u_min,	v_min,
-	};
-
-	int vertex_count = 0;
-
-	// check if the tile to_block is in any of the four directions; if so, put a wall there
-	if (z == h - 1 || map[x + (z + 1) * w] == to_block) {
-
-		append_ezarray(data, data_wall, sizeof(float) * 8 * 6);
-		vertex_count += 6;
-	}
-	if (z == 0 || map[x + (z - 1) * w] == to_block) {
-
-		append_ezarray(data, data_wall + 8 * 6, sizeof(float) * 8 * 6);
-		vertex_count += 6;
-	}
-	if (x == w - 1 || map[(x + 1) + z * w] == to_block) {
-
-		append_ezarray(data, data_wall + 8 * 6 * 2, sizeof(float) * 8 * 6);
-		vertex_count += 6;
-	}
-	if (x == 0 || map[(x - 1) + z * w] == to_block) {
-
-		append_ezarray(data, data_wall + 8 * 6 * 3, sizeof(float) * 8 * 6);
-		vertex_count += 6;
-	}
-
-	return vertex_count;
-}
-
-int mesh_wall_corner(EZArray *data, const tile* map, int w, int h, int x, int z, tile to_block, float u_min, float u_max, float v_min, float v_max) {
-
-	const float u_mid = (u_min + u_max) / 2;
-
-	float data_wall[] = {
-		// +z +x
-		x + 0.5,	2,	z + 0.5,	-0.7, 0, -0.7,	u_mid,			v_max,
-		x + 0.5,	0,	z + 0.2,	-1, 0, 0,		u_mid - 0.05,	v_min,
-		x + 0.2,	0,	z + 0.5,	0, 0, -1,		u_mid + 0.05,	v_min,
-		// +x -z
-		x + 0.5,	2,	z - 0.5,	-0.7, 0, 0.7,	u_mid,			v_max,
-		x + 0.2,	0,	z - 0.5,	0, 0, 1,		u_mid - 0.05,	v_min,
-		x + 0.5,	0,	z - 0.2,	-1, 0, 0,		u_mid + 0.05,	v_min,
-		// -z -x
-		x - 0.5,	2,	z - 0.5,	0.7, 0, 0.7,	u_mid,			v_max,
-		x - 0.5,	0,	z - 0.2,	1, 0, 0,		u_mid - 0.05,	v_min,
-		x - 0.2,	0,	z - 0.5,	0, 0, 1,		u_mid + 0.05,	v_min,
-		// -x +z
-		x - 0.5,	2,	z + 0.5,	0.7, 0, -0.7,	u_mid,			v_max,
-		x - 0.2,	0,	z + 0.5,	0, 0, -1,		u_mid - 0.05,	v_min,
-		x - 0.5,	0,	z + 0.2,	1, 0, 0,		u_mid + 0.05,	v_min,
-	};
-
-	int vertex_count = 0;
-
-	bool z_plus = z == h - 1 || map[x + (z + 1) * w] == to_block;
-	bool z_mins = z == 0     || map[x + (z - 1) * w] == to_block;
-	bool x_plus = x == w - 1 || map[(x + 1) + z * w] == to_block;
-	bool x_mins = x == 0     || map[(x - 1) + z * w] == to_block;
-
-	if (z_plus && x_plus) {
-
-		append_ezarray(data, data_wall, sizeof(float) * 8 * 3);
-		vertex_count += 3;
-	}
-	if (x_plus && z_mins) {
-
-		append_ezarray(data, data_wall + 8 * 3, sizeof(float) * 8 * 3);
-		vertex_count += 3;
-	}
-	if (z_mins && x_mins) {
-
-		append_ezarray(data, data_wall + 8 * 3 * 2, sizeof(float) * 8 * 3);
-		vertex_count += 3;
-	}
-	if (x_mins && z_plus) {
-
-		append_ezarray(data, data_wall + 8 * 3 * 3, sizeof(float) * 8 * 3);
-		vertex_count += 3;
-	}
-
-	return vertex_count;
-}
-
-Mesh *make_map_mesh(const char *ppm_path, const tile* map, int w, int h) {
-
-	EZArray data = {0};
-	int vertex_count = 0;
-
-	for (int z = 0; z < h; z++) {
-
-		for (int x = 0; x < w; x++) {
-
-			switch (map[x + z * w]) {
-		
-				case TILE_EMPTY:
-					break;
-				
-				case TILE_FLOOR:;
-
-					float data_floor[] = {
-						// floor
-						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0.25, 	0,
-						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 0.5, 	0.25,
-						x - 0.5, 0, z + 0.5, 0, 0, 0.5, 0.5, 	0,
-						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0.25, 	0,
-						x + 0.5, 0, z - 0.5, 0, 0, 0.5, 0.25, 	0.25,
-						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 0.5, 	0.25,
-						// ceiling
-						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0.5, 	0,
-						x - 0.5, 1, z + 0.5, 0, 0, 0.5, 0.75, 	0,
-						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 0.75, 	0.25,
-						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0.5, 	0,
-						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 0.75, 	0.25,
-						x + 0.5, 1, z - 0.5, 0, 0, 0.5, 0.5, 	0.25
-					};
-
-					append_ezarray(&data, &data_floor, sizeof(float) * 8 * 12);
-					vertex_count += 12;
-
-					vertex_count += mesh_wall(&data, map, w, h, x, 0, z, TILE_EMPTY, 0.75, 1, 0, 0.25);
-					break;
-
-				case TILE_LAVA:;
-
-					float data_lava[] = {
-						// floor
-						x + 0.5, -0.2, z + 0.5, 0, 0, 0.5, 0, 		0.25,
-						x - 0.5, -0.2, z - 0.5, 0, 0, 0.5, 0.25, 	0.5,
-						x - 0.5, -0.2, z + 0.5, 0, 0, 0.5, 0.25, 	0.25,
-						x + 0.5, -0.2, z + 0.5, 0, 0, 0.5, 0, 		0.25,
-						x + 0.5, -0.2, z - 0.5, 0, 0, 0.5, 0, 		0.5,
-						x - 0.5, -0.2, z - 0.5, 0, 0, 0.5, 0.25, 	0.5,
-						// ceiling
-						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0.5, 	0,
-						x - 0.5, 1, z + 0.5, 0, 0, 0.5, 0.75, 	0,
-						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 0.75, 	0.25,
-						x + 0.5, 1, z + 0.5, 0, 0, 0.5, 0.5, 	0,
-						x - 0.5, 1, z - 0.5, 0, 0, 0.5, 0.75, 	0.25,
-						x + 0.5, 1, z - 0.5, 0, 0, 0.5, 0.5, 	0.25
-					};
-
-					append_ezarray(&data, &data_lava, sizeof(float) * 8 * 12);
-					vertex_count += 12;
-
-					vertex_count += mesh_wall(&data, map, w, h, x,  0, z, TILE_EMPTY, 0.75, 1, 0, 0.25);
-					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_EMPTY, 0.75, 1, 0, 0.25);
-					vertex_count += mesh_wall(&data, map, w, h, x, -1, z, TILE_FLOOR, 0.75, 1, 0, 0.25);
-					break;
-				
-				case TILE_OUTSIDE:;
-
-					float data_outside[] = {
-						// floor
-						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0.25, 	0.25,
-						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 0.5, 	0.5,
-						x - 0.5, 0, z + 0.5, 0, 0, 0.5, 0.5, 	0.25,
-						x + 0.5, 0, z + 0.5, 0, 0, 0.5, 0.25, 	0.25,
-						x + 0.5, 0, z - 0.5, 0, 0, 0.5, 0.25, 	0.5,
-						x - 0.5, 0, z - 0.5, 0, 0, 0.5, 0.5, 	0.5,
-					};
-
-					append_ezarray(&data, &data_outside, sizeof(float) * 8 * 6);
-					vertex_count += 6;
-
-					vertex_count += mesh_wall_corner(&data, map, w, h, x, z, TILE_EMPTY, 0.25, 0.5, 0.5, 1.0);
-					vertex_count += mesh_wall(&data, map, w, h, x, 0, z, TILE_EMPTY, 0.25, 0.5, 0.5, 0.75);
-					vertex_count += mesh_wall(&data, map, w, h, x, 1.0, z, TILE_EMPTY, 0.25, 0.5, 0.75, 1.0);
-					vertex_count += mesh_wall(&data, map, w, h, x, 1.0, z, TILE_FLOOR, 0, 0.25, 0, 0.25);
-					break;
-			}
-		}
-	}
-
-	return mesh_builder((const float *) data.data, sizeof(float) * 8 * vertex_count, vertex_count, ppm_path, MESH_SHADED);
 }
 
 void mat4_mult(const GLfloat b[4][4], const GLfloat a[4][4], GLfloat out[4][4]) {
@@ -773,8 +508,8 @@ void draw_mesh(const Transform *camera, const Transform *mesh_transform, const M
 		position_matrix[2][2] = 1;
 		position_matrix[3][3] = 1;
 
-		position_matrix[3][0] = mesh_transform->x / (SCREEN_W / 2) - 1; // translation (converted from screen [0,SCREEN_W]x[0,SCREEN_H] to UV [-1,1]x[-1,1])
-		position_matrix[3][1] = mesh_transform->y / (SCREEN_H / 2) - 1;
+		position_matrix[3][0] = mesh_transform->x; // translation (expects UV [-1,1]x[-1,1])
+		position_matrix[3][1] = mesh_transform->y;
 
 		// load the shader program and the uniforms we just calculated
 		glUseProgram(sp_unshaded);

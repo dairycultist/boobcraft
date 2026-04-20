@@ -4,6 +4,10 @@ server-side plugin system for guns + skins + maps + gamemodes
 
 server handles EVERYTHING. all the client does is render stuff the server sends them and send the server their input. you don't even get an inventory client-side
 
+TODO switch from ppm to png
+
+TODO free aspect ratio (alongside updating UI meshes and projection matrix)
+
 ## Installation
 
 ```
@@ -16,7 +20,7 @@ make run
 
 ## idk
 
-I want to make a game that has a smol community and that I actually enjoy playing day to day
+the code will be bad and the ideas will be ruined and idc I want to make a game that has a smol community and that I actually enjoy playing occasionally bruh
 
 https://mods.sm64coopdx.com/mods/cs-karisa.1108/
 
