@@ -8,11 +8,11 @@ else
 	$(error Unsupported OS: $(UNAME))
 endif
 
-game: res/* src/*
-	@gcc -o game src/main.c $(GCCFLAGS) $(shell pkg-config --cflags --libs sdl2 SDL2_image)
+client.out: client/*
+	@gcc -o client.out client/main.c $(GCCFLAGS) $(shell pkg-config --cflags --libs sdl2 SDL2_image)
 
-run: game
-	@./game
+run: client.out
+	@./client.out
 
 clean:
-	rm game
+	rm client.out

@@ -12,13 +12,19 @@ Mesh *sky;
 Transform transform_test_sprite;
 Mesh *test_sprite;
 
+Transform transform_miku;
+Mesh *miku;
+
 void on_start() {
 
-	sky = make_sky_mesh("res/sky.ppm");
+	sky = make_sky_mesh("client/sky.ppm");
 
 	transform_test_sprite.x = 0.0;
 	transform_test_sprite.y = 0.0;
-	test_sprite = make_sprite_mesh("res/miku.ppm", 0.3);
+	test_sprite = make_sprite_mesh("client/miku.ppm", 0.3);
+
+	transform_miku.z = -0.5;
+	miku = import_mesh("client/miku.obj", "client/miku.ppm", TRUE);
 
 	camera.y = 0.5;
 }
@@ -45,10 +51,11 @@ void process(bool up, bool down, bool left, bool right, bool action_1, bool acti
 	if (down) {
 		
 		camera.x -= PLAYER_MOVE_SPEED * sin(camera.yaw);
-		camera.x += PLAYER_MOVE_SPEED * cos(camera.yaw);
+		camera.z += PLAYER_MOVE_SPEED * cos(camera.yaw);
 	}
 
 	// draw
 	draw_mesh(&camera, NULL, sky);
+	draw_mesh(&camera, &transform_miku, miku);
 	draw_mesh(&camera, &transform_test_sprite, test_sprite);
 }

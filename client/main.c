@@ -114,6 +114,7 @@ int main() {
 	glFrontFace(GL_CCW);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	
+	// logical start
 	on_start();
 
 	// process events until window is closed

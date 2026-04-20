@@ -8,6 +8,10 @@ TODO switch from ppm to png
 
 TODO free aspect ratio (alongside updating UI meshes and projection matrix)
 
+TODO header files
+
+TODO mouse input for camera control
+
 ## Installation
 
 ```

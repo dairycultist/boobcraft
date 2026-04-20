@@ -311,7 +311,7 @@ Mesh *make_sprite_mesh(const char *ppm_path, float u_amt) {
 	get_ppm_resolution(ppm_path, &width, &height);
 
 	float w = u_amt;
-	float h = u_amt * height / width;
+	float h = u_amt * height / width * ASPECT;
 
 	// sprite mesh is initialized with bottom left corner in center, and moved to screen bottom left corner by transformations
 	const float data[] = {
