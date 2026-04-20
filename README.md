@@ -1,4 +1,8 @@
-Smol retro FOSS 3D Doom clone written in C + OpenGL.
+Lightweight FOSS 3D FPS server-client code written in C + OpenGL.
+
+server-side plugin system for guns + skins + maps + gamemodes
+
+server handles EVERYTHING. all the client does is render stuff the server sends them and send the server their input. you don't even get an inventory client-side
 
 ## Installation
 
@@ -10,15 +14,9 @@ cd boobcraft
 make run
 ```
 
-## Inspiration/References
-
-I know I like to play FPS games, and I like games with clear objectives, and I like light worldbuilding. I also like lightweight games that can run on a potato.
-
-medieval fantasy, you're a [sorceress elf](https://x.com/GOXONQ/status/2029430086064390615) with leather gloves who casts spells
+## idk
 
 I want to make a game that has a smol community and that I actually enjoy playing day to day
-
-easy to make levels with enemies and rooms and keys and hazards and the collision is simple and the visuals are aesthetic
 
 https://mods.sm64coopdx.com/mods/cs-karisa.1108/
 
