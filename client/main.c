@@ -7,6 +7,7 @@ typedef char bool;
 #define TRUE 1
 #define FALSE 0
 
+// free aspect ratio is outside of scope (involves updating UI meshes and their positions plus the projection matrix, no thanks)
 #define ASPECT 1.666
 
 typedef struct {

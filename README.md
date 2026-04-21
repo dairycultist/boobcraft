@@ -4,13 +4,11 @@ server-side plugin system for guns + skins + maps + gamemodes
 
 server handles EVERYTHING. all the client does is render stuff the server sends them and send the server their input. you don't even get an inventory client-side
 
-TODO switch from ppm to png
-
-TODO free aspect ratio (alongside updating UI meshes and projection matrix)
-
 TODO header files
 
 TODO mouse input for camera control
+
+TODO switch to 4:3 aspect ratio since it's retro gaming
 
 ## Installation
 
